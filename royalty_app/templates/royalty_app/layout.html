@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+
+  
+ 
+    <title>Royalty</title>
+
+    {% load static %}
+    <link rel="icon" href="{% static 'royalty_app/minilogo.png' %}">   <!-- logo on page title -->
+  
+    <!-- dataTables CSS- used to design the datatables -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css" >
+
+    <!-- Bootstrap core CSS- used to design the frame of the webpage
+    <link href="https://getbootstrap.com/docs/4.5/dist/css/bootstrap.min.css" rel="stylesheet"> --> 
+    <link href="{% static 'royalty_app/layout.css' %}" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="{% static 'royalty_app/app.css' %}" rel="stylesheet">
+    
+    <!-- Boostrap ICON -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+
+  </head>
+
+  <body >
+    <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar">
+      <H2 style="margin-left:10px">Your Logo</H2> 
+      
+      <ul class="navbar-nav px-3"  style="display: grid; grid-template-columns:auto auto auto" id="nav-top"> 
+        
+
+
+        <li class="nav-item text-nowrap" >
+          <img src="{% static 'royalty_app/logo_me.png' %}" style="width: 100px; margin-left: 10px;  margin-right: 10px;" >
+        </li>
+
+      </ul>
+
+    </nav>
+
+
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar" style="max-width:180px">
+          <div class="sidebar-sticky" >
+            <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link item_in_sidebar " id="item_in_sidebar_1"  href="{% url 'home' %}" title="Dashboard" style="display: grid; grid-template-columns:20px  auto">
+                  <span class="bi bi-house"></span>
+                  <span class="item_name">Dashboard</span>
+                </a>
+              </li>
+          
+              <li class="nav-item">
+                <a class="nav-link item_in_sidebar"  id="item_in_sidebar_2"  href="{% url 'partners' %}" title="Partners" style="display: grid; grid-template-columns:20px  auto">
+                  <span class="bi bi-people"></span>
+                  <span class="item_name">Partners</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link item_in_sidebar" id="item_in_sidebar_3"  href="{% url 'contracts' %}" title="Contracts" style="display: grid; grid-template-columns:20px  auto">
+                  <span class="bi bi-book"></span>
+                  <span class="item_name">Contracts</span>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a class="nav-link item_in_sidebar" id="item_in_sidebar_5"  href="{% url 'invoices' %}" title="Invoices" style="display: grid; grid-template-columns:20px  auto">
+                  <span class="bi bi-receipt"></span>
+                  <span class="item_name">Invoices</span>
+                  
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link item_in_sidebar" id="item_in_sidebar_6"  href="{% url 'static_data' %}" title="Static Data" style="display: grid; grid-template-columns:20px  auto">
+                  <span class="bi bi-server"></span>
+                  <span class="item_name">Static Data</span>
+                </a>
+              </li>
+
+            </ul>
+
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+              <span class="item_name" >Reports</span>
+            </h6>
+            <ul class="nav flex-column mb-2">
+              <li class="nav-item">
+                <a class="nav-link item_in_sidebar" id="item_in_sidebar_8"  href="{% url 'monthly_accruals' %}" title="Monthly Accruals" style="display: grid; grid-template-columns:20px  auto">
+                  <span class="bi bi-journals"></span>
+                  <span class="item_name">Monthly Accruals</span>
+                  
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link item_in_sidebar" id="item_in_sidebar_9" href="{% url 'cash_flow_forecast' %}" title="Cash Flow Forecast" style="display: grid; grid-template-columns:20px  auto">
+                  <span class="bi bi-graph-up"></span>
+                  
+                  <span class="item_name">Cash Flow Forecast </span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link item_in_sidebar" id="item_in_sidebar_10" href="{% url 'partner_report' %}" title="Partner payment report" style="display: grid; grid-template-columns:20px  auto">
+                  <span class="bi bi-cash"></span>
+                  
+                  <span class="item_name">Partner payment report</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+       
+      
+
+        {% block content %}{% endblock %}
+
+
+
+
+
+    <!-- Placed at the end of the document so the pages load faster -->
+   
+    <script src="{% static 'royalty_app/layout.js'%}"></script> 
+    <script type="text/javascript" src="{% static 'royalty_app/jquery.min.js'%}"></script>     
+    <script type="text/javascript" src="{% static 'royalty_app/jquery.dataTables.min.js'%}"></script> 
+    
+
+    
+
+  </body>
+</html>
+
+
+  

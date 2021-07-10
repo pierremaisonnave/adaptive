@@ -1,0 +1,521 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+  <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 " style="visibility: hidden;" >
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" >
+        <h1 class="h2">Contracts </h1>
+      </div>
+  
+  <!------------------------------------------------------------------------------------->   
+  <!---------------------------Form for new Contracts------------------------------------> 
+
+    <form   id="form_new" > 
+      <table>
+        <tr>
+          <td style="width: 140px">
+            <span style="width: 100%; margin-left:5px;">New Contract:</span>
+          </td>
+        </tr>
+        <tr>
+          <td ><span style="width: 100%; margin-left:5px;">accounting:</span></td>
+          <td > <!--Name-->
+            <input type="text" id="contract_name_new" placeholder="Contract Name"  maxlength="50" style="width: 100%; margin-left:5px;">
+          </td>
+          <td>
+            <!--M3 Brand list-->
+            <div style="width: 100%; margin-left:5px;">
+              <div  class="comboTreeInputWrapper" dd_id="m3_brand_new">
+                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Brand Code" readonly dd_id="m3_brand_new" id="displayed_item_name_m3_brand_new" >
+                <input type="text"   hidden id="hidden_item_code_m3_brand_new">
+              </div>
+              <div  class="comboTreeDropDownContainer" id="dropdown_m3_brand_new" style="display: none;">
+                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="m3_brand_new" >
+                  <ul  >
+                    {% for brand in m3_brand_list %}
+                      <li style="display: block;" class="item_single_select" dd_id="m3_brand_new">
+                        <span hidden>{{ brand.id }}</span><span hidden> : </span><span>{{ brand.brand_name }}</span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+              </div>
+            </div>
+          </td>
+          <td>
+            <!--Gald Div list-->
+            <div style="width: 100%; margin-left:5px;">
+              <div  class="comboTreeInputWrapper" dd_id="division_new">
+                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Division" readonly dd_id="division_new" id="displayed_item_name_division_new" >
+                <input type="text"   hidden id="hidden_item_code_division_new">
+              </div>
+              <div  class="comboTreeDropDownContainer" id="dropdown_division_new" style="display: none;">
+                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="division_new" >
+                  <ul  >
+                    {% for division in division_list %}
+                      <li style="display: block;" class="item_single_select" dd_id="division_new">
+                        <span >{{ division.division_id }}</span><span > : </span><span>{{ division.division_name }}</span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+              </div>
+            </div>
+
+          </td>
+          <td>
+            <!--Gald Div via-->
+            <div style="width: 100%; margin-left:5px;">
+              <div  class="comboTreeInputWrapper" dd_id="division_via_new">
+                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="pass-through division" readonly dd_id="division_via_new" id="displayed_item_name_division_via_new" >
+                <input type="text"   hidden id="hidden_item_code_division_via_new">
+              </div>
+              <div  class="comboTreeDropDownContainer" id="dropdown_division_via_new" style="display: none;">
+                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="division_via_new" >
+                  <ul  >
+                    <li style="display: block;" class="item_single_select" dd_id="division_via_new">
+                      <span></span><span style="color:white"> : </span><span></span>
+                    </li>
+                    {% for division in division_list %}
+                      <li style="display: block;" class="item_single_select" dd_id="division_via_new">
+                        <span >{{ division.division_id }}</span><span > : </span><span>{{ division.division_name }}</span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+              </div>
+            </div>
+
+          </td>
+        </tr>
+        <tr>
+          <td ><span style="width: 100%; margin-left:5px;">payment:</span></td>
+          <td >
+            <div style="width: 100%; margin-left:5px;">
+              <select  style="width: 100% ; padding:2px" id="transaction_direction_new" >
+                <option value="PAY"> PAY</option>
+                <option value="REC"> REC</option>
+              </select>
+            </div>
+          </td>
+          <td>
+            <!--Currency-->
+            <div style="width: 100%; margin-left:5px;">
+              <div  class="comboTreeInputWrapper" dd_id="contract_currency_new">
+                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Currency" readonly dd_id="contract_currency_new" id="displayed_item_name_contract_currency_new" >
+                <input type="text"   hidden id="hidden_item_code_contract_currency_new">
+              </div>
+              <div  class="comboTreeDropDownContainer" id="dropdown_contract_currency_new" style="display: none;">
+                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="contract_currency_new" >
+                  <ul  >
+                    {% for currency in currency_list %}
+                      <li style="display: block;" class="item_single_select" dd_id="contract_currency_new">
+                        <span hidden>{{ currency.currency }}</span><span hidden> : </span><span>{{ currency.currency }}</span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+              </div>
+            </div>
+
+          </td>
+          <td>
+            <!--periodicity-->
+            <div style="width: 100%; margin-left:5px;">
+              <div  class="comboTreeInputWrapper" dd_id="periodicity_new">
+                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Periodicity" readonly dd_id="periodicity_new" id="displayed_item_name_periodicity_new" >
+                <input type="text"   hidden id="hidden_item_code_periodicity_new">
+              </div>
+              <div  class="comboTreeDropDownContainer" id="dropdown_periodicity_new" style="display: none;">
+                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="periodicity_new" >
+                  <ul  >
+                    {% for periodicity in periodicity_list %}
+                      <li style="display: block;" class="item_single_select" dd_id="periodicity_new">
+                        <span hidden>{{ periodicity.id }}</span><span hidden> : </span><span>{{ periodicity.periodicity }}</span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+              </div>
+            </div>    
+          </td>
+
+          <td ><!--payment terms-->
+            <input id="payment_terms_new" placeholder="nb days-payment terms"  type="number" min="0"  style="width: 100%; margin-left:5px;">
+          </td>
+        </tr>
+        <tr>
+          <td ><span style="width: 100%; margin-left:5px;">Minimum Guarantee:</span></td>
+          <td ><!--mini gar status-->
+            <div   style="width: 100%; margin-left:5px;">
+              <select  style="width: 100%; padding:2px"  id="mini_gar_status_new" onchange="hide_option()" >
+                <option value="YES"> YES</option>
+                <option value="NO" selected> NO</option>
+              </select>
+            </div>
+          </td>
+          <td class="mini_gar_option" hidden><!--amount-->
+            <input class="number-separator" id="minimum_guar_amount_new" placeholder="amount"  type="text"  style="width: 100%; margin-left:5px;">
+          </td>
+        <!--Country List-->
+          <td  class="comboTreeWrapper mini_gar_option" hidden>
+            <div style="width: 100%; margin-left:5px;" >
+              <div  class="comboTreeInputWrapper" dd_id="country_new">
+                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Country" readonly dd_id="country_new" id="displayed_item_name_country_new" >
+                <input type="text"   hidden id="hidden_item_code_country_new">
+              </div>
+              <div  class="comboTreeDropDownContainer" id="dropdown_country_new" style="display: none;">
+                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="country_new" >
+                  <ul  >
+                    <li style="display: block;" class="item_single_select" dd_id="country_new">
+                      <span></span><span style="color:white"> : </span><span></span>
+                    </li> 
+                  {% for region in region_list %} 
+                    <li  >
+                      <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="country_new" region_id={{region.id}} ></span>
+                      <span class="region" dd_id="country_new">{{region.region}}</span>
+                      <ul style="display: block;" id="country_new_{{region.id}}">
+                          {% for country in country_list %}
+                            {% if region == country.country_region%}
+                            <li style="display: block;" class="item_single_select" dd_id="country_new">
+                              <span>{{ country.country_id }}</span><span> : </span><span>{{ country.country }}</span>
+                            </li>
+                            {% endif %}
+                          {% endfor %}
+                      </ul>
+                    </li>
+                  {% endfor %}
+                    
+                  </ul>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr > 
+          <td>
+
+      
+        <tr > <!--last row-->
+          <td colspan="2">
+            <div style="width: 100%; margin-left:5px;">
+              <div id="message_save" style="color: green;" hidden > Item saved</div>
+              <div id="message_error" style="color: red;" hidden > error: some fields are missing</div>
+          </div>
+          </td>
+          <td></td>
+          <td></td>
+          <td >
+            <div style="width: 100%; text-align: end; margin-left:5px;">
+              <button class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()" title="save"><span class="bi bi-save2-fill"></span></button>
+              <button class="btn btn-sm btn-outline-warning"  onclick="cancel_new_record()" type="reset" title="cancel"> <span class="bi bi-x-circle"></span></button>
+            </div>
+          </td>
+        </tr>
+      </table> 
+
+    </form>
+
+  <!------------------------------------------------------------------------------------->   
+  <!---------------------------Contracts Table------------------------------------------->  
+  
+  <!----setting to unhide/hide column--->  
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" >
+    <div></div>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group mr-2">
+        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="column_sel()" title="column selection" ><span class="bi bi-gear"></span> </button>
+      </div>
+      <div class="btn-group mr-2">
+        <a class="btn btn-sm btn-outline-secondary" href="/export/contract,contract_partner,rule"><span class="bi bi-download" ></span> download </a>
+      </div>
+
+    </div>
+  </div> 
+  <div id="column_selection" style=" display:none" >
+    <table class="table table-striped table-sm" id="beneficiary_table" >
+      <thead>
+        <tr >
+          <th  > </th>
+          <th ></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr >
+          <td ><input type="checkbox" checked value=1 onclick="column_visibility(this,1)"></td>
+          <td >Name</td>
+          <td ><input type="checkbox" checked value=2 onclick="column_visibility(this,2)"></td>
+          <td >Brand</td>
+
+          <td ><input type="checkbox" checked value=3 onclick="column_visibility(this,3)"></td>
+          <td >Division</td>
+
+          <td ><input type="checkbox" checked value=4 onclick="column_visibility(this,4)"></td>
+          <td >Division via</td>
+        </tr>
+        <tr >
+          <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5)"></td>
+          <td >Pay/Rec</td>
+          <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6)"></td>
+          <td >Curr</td>
+
+          <td ><input type="checkbox" checked value=7 onclick="column_visibility(this,7)"></td>
+          <td >periodicity</td>
+
+          <td ><input type="checkbox" checked value=8 onclick="column_visibility(this,8)"></td>
+          <td >payment terms:nb days</td>
+        </tr>
+        <tr >
+          <td ><input type="checkbox"  checked value=9 onclick="column_visibility(this,9)"></td>
+          <td >Minimum Guarantee:Yes/No</td>
+          <td ><input type="checkbox"  checked value=10 onclick="column_visibility(this,10)"></td>
+          <td >Minimum Guarantee:Amount</td>
+          <td ><input type="checkbox"  checked value=11 onclick="column_visibility(this,11)"></td>
+          <td >Minimum Guarantee:Country</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>  
+
+
+  <div class="table-responsive">
+    <table class="table table-striped table-sm " id="contracts_table" style="width: 100%;">
+      <thead>
+        <tr class="search_box_class">
+          <th style="padding-left:8px"><input  id="column0_search"  class="fname2" placeholder="..." column=0> </th>
+          <th style="padding-left:8px"><input  id="column1_search"  class="fname2" placeholder="..." column=1> </th>
+          <th style="padding-left:8px"><input  id="column2_search"  class="fname2" placeholder="..." column=2>  </th>
+          <th style="padding-left:8px"><input  id="column3_search"  class="fname2" placeholder="..." column=3> </th>
+          <th style="padding-left:8px"><input  id="column4_search"  class="fname2" placeholder="..." column=4> </th>
+          <th style="padding-left:8px"><input  id="column5_search"  class="fname2" placeholder="..." column=5> </th>
+          <th style="padding-left:8px"><input  id="column6_search"  class="fname2" placeholder="..." column=6> </th>
+          <th style="padding-left:8px"><input  id="column7_search"  class="fname2" placeholder="..." column=7> </th>
+          <th style="padding-left:8px"><input  id="column8_search"  class="fname2" placeholder="..." column=8> </th>
+          <th style="padding-left:8px"><input  id="column9_search"  class="fname2" placeholder="..." column=9> </th>
+          <th style="padding-left:8px"><input  id="column10_search"  class="fname2" placeholder="..." column=10> </th>
+          <th style="padding-left:8px" ><input  id="column11_search"  class="fname2" placeholder="..." column=11 > </th>
+          <th style="padding-left:8px"></th>
+        </tr>
+        <tr >
+          <th style="border-bottom:none" colspan=9></th>
+          <th colspan=3 style="text-align: center;border-bottom:none; padding:2px">Minimum Guarantee</th>
+          <th style="border-bottom:none"></th>
+        </tr>        
+        <tr style="height:65px">
+          <th style="border-top:none; padding-left: 8px; width:20px">ID</th>
+          <th style="border-top:none; padding-left: 8px">Name</th>
+          <th style="border-top:none; padding-left: 8px;">Brand</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">Division</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">via</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">Pay/Rec</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">Curr</th>
+          <th style="border-top:none; padding-left: 8px;">periodicity</th>
+          <th style="border-top:none; padding-left: 8px;width:70px;">nb days</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">Yes/No</th>
+          <th style="border-top:none; padding-left: 8px;">Amount</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;" >Country</th>
+          <th style="border-top:none"></th>
+        </tr>
+      </thead>
+
+      <tbody id="tbody_contracts">
+        {% for contract in contract_list %}
+          <tr id="contract_{{contract.id}}" contract_id={{contract.id}}>
+            <td><!--ID-->
+              <a href='/contracts/{{contract.id}}'><span class="fname" contract_id={{contract.id}} id="id_{{contract.id}}" >{{contract.id}}</span></a>
+            </td>
+            <td><!--Name-->
+              <span hidden class="fname"  id="span_contract_name_{{contract.id}}" >{{contract.contract_name}}</span>
+              <input type="text" class="fname"contract_id={{contract.id}} id="contract_name_{{contract.id}}"  value='{{contract.contract_name}}'>
+            </td>
+            <td><!--Brand-->
+              <span hidden class="fname"  id="span_m3_brand_{{contract.id}}" >searched_value:{{contract.m3_brand.brand_name}}</span>
+              <select class="fname" contract_id={{contract.id}} id="m3_brand_{{contract.id}}">
+                {% for brand in m3_brand_list %}
+                  {% if brand == contract.m3_brand  %}
+                    <option value="{{ brand.id }}" selected="selected">{{ brand.brand_name }}</option>
+                  {% else%}
+                    <option value="{{ brand.id }}">{{ brand.brand_name }}</option>
+                  {% endif %}
+                {% endfor %}
+            </select>
+            </td>
+            <td><!--Division-->
+              <span hidden class="fname"  id="span_division_{{contract.id}}" >searched_value:{{contract.division.division_id}}</span>
+              <select class="fname" contract_id={{contract.id}} id="division_{{contract.id}}">
+                {% for division in division_list %}
+                  {% if division == contract.division  %}
+                    <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}</option>
+                  {% else%}
+                  <option value="{{ division.division_id }}" >{{ division.division_id }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </td>
+
+            <td><!--Division via-->
+              <span hidden class="fname"  id="span_division_via_{{contract.id}}" >searched_value:{{contract.division_via.division_id}}</span>
+              <select class="fname" contract_id={{contract.id}} id="division_via_{{contract.id}}">
+                <!--Contrary to other fields, division via is not a mandatory field, hence, if this field is empty, we should select the value ""-->
+                {% if contract.division_via is None  %}
+                  <option value="" selected="selected"></option>
+                  {% else%}
+                  <option value="" ></option>
+                {% endif %}  
+                {% for division in division_list %}
+                  {% if division == contract.division_via  %}
+                    <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}</option>
+                  {% else%}
+                    <option value="{{ division.division_id }}" >{{ division.division_id }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </td>
+
+            <td><!--pay/rec-->
+              <span hidden class="fname"  id="span_transaction_direction_{{contract.id}}" >searched_value:{{contract.transaction_direction}}</span>
+              <select class="fname" contract_id={{contract.id}} id="transaction_direction_{{contract.id}}">
+                    <option value="" selected disabled hidden></option>
+                  {% if "REC" == contract.transaction_direction  %}
+                    <option value="REC" selected="selected">REC</option>
+                  {% else%}
+                    <option value="REC" >REC</option>
+                  {% endif %}
+
+                  {% if "PAY" == contract.transaction_direction  %}
+                  <option value="PAY" selected="selected">PAY</option>
+                {% else%}
+                  <option value="PAY" >PAY</option>
+                {% endif %}
+              </select>
+            </td>
+
+            <td><!--Currency-->
+              <span  class="fname"  id="span_contract_currency_{{contract.id}}" >{{contract.contract_currency}}</span>
+            </td>
+
+            <td><!--Periodicity-->
+              <span hidden class="fname"  id="span_payment_periodicity_{{contract.id}}" >searched_value:{{contract.payment_periodicity.periodicity}}</span>
+              <select class="fname" contract_id={{contract.id}} id="payment_periodicity_{{contract.id}}">
+                {% for periodicity in periodicity_list %}
+                  {% if periodicity == contract.payment_periodicity  %}
+                    <option value="{{ periodicity.id }}" selected="selected">{{ periodicity.periodicity }}</option>
+                  {% else%}
+                    <option value="{{ periodicity.id }}" >{{ periodicity.periodicity }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </td>
+
+            <td> <!--payment_terms-->
+              <span hidden class="fname"  id="span_payment_terms_{{contract.id}}" >{{contract.payment_terms}}</span>
+              <input type="number" class="fname"contract_id={{contract.id}} id="payment_terms_{{contract.id}}" value='{{contract.payment_terms}}'>
+            </td>
+
+            <td><!--yes/no mini gar-->
+              <span hidden class="fname"  id="span_mini_gar_status_{{contract.id}}" >searched_value:{{contract.mini_gar_status}}</span>
+              <select class="fname" contract_id={{contract.id}} id="mini_gar_status_{{contract.id}}">
+                  {% if "YES" == contract.mini_gar_status  %}
+                    <option value="YES" selected="selected">YES</option>
+                  {% else%}
+                    <option value="YES" >YES</option>
+                  {% endif %}
+
+                  {% if "NO" == contract.mini_gar_status  %}
+                  <option value="NO" selected="selected">NO</option>
+                {% else%}
+                  <option value="NO" >NO</option>
+                {% endif %}
+              </select>
+            </td>
+            
+            <td><!--Amount-->
+              <span hidden class="fname"  id="span_minimum_guar_amount_{{contract.id}}" >{{contract.minimum_guar_amount|default_if_none:""}}</span>
+              <input type="text" class="fname number-separator" contract_id={{contract.id}} id="minimum_guar_amount_{{contract.id}}"  value='{{contract.minimum_guar_amount|default_if_none:""|floatformat:"-3g"}}'>
+            </td>
+
+            <td><!--Country-->
+              <span hidden=true  id="span_minimum_guar_remaining_allocation_country_{{contract.id}}">searched_value:{{contract.minimum_guar_remaining_allocation_country.country_id}} </span>
+              <select contract_id={{contract.id}}  class="fname" id="minimum_guar_remaining_allocation_country_{{contract.id}}">
+                <!--Contrary to other fields, division via is not a mandatory field, hence, if this field is empty, we should select the value ""-->
+                {% if contract.minimum_guar_remaining_allocation_country is None  %}
+                  <option value="" selected="selected"></option>
+                  {% else%}
+                  <option value="" ></option>
+                {% endif %}  
+                {% for region in region_list %}  
+                  <optgroup label={{region.region}}>
+                    {% for country in country_list %}
+                      {% if region == country.country_region%}
+                        {% if country == contract.minimum_guar_remaining_allocation_country  %}
+                          <option value="{{ country.country_id }}" selected="selected">{{ country.country_id }}   </option> 
+                        {% else %}
+                          <option value="{{ country.country_id }}"> {{ country.country_id }} </option>
+                        {% endif %}
+                      {% endif %}
+                    {% endfor %}
+                  </optgroup>
+                {% endfor %}
+              </select>
+            </td>
+
+            <td class="button_td" ><!--Button-->
+              <button class="btn btn-sm btn-outline-danger" title="delete" name="delete" contract_id={{contract.id}} id="delete_{{contract.id}}" onclick="delete_row_contract('{{contract.id}}')"><span class="bi bi-trash"></span></button>
+              <button class="btn btn-sm btn-outline-success" title="save modification" contract_id={{contract.id}} name="change" id="change_{{contract.id}}" hidden=true onclick="change_row_contract('{{contract.id}}',this)"><span class="bi bi-save2-fill"></span></button>
+              <button class="btn btn-sm btn-outline-warning" title="cancel modification" contract_id={{contract.id}} name="cancel" id="cancel_{{contract.id}}" onclick="cancel_row_contract('{{contract.id}}',this)" hidden=true><span class="bi bi-x-circle"></span></button>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>    
+      
+    </table>
+  </div>
+
+  <!-------------------------------------------------------------------------------------> 
+  <!--------------------------------Hidden List------------------------------------------> 
+     <div  hidden=true> <!--Hidden dd-->
+      <select class="fname" contract_id="" id="m3_brand_newlist"><!--Hidden dd-->
+        {% for brand in m3_brand_list %}
+          <option value="{{ brand.id }}">{{ brand.brand_name }}</option>
+        {% endfor %}
+      </select>
+      <select class="fname" contract_id="" id="division_newlist"> <!--division-->
+        {% for division in division_list %}
+          <option value="{{ division.division_id }}" >{{ division.division_id }}</option>
+        {% endfor %}
+      </select>
+      <select class="fname" contract_id="" id="division_via_newlist"><!--division via-->
+          <option value=""  ></option>
+        {% for division in division_list %}
+          <option value="{{ division.division_id }}" >{{ division.division_id }}</option>
+        {% endfor %}
+      </select>
+      <select class="fname" contract_id="" id="payment_periodicity_newlist"><!--Periodicity-->
+        {% for periodicity in periodicity_list %}
+          <option value="{{ periodicity.id }}" >{{ periodicity.periodicity }}</option>
+        {% endfor %}
+      </select>
+      <select contract_id=""  class="fname" id="country_newlist" ><!--country-->
+          <option value=""  ></option>
+        {% for region in region_list %}  
+          <optgroup label={{region.region}}>
+            {% for country in country_list %}
+              {% if region == country.country_region%}
+                  <option value="{{ country.country_id }}"> {{ country.country_id }}:{{country.country}} </option>
+              {% endif %}
+            {% endfor %}
+          </optgroup>
+        {% endfor %}
+      </select>
+    </div>
+
+
+{% load static %}
+  
+    <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+    <script src="{% static 'royalty_app/dropdown_single.js'%}"></script> 
+    <script src="{% static 'royalty_app/contract.js'%}"></script>
+    <script src="{% static 'royalty_app/easy-number-separator.js'%}"></script>
+  </main>
+
+
+ 
+
+{% endblock %}
+

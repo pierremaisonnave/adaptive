@@ -1,0 +1,201 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+  <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 "  >
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" >
+        <h1 class="h2">Dashboard </h1>
+      </div>
+      <h4 >Accruals Summary ({{consolidation_currency}}) <span class="bi bi-arrow-repeat refresh" title="refresh" onclick="accruals_change()" ></span></h4>
+      <div style="display:grid; grid-template-columns: 300px 150px; ">
+        <div  class="comboTreeWrapper" onchange="accruals_change()" >
+            <div  class="comboTreeInputWrapper" dd_id="contract">
+              <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="contract"  value="Contract_list">
+              <input   type="text" hidden  id="item_list_contract" selection_mode="" value={{contract_id_list|join:"," }}> 
+            </div>
+            <div  class="comboTreeDropDownContainer" id="dropdown_contract" style="display: none;">
+              <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="contract">
+                <ul  >
+                  <li class="selection_mode" >
+                    <span class="mdi mdi-chevron-down-circle-outline" dd_id="contract"></span>
+                    <ul >
+                      <span class="select_all" id="select_mode_contract" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d" onclick="selectall(this)">(unselect all)</span>
+                    </ul>
+                  {% for c in contract_list %}
+                    <li   style="display: block;">
+                      <input type="checkbox" style="margin-right:5px;"  dd_id="contract" checked><span hidden>{{c.id}}</span><span> {{c.id}}: </span><span>{{c.contract_name}}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+            </div>
+          </div>
+
+        <select id="item_list_year" onchange="accruals_change()" style="margin-left:10px">
+          {% for y in year_list %}
+            {% if y == current_year %}
+              <option value={{y}} selected="selected">{{y}}</option>
+              {% else %}
+              <option value={{y}}>{{y}}</option>
+            {% endif %}
+          {% endfor %}
+          </select>
+      </div>
+      <div style="width:95%; height: 300px;">
+        <canvas id="myChart" ></canvas>
+      </div>
+
+
+
+
+
+
+
+
+      <h4 >Cash Flow Forecast ({{consolidation_currency}}) <span class="bi bi-arrow-repeat refresh" title="refresh" onclick="cash_forecast_change()" ></span></h4>
+
+        <div style="display:grid; grid-template-columns: 300px 150px 150px; ">
+          <div  class="comboTreeWrapper" onchange="cash_forecast_change()" >
+              <div  class="comboTreeInputWrapper" dd_id="currency">
+                <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="currency"  value="currency_list" id="item_list_display_currency">
+                <input   type="text" hidden  id="item_list_currency" selection_mode="" value={{currency_list|join:"," }}> 
+              </div>
+              <div  class="comboTreeDropDownContainer" id="dropdown_currency" style="display: none;">
+                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="currency">
+                  <ul  >
+                    <li class="selection_mode" >
+                      <span class="mdi mdi-chevron-down-circle-outline" dd_id="currency"></span>
+                      <ul >
+                        <span class="select_all" id="select_mode_currency" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d" onclick="selectall_forecast(this)">(unselect all)</span>
+                      </ul>
+                    {% for c in currency_list %}
+                      <li   style="display: block;">
+                        <input type="checkbox" style="margin-right:5px;"  dd_id="currency" checked><span >{{c}}</span><span>    </span><span></span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+              </div>
+            </div>
+            <select id="item_list_year_forecast" onchange="cash_forecast_change()" style="margin-left:10px">
+            {% for y in year_list_cash_forecast %}
+              {% if y == current_year %}
+                <option value={{y}} selected="selected">{{y}}</option>
+                {% else %}
+                <option value={{y}}>{{y}}</option>
+              {% endif %}
+            {% endfor %}
+            </select>
+            <select id="list_report" onchange="cash_forecast_change()" style="margin-left:10px">
+            {% for r in CFF_report_list %}
+              {% if r.id == CFF_report_id %}
+                <option value={{r.id}} selected="selected">{{r.name}}</option>
+                {% else %}
+                <option value={{r.id}}>{{r.name}}</option>
+              {% endif %}
+            {% endfor %}
+            </select>
+      </div>
+
+      <div  style="width:95%; height: 300px;">
+        <canvas id="myChart2" style="height:300px"></canvas>
+      </div>
+  <!------------------------------------------------------------------------------------->   
+  <!---------------------------Form for new Contracts------------------------------------> 
+
+
+
+  
+
+
+{% load static %}
+<script>
+var ctx2 = document.getElementById('myChart2');
+
+var myChart2 = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+        labels: {{ labels_cash_forecast|safe }},
+        datasets: [
+          {
+            label: 'CFF Y-1',
+            data: {{data_cash_forecast_last_year|safe}},
+            backgroundColor:'rgba(54, 162, 235, 0.1)',// red bg 'rgba(255, 99, 132, 0.2)' red border 'rgba(255, 99, 132, 1)'  
+            borderColor: 'rgba(54, 162, 235, .2)',
+            borderWidth: 1
+          },
+          {
+            label: 'CFF',
+            data: {{data_cash_forecast|safe}},
+            backgroundColor:'rgba(54, 162, 235, 0.5)',// red bg 'rgba(255, 99, 132, 0.2)' red border 'rgba(255, 99, 132, 1)'  
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          },
+
+        ]
+    },
+    options: {
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+var ctx = document.getElementById('myChart');
+
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: {{ labels|safe }},
+        datasets: [
+          {
+            label: 'Roy_Ytd Y-1',
+            data: {{data_roy_ytd_last_year|safe}},
+            backgroundColor:'rgba(54, 162, 235, 0.1)',// red bg 'rgba(255, 99, 132, 0.2)' red border 'rgba(255, 99, 132, 1)'  
+            borderColor: 'rgba(54, 162, 235, .2)',
+            borderWidth: 1
+          },
+          {
+            label: 'Roy_Ytd',
+            data: {{data_roy_ytd|safe}},
+            backgroundColor:'rgba(54, 162, 235, 0.5)',// red bg 'rgba(255, 99, 132, 0.2)' red border 'rgba(255, 99, 132, 1)'  
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          },
+          {
+            label: 'Accruals Y-1',
+            data: {{data_accruals_last_year|safe}},
+            backgroundColor:'rgba(255, 99, 132, 0.1)',// red bg 'rgba(255, 99, 132, 0.2)' red border 'rgba(255, 99, 132, 1)'  
+            borderColor: 'rgba(255, 99, 132, .2)',
+            borderWidth: 1
+          },
+          {
+            label: 'Accruals',
+            data: {{data_accruals|safe}},
+            backgroundColor:'rgba(255, 99, 132, 0.5)',// red bg 'rgba(255, 99, 132, 0.2)' red border 'rgba(255, 99, 132, 1)'  
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 1
+          },
+
+        ]
+    },
+    options: {
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+    <script src="{% static 'royalty_app/home.js'%}"></script>
+    <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+    <script src="{% static 'royalty_app/dropdown_multiple.js'%}"></script>
+  </main>
+
+
+ 
+
+{% endblock %}
+

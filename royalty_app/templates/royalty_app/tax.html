@@ -1,0 +1,134 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+  <main role="main" class="col-md-9  col-lg-10 pt-3 px-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Tax</h1>
+
+      </div>
+      <h4></h4>
+  <!----------------------------------------------------------------------------->
+  <!----------------------------Main table-------------------------------->
+  <!----------------------------------------------------------------------------->
+
+    <table class="table table-striped table-sm" id="main_table" style="display: block; max-height: 700px; overflow-y: scroll; max-width: 500px">
+      <thead>
+        <tr style="border-top: hidden">
+          <th style="color:transparent">:</th>
+          <th colspan="3" style="text-align: end; color:green" id="saved_message"></th>
+        </tr>
+        <tr >
+          <th >From</th>
+          <th >To</th>
+          <th >Rate</th>
+          <th style="width: 30px">
+            <button   class="btn btn-sm btn-outline-success" title="save" onclick="save()" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="tbody_main_table">
+        {% for t in tax_list %}
+        <tr >
+
+          <td ><!--column0-->
+            <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="is_unique_key(this)" previous_value="{{c.country_id}}">
+              {% for c in country_list %}
+                {% if c == t.country_from %}
+                  <option value={{c.country_id}} selected="selected">{{c.country_id}}</option>
+                {% else %}
+                  <option value={{c.country_id}}>{{c.country_id}}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </td>
+          <td ><!--column1-->
+            <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="is_unique_key(this)" previous_value="{{c.country_id}}">
+              {% for c in country_list %}
+                {% if c == t.country_to %}
+                  <option value={{c.country_id}} selected="selected">{{c.country_id}}</option>
+                {% else %}
+                  <option value={{c.country_id}}>{{c.country_id}}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </td>
+          <td><!--column2-->
+            <input style="width:100%;background-color: transparent;border-style: hidden;" value="{{t.wht_rate}}">
+          </td>
+          <td ><!--column3-->
+            <button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
+          </td>
+        </tr>
+        {% endfor %}
+        <!--new row-->
+        <tr id="new_tr">
+
+          <td><!--column0-->
+              <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="add_new_row(this)"  previous_value="">
+                <option disabled selected></option>
+              {% for c in country_list %}
+                <option value={{c.country_id}}>{{c.country_id}}</option>
+              {% endfor %}
+            </select>  
+          </td>
+
+          <td><!--column1-->
+              <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="add_new_row(this)"  previous_value="">
+                <option disabled selected></option>
+              {% for c in country_list %}
+                <option value={{c.country_id}}>{{c.country_id}}</option>
+              {% endfor %}
+            </select>  
+          </td>
+
+          <td><!--column2-->
+            <input style="width:100%;background-color: transparent;border-style: hidden;" onchange="add_new_row(this)"   value="{{t.wht_rate}}">
+          </td>
+
+          <td ><!--column3-->
+            <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+     <!--dd for new beneficiary--> 
+      <div hidden>
+        <div id="column_0">
+            <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="add_new_row(this)"  previous_value="">
+                <option disabled selected></option>
+              {% for c in country_list %}
+                <option value={{c.country_id}}>{{c.country_id}}</option>
+              {% endfor %}
+            </select>  
+        </div>
+        <div id="column_1">
+            <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="add_new_row(this)" previous_value="">
+                <option disabled selected></option>
+              {% for c in country_list %}
+                <option value={{c.country_id}}>{{c.country_id}}</option>
+              {% endfor %}
+            </select>  
+        </div>
+        <div id="column_2" >
+          <input style="width:100%;background-color: transparent;border-style: hidden;"  onchange="add_new_row(this)" value="{{t.wht_rate}}"> 
+        </div>
+
+        <div id="column_3">
+          <button hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px"><span class="bi bi-trash" ></span></button> 
+        </div>
+      </div>
+
+</main>
+
+
+{% load static %}
+<script src="{% static 'royalty_app/tax.js'%}"></script>
+<link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+
+
+{% endblock %}
+
+
+  

@@ -1,0 +1,200 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+  <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 " style="visibility: hidden;">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Invoices </h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+        </div>
+      </div>
+
+  <!------------------------------------------------------------------------------------->   
+  <!---------------------------Form for new invoice-------------------------------------> 
+
+    <form   id="form_new" > 
+      <table>
+        <tr><!--Row 1-->
+          <td ><!--Name-->
+            <span style="width: 100%; margin-left:5px;">New Invoice:</span>
+          </td>
+        </tr>
+        <tr><!--Row 2-->
+          <td ><!--Contract Name-->
+            <div style="width: 100%; margin-left:5px;"> 
+              <select id="contract_" onchange="onchange_contract(this)" style="width:100%; padding:2px" placeholder="Contract">
+                <option value="" disabled selected>select contract</option>
+                {% for c in contract_list %}
+                  <option value={{c.id}} transaction_direction= "{{c.transaction_direction}}" currency="{{c.contract_currency.currency}}" periodicity_id={{c.payment_periodicity.id}}>{{c.contract_name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </td>        
+          <td ><!--Partner Name-->
+            <div style="width: 100%; margin-left:5px;"> 
+              <select id="partner_" disabled="true" style="width:100%; padding:2px">
+                <option  value="" disabled selected>select partner</option>
+                {% for cp in contract_partner_list %}
+                  <option id="" value={{cp.partner.id}} contract_of_cp_id={{cp.contract.id}}>{{cp.partner.partner_name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </td>
+          <td style="width:0px; padding:0px"><!-- transaction_direction-->
+            <span  id="transaction_direction_" style=" position: absolute; margin-left: 10px; margin-top: -10px; color:grey"></span> 
+          </td>
+          <td style="width:0px; padding:0px"><!-- currency-->
+            <span style="position: absolute; margin-left: 37px; margin-top: -10px; color:grey" id="currency_contract_"></span>
+          </td>
+          <td ><!--Amount-->
+            <input  id="amount_" disabled="true" class="number-separator" style=" padding-left: 60px;width: 100%; margin-left:5px;" placeholder="Amount"  type="text">
+          </td>
+
+        </tr>
+        <tr > <!--Row 3-->
+          <td><!--Year-->
+            <input id="year_" disabled="true" style="width: 100%; margin-left:5px;"  type="number" placeholder="Year">
+          </td>
+          <td><!--Period-->
+            <div  style="width: 100%; margin-left:5px">
+              <select id="period_" disabled="true" style="width:100%; padding:2px">
+                <option value="" disabled selected>select period</option>
+              {% for pc in periodicity_cat_list %}
+                <option value={{pc.id}} periodicity_of_ps_id={{pc.periodicity.id}}>{{pc.periodicity_cat}}</option>
+              {% endfor %}
+              </select>
+            </div>
+          </td>
+          <td colspan="3"><!--comment-->
+            <input disabled="true" type="text"  id="comment_" name="partner_bank_account" placeholder="comment" maxlength="100"style="width: 100%; margin-left:5px;">
+          </td>
+        </tr >
+        <tr > <!--Row 4-->
+          <td colspan="2"><!--message-->
+            <div style="width: 100%; margin-left:5px;">
+              <div id="message_save" style="color: green;" hidden > Item saved</div>
+              <div id="message_error" style="color: red;" hidden > error: some fields are missing</div>
+          </div>
+          </td>
+          <td colspan="3"><!--Button-->
+            <div style="width: 100%; text-align: end; margin-left:5px;">
+              <button class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()"><span class="bi bi-save2-fill"></span></button>
+              <!--<button class="btn btn-sm btn-outline-warning"  type="reset" title="cancel"> <span class="bi bi-x-circle"></span></button>-->
+            </div>
+          </td>
+        </tr>
+      </table> 
+    </form>
+
+  <!------------------------------------------------------------------------------------->   
+  <!---------------------------Invoice Table------------------------------------------->  
+
+<!----setting to unhide/hide column--->  
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" >
+    <div></div>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group mr-2">
+        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="column_sel()" title="column selection" ><span class="bi bi-gear"></span> </button>
+      </div>
+      <div class="btn-group mr-2">
+        <a class="btn btn-sm btn-outline-secondary" href="/export/invoice"><span class="bi bi-download"></span> download </a>
+      </div>
+
+    </div>
+  </div> 
+  <div id="column_selection" style=" display:none" >
+    <table class="table table-striped table-sm" id="beneficiary_table" >
+      <thead>
+        <tr >
+          <th  > </th>
+          <th ></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr >
+          <td ><input type="checkbox" checked onclick="column_visibility(this,1)"></td>
+          <td >Contract</td>
+          <td ><input type="checkbox" checked onclick="column_visibility(this,2)"></td>
+          <td >Partner</td>
+          <td ><input type="checkbox" checked onclick="column_visibility(this,3)"></td>
+          <td >Amount</td>
+         </tr >
+         <tr >
+          <td ><input type="checkbox" checked onclick="column_visibility(this,4)"></td>
+          <td >Year</td>
+          <td ><input type="checkbox" checked onclick="column_visibility(this,5)"></td>
+          <td >Period</td>
+          <td ><input type="checkbox" checked onclick="column_visibility(this,6)"></td>
+          <td >comment</td>
+
+        </tr>
+        
+      </tbody>
+    </table>
+  </div> 
+
+
+  <div class="table-responsive">
+    <table class="table table-striped table-sm " id="invoices_table" style="width: 100%;">
+      <thead>
+        <tr class="search_box_class">
+          <th style="padding-left:8px"><input  id="column0_search"  class="fname2" placeholder="..." column=0> </th>
+          <th style="padding-left:8px"><input  id="column1_search"  class="fname2" placeholder="..." column=1> </th>
+          <th style="padding-left:8px"><input  id="column2_search"  class="fname2" placeholder="..." column=2>  </th>
+          <th style="padding-left:8px"><input  id="column3_search"  class="fname2" placeholder="..." column=3> </th>
+          <th style="padding-left:8px"><input  id="column4_search"  class="fname2" placeholder="..." column=4> </th>
+          <th style="padding-left:8px"><input  id="column5_search"  class="fname2" placeholder="..." column=5> </th>
+          <th style="padding-left:8px"><input  id="column6_search"  class="fname2" placeholder="..." column=6> </th>
+          <th style="padding-left:8px"></th>
+          <th style="padding-left:8px"></th>
+        </tr>       
+        <tr >
+          <th style="border-top:none; padding-left: 8px; width:20px">ID</th>
+          <th style="border-top:none; padding-left: 8px">Contract</th>
+          <th style="border-top:none; padding-left: 8px">Partner</th>
+          <th style="border-top:none; padding-left: 8px;">Amount</th>
+          <th style="border-top:none; padding-left: 8px;">Year</th>
+          <th style="border-top:none; padding-left: 8px;">Period</th>
+          <th style="border-top:none; padding-left: 8px;">comment</th>
+          <th style="border-top:none; padding-left: 8px;">paid</th>
+          <th style="border-top:none"></th>
+        </tr>
+      </thead>
+      <tbody >
+        {% for invoice in invoice_list %}
+        <tr>
+          <td>{{invoice.id}}</td> 
+          <td>{{invoice.contract.contract_name}}</td>  
+          <td>{{invoice.partner.partner_name}}</td>
+          <td>
+            <div style="display:grid;grid-template-columns: 30px 30px auto" >
+              <span style="color:grey">{{invoice.contract.transaction_direction}}:</span>
+              <span style="color:grey">{{invoice.contract.contract_currency.currency}}</span>
+              <span>{{invoice.amount|floatformat:"-3g"}}</span>
+            </div>
+          </td>
+          <td>{{invoice.year}}</td>
+          <td>{{invoice.periodicity_cat.periodicity_cat}}</td>
+          <td>{{invoice.comment}}</td>
+          <td><input  type="checkbox" {% if invoice.paid %} checked {% endif %} onclick="save_paid_status(this)"></td>
+          <td><button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)"><span class="bi bi-trash"></span></button></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% load static %}
+  
+    <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+    <script src="{% static 'royalty_app/invoices.js'%}"></script>
+    <script src="{% static 'royalty_app/easy-number-separator.js'%}"></script>
+
+
+
+
+    </main>
+  </div>
+  </div>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+Django
+python-dotenv
+whitenoise
+mysqlclient
+numpy
+pandas
+openpyxl
+xlwt
+pyyaml
+msal
+django-excel
+pyexcel-xlsx
+xlsxwriter
+django-cleanup #deletes the file in Media
+

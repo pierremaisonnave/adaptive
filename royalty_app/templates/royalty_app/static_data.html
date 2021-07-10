@@ -1,0 +1,139 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+  <main role="main" class="col-md-9 col-lg-10 pt-3 px-4">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Static Data</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          
+        </div>
+      </div>
+  
+  <div style="display:grid ;grid-template-columns: 100px auto; margin-bottom:10px ">
+    <div>
+      <a class="btn btn-sm btn-outline-secondary"  id="button_extract_static" ><span class="bi bi-download"></span> download </a>
+    </div>
+
+    <form hidden action="{% url 'import_static' %}" id="button_extract_static" method="post" enctype="multipart/form-data" style=" width:300px  ;display:grid ;grid-template-rows: 30px 20px ">
+            {% csrf_token %} 
+      <div>
+          <div id="imput_label_select">
+              <input  type="file" name="loaded_file" id="fileSelect" accept=".xlsx" onchange="processSelectedFiles(this)"  hidden >
+              <input  type="text" name="sheet_list_to_upload" id="sheet_list_to_upload"  hidden >
+              <label for="fileSelect" class="btn btn-sm btn-outline-secondary" > <span class="bi bi-upload"  ></span > Select upload File</label>
+          </div>
+          <div style=" display:grid ; grid-template-columns: 70px 70px auto "  >
+            <button type="submit" value="Upload"   id="load_file" class="btn btn-sm btn-sm btn-outline-secondary" onclick="loadSelectedFiles(this)"  hidden >
+              <span class="bi bi-upload" ></span>
+              <span>Load</span>            
+            </button>
+            <button  type="reset" id="cancel_file" class="btn btn-sm btn-outline-secondary" hidden onclick="cancelload()"style="margin-left:7px" > Cancel</button>
+             <!-- here the css code nowwrap prevent the text from wrapping, elipsis and overflow prevent the text from overlapping-->
+          </div>
+      </div>
+      <div id="file_name" style="font-family: arial; font-size: 0.725rem; color:#6c757d; white-space: nowrap; overflow:hidden;text-overflow:ellipsis;"></div>       
+    </form>
+  </div>
+  <div style="color:red" id='error_message_load'>{{error}}</div>
+
+
+
+               
+  <table class="table table-striped table-sm " style="max-width:500px; width:auto" id="static_data_table">
+    <thead>
+
+      <tr>
+        <th >File Name</th>
+        <th >
+          <span class="select_all" id="select_all" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d">(select all)</span> 
+          
+         </th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <tr >
+        <td style="padding-left: 18px;"> <a href="{% url 'partners' %}">Partners</a></td>
+        <td><input type="checkbox" name="partner"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'division' %}">Divisions</a></td>
+        <td ><input type="checkbox" name="division"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'contracts' %}">Contracts</a></td>
+        <td ><input type="checkbox" name="contract"></td>
+      </tr>
+      <tr >
+        <td style="padding-left: 18px;">Contract_partner</td>
+        <td><input type="checkbox" name="contract_partner"></td>
+      </tr>
+      <tr >
+        <td style="padding-left: 18px;"> <a href="{% url 'invoices' %}">Invoices</a></td>
+        <td><input type="checkbox" name="invoice"></td>
+      </tr>
+      <tr >
+        <td style="padding-left: 18px;">Rules</td>
+        <td><input type="checkbox" name="rule"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;" >Tranches</td>
+        <td ><input type="checkbox" name="tranche"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'country' %}">Countries</a></td>
+        <td ><input type="checkbox" name="country"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'region' %}">Regions</a></td>
+        <td ><input type="checkbox" name="region"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'formulation' %}">Formulations</a></td>
+        <td ><input type="checkbox" name="formulation"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'brand' %}">Brands</a></td>
+        <td ><input type="checkbox" name="brand"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'currency' %}">Currencies</a></td>
+        <td ><input type="checkbox" name="currency"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'consolidation_currency' %}">Consolidation Currency</a></td>
+        <td ><input type="checkbox" name="consolidation_currency"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'accounting' %}">Accounting</a></td>
+        <td ><input type="checkbox" name="accounting"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'tax' %}">Tax Rules</a></td>
+        <td ><input type="checkbox" name="tax"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'sales_breakdown_item' %}">Sales Breakdown Definition</a></td>
+        <td ><input type="checkbox" name="sales_breakdown_item"></td>
+      </tr>
+
+    </tbody>
+  </table>
+
+
+
+{% load static %}
+
+  <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+  <script src="{% static 'royalty_app/dropdown_multiple.js'%}"></script> 
+  <script src="{% static 'royalty_app/static_data.js'%}"></script>
+
+</main>
+
+
+
+
+
+
+{% endblock %}

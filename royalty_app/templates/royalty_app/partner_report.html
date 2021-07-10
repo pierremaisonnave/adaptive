@@ -1,0 +1,116 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+  <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 " style="visibility: hidden">
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Partner payment report </h1>
+      </div>
+
+  <!------------------------------------------------------------------------------------->   
+  <!---------------------------Form for new accruals-------------------------------------> 
+
+    <form   id="form_new"  > 
+    {% csrf_token %} 
+      <table>
+        <tr><!--Row 1-->
+          <td ><!--Name-->
+            <span style="width: 100%; margin-left:5px;">New Partner Report:</span>
+          </td>
+        </tr>
+        <tr><!--Row 2-->
+          <td colspan="2"><!--accruals Name-->
+            <input  type="text"  id="name_" placeholder="name" maxlength="50" style="width: 100%; margin-left:5px;">
+          </td>  
+        </tr>
+        <tr > <!--Row 3-->
+          <td > <!--file selection-->
+            <input  type="file" name="loaded_file" id="fileSelect" accept=".xlsx"  style="width: 100%; margin-left:5px;">
+          </td>
+        </tr >
+        <tr > <!--Row 4-->
+          <td><!--message-->
+            <div style="width: 100%; margin-left:5px;">
+              <div id="message_save" style="color: green;" hidden > Item saved</div>
+              <div id="message_error" style="color: red;" hidden > error: some fields are missing</div>
+              <div id="message_wait"  hidden > please wait.. : loading and calculating </div>
+          </div>
+          </td>
+          <td ><!--Button-->
+            <div style="width: 100%; text-align: end; margin-left:5px;">
+              <button type="submit" class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()"><span class="bi bi-save2-fill"></span></button>
+              <button class="btn btn-sm btn-outline-warning"  type="reset" title="cancel"> <span class="bi bi-x-circle"></span></button>
+            </div>
+          </td>
+        </tr>
+      </table> 
+    </form>
+
+
+      <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <div id="selection_table">
+          <input checked type="checkbox" value="sales"><span>Sales</span>
+          <input checked type="checkbox" value="fx"><span>Fx</span>
+          <input checked type="checkbox" value="rule"><span>Rule</span>
+          <input checked type="checkbox" value="detail"><span>Detail</span>
+          <input checked type="checkbox" value="sales_details"><span>sales_details</span>
+        </div>
+        <div class="btn-toolbar mb-2 mb-md-0">
+          <div class="btn-group mr-2">
+            <a class="btn btn-sm btn-outline-secondary" onclick="export_file()"><span class="bi bi-download"></span> download </a>
+          </div>
+
+        </div>
+      </div>
+
+
+  <!------------------------------------------------------------------------------------->   
+  <!---------------------------Invoice Table------------------------------------------->  
+     
+  <div class="table-responsive">
+    <table class="table table-striped table-sm " id="file_table" style="width: 100%;">
+      <thead>
+        <tr class="search_box_class">
+          <th style="padding-left:8px ; width:20px"> </th>
+          <th style="padding-left:8px; width:20px"><input  id="column1_search"  class="fname2" placeholder="..." column=1> </th>
+          <th style="padding-left:8px"><input  id="column2_search"  class="fname2" placeholder="..." column=2>  </th>
+          <th style="padding-left:8px"><input  id="column3_search"  class="fname2" placeholder="..." column=3> </th>
+          <th style="padding-left:8px"></th>
+        </tr>       
+        <tr >
+          <th style="border-top:none; padding-left: 8px"></th>
+          <th style="border-top:none; padding-left: 8px">ID</th>
+          <th style="border-top:none; padding-left: 8px">Name</th>
+          <th style="border-top:none; padding-left: 8px;">creation date</th>
+          <th style="border-top:none"></th>
+        </tr>
+      </thead>
+      <tbody >
+      {% for file in file_list %}
+        <tr>
+          <td><input type="checkbox"></td>
+          <td>{{file.id}}</td>   
+          <td>{{file.name}}</td>
+          <td>{{file.date}}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)">
+              <span class="bi bi-trash"></span>
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% load static %}
+  
+    <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+    <script src="{% static 'royalty_app/partner_report.js'%}"></script>
+
+
+
+    </main>
+  </div>
+  </div>
+
+{% endblock %}
