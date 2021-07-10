@@ -30,31 +30,36 @@
           </td>
           <td  class="comboTreeWrapper"> <!--Country List-->
             <div style="width: 100%; margin-left:5px;">
-              <div  class="comboTreeInputWrapper" dd_id="new_country">
-                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Country" readonly dd_id="new_country" id="displayed_item_name_new_country" >
+              {% if country_list %}
+                <div  class="comboTreeInputWrapper" dd_id="new_country">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Country" readonly dd_id="new_country" id="displayed_item_name_new_country" >
+                  <input type="text"   hidden id="hidden_item_code_new_country">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_new_country" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="new_country" >
+                    <ul  >
+                    {% for region in region_list %}  
+                      <li  >
+                        <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="new_country" region_id={{region.id}} ></span>
+                        <span class="region" dd_id="new_country">{{region.region}}</span>
+                        <ul style="display: block;" id="new_country_{{region.id}}">
+                            {% for country in country_list %}
+                              {% if region == country.country_region%}
+                              <li style="display: block;" class="item_single_select" dd_id="new_country">
+                                <span>{{ country.country_id }}</span><span> : </span><span>{{ country.country }}</span>
+                              </li>
+                              {% endif %}
+                            {% endfor %}
+                        </ul>
+                      </li>
+                    {% endfor %}
+                      
+                    </ul>
+                </div>
+              {% else %}
+                <input type="text" readonly placeholder="Countries: Empty"  style="width:100%" title="please insert Countries in static data tab" id="displayed_item_name_new_country">
                 <input type="text"   hidden id="hidden_item_code_new_country">
-              </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_new_country" style="display: none;">
-                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="new_country" >
-                  <ul  >
-                  {% for region in region_list %}  
-                    <li  >
-                      <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="new_country" region_id={{region.id}} ></span>
-                      <span class="region" dd_id="new_country">{{region.region}}</span>
-                      <ul style="display: block;" id="new_country_{{region.id}}">
-                          {% for country in country_list %}
-                            {% if region == country.country_region%}
-                            <li style="display: block;" class="item_single_select" dd_id="new_country">
-                              <span>{{ country.country_id }}</span><span> : </span><span>{{ country.country }}</span>
-                            </li>
-                            {% endif %}
-                          {% endfor %}
-                      </ul>
-                    </li>
-                  {% endfor %}
-                    
-                  </ul>
-              </div>
+                {% endif %}
             </div>
           </td>
         </tr>
@@ -67,20 +72,25 @@
          </td>
           <td><!--payment list-->
             <div style="width: 100%; margin-left:5px;">
-              <div  class="comboTreeInputWrapper" dd_id="new_payment">
-                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="payment type" readonly dd_id="new_payment" id="displayed_item_name_new_payment" >
+              {% if payment_type_list %}
+                <div  class="comboTreeInputWrapper" dd_id="new_payment">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="payment type" readonly dd_id="new_payment" id="displayed_item_name_new_payment" >
+                  <input type="text"   hidden id="hidden_item_code_new_payment">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_new_payment" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="new_payment" >
+                    <ul  >
+                      {% for payment_type in payment_type_list %}
+                        <li style="display: block;" class="item_single_select" dd_id="new_payment">
+                          <span>{{ payment_type.id }}</span><span> : </span><span>{{ payment_type }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+              {% else %}
                 <input type="text"   hidden id="hidden_item_code_new_payment">
-              </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_new_payment" style="display: none;">
-                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="new_payment" >
-                  <ul  >
-                    {% for payment_type in payment_type_list %}
-                      <li style="display: block;" class="item_single_select" dd_id="new_payment">
-                        <span>{{ payment_type.id }}</span><span> : </span><span>{{ payment_type }}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-              </div>
+                <input type="text" readonly placeholder="payment type: Empty"  style="width:100%" title="please insert payment_type in static data tab" id="displayed_item_name_new_payment" >
+              {% endif %}
             </div>
           </td>
           <td><!--Bank-->

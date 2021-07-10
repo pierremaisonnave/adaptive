@@ -9,7 +9,7 @@ from .models import (Invoice,Country,Partner,Region,Payment_type,Brand,
   Payment_structure,Contract,Contract_partner,Rule,Tranche,
   Periodicity_cat,Fx,Sales_breakdown_item,Sales_breakdown_per_contract,Sales_breakdown_item,
   File,Sale, Rule_calc,Periodicity_cat,Consolidation_currency,Cash_flow,Detail,Gls,Conso,Wht,Sales_breakdown_for_contract_report,
-  Contract_file)
+  Contract_file,Month)
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 import numpy as np
@@ -17,10 +17,13 @@ import json
 import sqlite3
 from io import BytesIO
 from django.db.models import ProtectedError
+
 # for MySql impot : https://www.dataquest.io/blog/sql-insert-tutorial/
 
 import django_excel as excel
 import pyexcel as p
+
+
 
 def home(request):
 
@@ -212,11 +215,12 @@ def chart_accruals(year,contract_id_list):
     data_accruals=[0,0,0,0,0,0,0,0,0,0,0,0]
     data_roy_ytd=[0,0,0,0,0,0,0,0,0,0,0,0]
   else:
-
+    print("chart_accruals 1")
     #import detail tab:
     detail_list=Detail.objects.filter(import_file__in=file_list,contract_id__in=contract_id_list ).values_list('import_file_id','year_of_sales','amount_consolidation_curr','entry_type','transaction_direction')
     df_detail_list=pd.DataFrame.from_records(list(detail_list), columns=['import_file_id','year_of_sales','amount_consolidation_curr','entry_type','transaction_direction'])
     df_detail_list=df_detail_list.groupby(['import_file_id','year_of_sales','entry_type','transaction_direction'], as_index=False).agg({"amount_consolidation_curr": "sum"})
+    print("chart_accruals 2")
     #merge file and detail:
     df_data=pd.merge(df_file_list,df_detail_list, how="inner",left_on=['id'], right_on=['import_file_id'] )
     #df_data=df_data.groupby(['acc_year','acc_month','entry_type','year_of_sales'], as_index=False).agg({"amount_consolidation_curr": "sum"})
@@ -226,13 +230,13 @@ def chart_accruals(year,contract_id_list):
       -df_data["amount_consolidation_curr"],
       df_data["amount_consolidation_curr"]
     )
-   
+    print("chart_accruals 3")
     df_data["Accruals"]=np.where(
       df_data["transaction_direction"]=="REC",
       -df_data["Accruals"],
       df_data["Accruals"]
     )
-
+    print("chart_accruals 4")
     df_data["Ytd_roy"]=np.where(
       df_data["year_of_sales"]==df_data["acc_year"],
       np.where(
@@ -243,19 +247,20 @@ def chart_accruals(year,contract_id_list):
       0
     )
 
-   
+    print("chart_accruals 5")
     df_data["Ytd_roy"]=np.where(
       df_data["transaction_direction"]=="REC",
       -df_data["Ytd_roy"],
       df_data["Ytd_roy"]
     )
-
-
-    df_data["acc_month"]=df_data['acc_month'].astype(int)
+    print(df_data)
+    df_data=df_data.rename(columns={'acc_month_id':'acc_month'})
+  
     df_month = pd.DataFrame({
       'month_nb': [1,2,3,4,5,6,7,8,9,10,11,12],
       'month': ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
     })
+    print("chart_accruals 6")
     df_data=pd.merge(df_month,df_data,how="left",left_on=["month_nb"],right_on=["acc_month"])
     df_data["acc_year"]=year
     df_data["acc_year"]=df_data['acc_year'].astype(int)
@@ -344,9 +349,9 @@ def settings(request):
 
   return render(request, 'royalty_app/settings.html', {})
 def monthly_accruals(request):
-
+  month_list=Month.objects.all()
   file_list=File.objects.filter(file_type="accruals")
-  return render(request, 'royalty_app/monthly_accruals.html', {"file_list":file_list})
+  return render(request, 'royalty_app/monthly_accruals.html', {"month_list":month_list,"file_list":file_list})
 
 def cash_flow_forecast(request):
 
@@ -472,11 +477,6 @@ def export(request,file):
   #Periodicity
   list_to_pd=Periodicity.objects.all()
   df_periodicity = pd.DataFrame(list(list_to_pd.values()))
-
-  #Periodicity Cat
-  list_to_pd=Periodicity_cat.objects.all()
-  df_periodicity_cat = pd.DataFrame(list(list_to_pd.values()))
-
   
   #Payment Type
   list_to_pd=Payment_type.objects.all()
@@ -602,7 +602,7 @@ def export(request,file):
 
 
 
-def import_static(request):
+def import_static_Sales(request):
   filehandle = request.FILES['loaded_file']
   sheet_=filehandle.get_sheet(sheet_name="Sales",name_columns_by_row=0)
   file_=File.objects.filter(id="30")[0]
@@ -637,121 +637,21 @@ def import_static_withinitialiser(request):
   
   return HttpResponseRedirect(reverse('static_data'))
 
-def import_static_Country(request):
-
+@csrf_exempt
+def import_static(request):
+  conn = sqlite3.connect('db.sqlite3')
+  
   if request.method == "POST":
     filehandle = request.FILES['loaded_file']
-    sheet_=filehandle.get_sheet(sheet_name="Country",name_columns_by_row=0)
-
-    #On the last column , we add the id to the 
-    for row in sheet_ :
-      row[3]="1"
-
-    sheet_.save_to_django_model(
-      model=Country,
-    )
+   
+    country_list = pd.read_excel(filehandle, 'Countries')#,dtype={'country_region_id':str,'country_id':str})#
+    country_list.to_sql('royalty_app_country', con=conn, index=False, if_exists="replace")
+  
+  conn.close()
+ 
   
   return HttpResponseRedirect(reverse('static_data'))
 
-
-
-
-  if request.method == "POST":
-    myfile =request.FILES.get('loaded_file')
-    #get list of data that the user selected ( checkbox)
-    sheet_list_to_upload=request.POST["sheet_list_to_upload"].split(',') 
-    wb =load_workbook(myfile)
-    # get the sheet name of the Excel loaded 
-    sheet_list_imported_file=wb.sheetnames 
-    #make sure that at least one element in the import list and check box list matches- if not reload static page and display an error message
-    sheet_list_intermediate = list(set(sheet_list_to_upload) &  set(sheet_list_imported_file))
-    if sheet_list_intermediate == [] :
-      error="error: verify that your import contains at least one of the element from the checkbox list"
-      return render(request, 'royalty_app/static_data.html', {'error':error})
-      
-
-    # ----------------------------------------------------
-    #for each table in Model, we must translate the column name, as display to the user-
-    partner_dic={'id':'id','partner_name':'partner_name','country_id':'partner_country','bank_account':'partner_bank_account','payment_type_id':'partner_payment_type'}
-    #country_dic={'country_id':['country_id',3,str,True,None,None], 'country':['country',100,str,False,None,None],'region_id':['country_region',100,int,'Region','id']}
-    country_dic={'country_id':'country_id', 'country':'country','region_id':'country_region'}
-    region_dic={'id':'id','region':'region'}
-    Payment_type_dic={'id':'id','Payment_type':'Payment_type'}   
-    # create a dictionary with all database and their corresponding dictionary
-    database_model_dictionary={'Partner':partner_dic,'Country':country_dic,'Region':region_dic,'Payment_type':Payment_type_dic}
-    # ----------------------------------------------------
-    #make a list of the table  in the model ( database)- and make sure that the intermediate list contains at least one element in the Partner ( should be)- otherwise display an error
-    database_model_list=database_model_dictionary.keys()
-    sheet_list_final = list(set(sheet_list_intermediate) &  set(database_model_list))
-    if sheet_list_final == [] :
-      error=f"error: make sure that one of the following element is selected: {database_model_list}"
-      return render(request, 'royalty_app/static_data.html', {'error':error})
-
-    error= ''
-    #look through the Excel file ( based on the sheet_list_final )
-    for sheetname in sheet_list_final :
-      ws=wb[sheetname] #select the correct worksheet based on name
-      #-------------------------------------------------------------------------------easy version
-      if sheetname == "Partner":
-        #check column name are OK:
-        if ws.cell(1,1).value != 'import type' or ws.cell(1,2).value !='comment' or ws.cell(1,3).value !='id' or ws.cell(1,4).value !='partner_name' or ws.cell(1,5).value !='country_id' or ws.cell(1,6).value !='bank_account'or ws.cell(1,7).value !='payment_type_id' :
-          error= error + f"error on {sheetname} : make sure column A to H are as follow, import type/comment/id/partner_name/country_id/bank_account/payment_type_id"
-        else:
-        # if there areno error in the structure of the file, then we loop through the different lines. from 2 to until there are nothin on column 1
-          i=2
-          while ws.cell(i,1).value is not None :
-            if ws.cell(i,1).value =="change" :
-              try:
-                #we try to see if the key exist, if not we stop the loop ("break"), and display a message on the second column
-                table_item = Partner.objects.get( id=ws.cell(i,3).value)
-                try :
-                  table_item.partner_name=ws.cell(i,4).value
-                  table_item.partner_country=Country.objects.get(country_id=ws.cell(i,5).value)
-                  table_item.partner_bank_account=ws.cell(i,6).value
-                  table_item.partner_payment_type=Payment_type.objects.get(id=ws.cell(i,7).value)
-                  table_item.save()
-                  ws.cell(i,2).value ="Item Changed"
-                except:
-                  ws.cell(i,2).value ="error: make sure format is respected"
-              except table_item.DoesNotExist:
-                ws.cell(i,2).value ="error: ID does not exist"
-  
-            if ws.cell(i,1).value =="delete" :
-              try:
-                #we try to see if the key exist, if not we stop the loop ("break"), and display a message on the second column
-                #we should make sure that the user is not used in any contract, if so, a message must pops up ( to be done)
-                table_item = Partner.objects.get( id=ws.cell(i,3).value)
-                table_item.delete()
-                ws.cell(i,2).value ="Item Deleted"
-              except table_item.DoesNotExist:
-                ws.cell(i,2).value ="error: ID does not exist"
-            
-            if ws.cell(i,1).value =="new" :
-              try :
-                p=Partner(
-                  partner_name = ws.cell(i,4).value,
-                  partner_country=Country.objects.get(country_id=ws.cell(i,5).value),
-                  partner_bank_account = ws.cell(i,6).value,
-                  partner_payment_type=Payment_type.objects.get(id=ws.cell(i,7).value),
-                )
-                p.save()
-                ws.cell(i,2).value ="Item Created"
-              except:
-                ws.cell(i,2).value ="error: make sure format is respected"
-            i=i+1
-
-
-    
-
-    response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="export_stat_data.xlsx"'
-    wb.save(response)
-    render(request, 'royalty_app/static_data.html', {'error':error})
-    return response
-    #return render(request,response, 'royalty_app/static_data.html', {"user":user,'error':error}) 
-
-
-    
   #----------------------------------------------------------
   #API Partner:
 @csrf_exempt 
@@ -1017,23 +917,25 @@ def save_contract_partner(request,contract_id):
 
 @csrf_exempt
 def save_rule(request,contract_id):
+
   if request.method == "POST":
     contract=Contract.objects.get(id=contract_id)
     rules_before_modification=Rule.objects.filter(contract=contract)
     Rule.objects.filter(contract=contract).delete()    #delete the existing record for this contract_partner ( we replace then, see code after:)
     data = json.loads(request.body)
-
+    print(data)
     for item in data :
       try:  
 
         if item['Report_currency']=="same_as_contract" :
-          Report_currency=contract.contract_currency
+          report_currency=contract.contract_currency
         if (', '.join(item['country']))=='' :
           country_list='---'
         else:
           country_list=', '.join(item['country'])
 
         qty_value_currency=Currency.objects.get(currency=item['qty_value_currency'])
+
         r=Rule(
           contract = contract,
           country_incl_excl=item['country_incl_excl'],
@@ -1044,8 +946,10 @@ def save_rule(request,contract_id):
           rate_value=item['rate_value'],
           qty_value=item['qty_value'],
           qty_value_currency=qty_value_currency,
+          report_currency=report_currency,
           country_list=country_list
         )
+
         r.save()
         #add formulation
         formulation_list=Formulation.objects.filter(formula_code__in= item['formulation'])
@@ -1101,11 +1005,13 @@ def save_invoice_breakdown(request,contract_id):
 def new_invoice(request):
   if request.method == "POST":
     data = json.loads(request.body)
+    print(data)
     try:  
       invoice=Invoice(
         contract = Contract.objects.get(id=data["contract_id"]),
         partner = Partner.objects.get(id=data["partner_id"]),
         amount=data["amount_value"],
+        booking_date=data["booking_date"],
         year=data["year_value"],
         periodicity_cat= Periodicity_cat.objects.get(id=data["period_id"]),
         comment = data["comment_value"],
@@ -1214,7 +1120,7 @@ def new_report(request):
       file=File(
         name =  request.POST.get("name"),
         acc_year =acc_year,
-        acc_month=acc_month,
+        acc_month=Month.objects.get(month_nb=acc_month),
         file_type=file_type
       )
       file.save()
@@ -1241,9 +1147,14 @@ def new_report(request):
         division_list=Division.objects.all()
         df_division = pd.DataFrame(list(division_list.values()))
 
+        #Month
+        month_list=Month.objects.all()
+        df_month = pd.DataFrame(list(month_list.values()))
+
         #Periodicity_cat
         periodicity_cat_list=Periodicity_cat.objects.all()
         df_periodicity_cat = pd.DataFrame(list(periodicity_cat_list.values()))
+        #df_periodicity_cat=pd.merge(df_periodicity_cat,df_month, how="inner",left_on=['sales_month_id'], right_on=['month_nb'] )
 
         #Accounting
         accounting_list=Accounting.objects.all()
@@ -1324,7 +1235,7 @@ def new_report(request):
         print("definition of DF expect Sale: Done")
 
         #Sale
-        df_sales = pd.read_excel(filehandle, 'Sales',dtype={'SKU':str,'formulation':str,'year':str,'month':str})
+        df_sales = pd.read_excel(filehandle, 'Sales',dtype={'SKU':str,'formulation':str,'year':str,'month':int})
         print("df_sales")
 
 
@@ -1371,38 +1282,41 @@ def new_report(request):
         print("df_sales_breakdown 0")
 
         df_sales_breakdown=pd.merge(df_rule,df_sales_breakdown, how="inner",left_on=['formulation'], right_on=['formulation'] )
-        df_sales_breakdown['country_validation']=(
-                                    ((df_sales_breakdown.apply(lambda x: x.country_id in x.country_list, axis=1))& (df_sales_breakdown['country_incl_excl'] == "INCLUDE") ) | 
-                                    ((df_sales_breakdown.apply(lambda x: x.country_id not in x.country_list, axis=1))& (df_sales_breakdown['country_incl_excl'] == "EXCLUDE") )
-                                  )
-        print("df_sales_breakdown 1")
+        if not df_sales_breakdown.empty :
+          df_sales_breakdown['country_validation']=(
+                                      ((df_sales_breakdown.apply(lambda x: x.country_id in x.country_list, axis=1))& (df_sales_breakdown['country_incl_excl'] == "INCLUDE") ) | 
+                                      ((df_sales_breakdown.apply(lambda x: x.country_id not in x.country_list, axis=1))& (df_sales_breakdown['country_incl_excl'] == "EXCLUDE") )
+                                    )
+          print("df_sales_breakdown 1")
 
-        df_sales_breakdown['day']="1"
+          df_sales_breakdown['day']="1"
 
-        df_sales_breakdown['date'] = pd.to_datetime(df_sales_breakdown[['year', 'month','day']], errors = 'coerce')
-        df_sales_breakdown['date_validation']=((df_sales_breakdown['date']>=df_sales_breakdown['period_from']) & (df_sales_breakdown['date']<df_sales_breakdown['period_to']))
-        df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.date_validation ==True]
-        df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.country_validation ==True]
-        print("df_sales_breakdown 2")
+          df_sales_breakdown['date'] = pd.to_datetime(df_sales_breakdown[['year', 'month','day']], errors = 'coerce')
+          df_sales_breakdown['date_validation']=((df_sales_breakdown['date']>=df_sales_breakdown['period_from']) & (df_sales_breakdown['date']<df_sales_breakdown['period_to']))
+          df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.date_validation ==True]
+          df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.country_validation ==True]
+          print("df_sales_breakdown 2")
 
-        # df_on_sales and contract
-        df_sales_breakdown=pd.merge(df_sales_breakdown,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
-        print("df_sales_breakdown 3")
-        #df_on_sales and fx 
-        df_sales_breakdown=pd.merge(df_sales_breakdown,df_fx, how="inner",left_on=['year','sales_currency'], right_on=['year','currency'] )
-        df_sales_breakdown = df_sales_breakdown.rename(columns={'exchange_rate': 'exchange_rate_sales_curr'})
-        df_sales_breakdown=pd.merge(df_sales_breakdown,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
-        df_sales_breakdown = df_sales_breakdown.rename(columns={'exchange_rate': 'exchange_rate_contract_curr'})
-        print("df_sales_breakdown 4")
-        df_sales_breakdown["sales_in_contract_curr"]=df_sales_breakdown["sales_in_market_curr"]*df_sales_breakdown["exchange_rate_sales_curr"]/df_sales_breakdown["exchange_rate_contract_curr"]
-        df_sales_breakdown=df_sales_breakdown[['contract_id','contract_name','year','month','country_id','formulation','SKU','SKU_name','sales_currency','import_file_id','volume','sales_in_market_curr','sales_in_contract_curr','sales_breakdown_definition','contract_currency']]
+          # df_on_sales and contract
+          df_sales_breakdown=pd.merge(df_sales_breakdown,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
+          print("df_sales_breakdown 3")
+          #df_on_sales and fx 
+          df_sales_breakdown=pd.merge(df_sales_breakdown,df_fx, how="inner",left_on=['year','sales_currency'], right_on=['year','currency'] )
+          df_sales_breakdown = df_sales_breakdown.rename(columns={'exchange_rate': 'exchange_rate_sales_curr'})
+          df_sales_breakdown=pd.merge(df_sales_breakdown,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
+          df_sales_breakdown = df_sales_breakdown.rename(columns={'exchange_rate': 'exchange_rate_contract_curr'})
+          print("df_sales_breakdown 4")
+          df_sales_breakdown["sales_in_contract_curr"]=df_sales_breakdown["sales_in_market_curr"]*df_sales_breakdown["exchange_rate_sales_curr"]/df_sales_breakdown["exchange_rate_contract_curr"]
+          df_sales_breakdown=df_sales_breakdown[['contract_id','contract_name','year','month','country_id','formulation','SKU','SKU_name','sales_currency','import_file_id','volume','sales_in_market_curr','sales_in_contract_curr','sales_breakdown_definition','contract_currency']]
 
-        #link to breakdown def:
+          #link to breakdown def:
 
 
-        df_sales_breakdown=pd.merge(df_sales_breakdown,df_breakdown_per_contract, how="left",left_on=['contract_id','sales_breakdown_definition'], right_on=['contract_id_breakdown','sales_breakdown_definition'] )
-        df_sales_breakdown=df_sales_breakdown[['import_file_id','contract_name','year','month','country_id','formulation','SKU','SKU_name','sales_currency','volume','sales_breakdown_definition','sales_breakdown_contract_definition','contract_currency','sales_in_market_curr','sales_in_contract_curr']]
-      
+          df_sales_breakdown=pd.merge(df_sales_breakdown,df_breakdown_per_contract, how="left",left_on=['contract_id','sales_breakdown_definition'], right_on=['contract_id_breakdown','sales_breakdown_definition'] )
+          df_sales_breakdown=df_sales_breakdown[['import_file_id','contract_name','year','month','country_id','formulation','SKU','SKU_name','sales_currency','volume','sales_breakdown_definition','sales_breakdown_contract_definition','contract_currency','sales_in_market_curr','sales_in_contract_curr']]
+        else:
+          pass
+        
     
         #---------------------------------------
 
@@ -1414,6 +1328,8 @@ def new_report(request):
           t1= pd.merge(df_rule,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
           #t1 and Sale
           t2=pd.merge(t1,df_sales, how="inner",left_on=['formulation'], right_on=['formulation'] )
+          if t2.empty:
+            return JsonResponse({"error": f"Sales data does not meet any contracts "}, status=201)
           t2['country_validation']=(
                                     ((t2.apply(lambda x: x.country_id in x.country_list, axis=1))& (t2['country_incl_excl'] == "INCLUDE") ) | 
                                     ((t2.apply(lambda x: x.country_id not in x.country_list, axis=1))& (t2['country_incl_excl'] == "EXCLUDE") )
@@ -1474,6 +1390,8 @@ def new_report(request):
         #preparation of df_sales : unpivot the data:
         #df_on_sales=df_sales.melt(id_var[''])
         df_on_sales=pd.merge(df_rule_calc,df_sales, how="inner",left_on=['formulation'], right_on=['formulation'] )
+        if df_on_sales.empty:
+          return JsonResponse({"error": f"Sales data does not meet any contracts "}, status=201)
         df_on_sales['country_validation']=(
                                     ((df_on_sales.apply(lambda x: x.country_id in x.country_list, axis=1))& (df_on_sales['country_incl_excl'] == "INCLUDE") ) | 
                                     ((df_on_sales.apply(lambda x: x.country_id not in x.country_list, axis=1))& (df_on_sales['country_incl_excl'] == "EXCLUDE") )
@@ -1558,7 +1476,7 @@ def new_report(request):
                                         ),
                                       df_mini_gar['minimum_guar_amount']/12*df_mini_gar['month_nb']
                                       )
-        df_mini_gar["month"]="12"
+        df_mini_gar["month"]=12
 
         df_mini_gar= df_mini_gar.rename(columns={'minimum_guar_remaining_allocation_country_id':'market_id'})
         print("Mini Gar6")
@@ -1579,7 +1497,8 @@ def new_report(request):
         df_mini_gar=df_mini_gar[['contract_id','year','month','SKU','SKU_name','amount_contract_curr','payment_periodicity_id','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency']]
         df_mini_gar=df_mini_gar.fillna("")
         df_mini_gar=df_mini_gar.groupby(['contract_id','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency'], as_index=False).agg({"amount_contract_curr": "sum","sales_in_market_curr": "sum","sales_in_contract_curr":"sum"})
-        df_mini_gar['entry_type']='Royalties'
+        df_mini_gar['entry_type']='Royalties- mini gar'
+        print(df_mini_gar)
         print("Mini Gar7")
 
 
@@ -1592,10 +1511,13 @@ def new_report(request):
 
         #merge with payment structure 
 
+
+        df_payment_structure=df_payment_structure.rename(columns={'sales_month_id': 'sales_month'})#.astype(str)
+
         df_payment_terms=pd.merge(df_periodicity_cat,df_payment_structure, how="inner",left_on=['id'], right_on=['periodicity_cat_id'] )
-
+        
         df_append_mini_roy=pd.merge(df_append_mini_roy,df_payment_terms, how="inner",left_on=['payment_periodicity_id','month'], right_on=['periodicity_id','sales_month'] )  
-
+        print(df_append_mini_roy)
         print("df_append_mini_roy2")    
         df_append_mini_roy=df_append_mini_roy[['contract_id','year','month','SKU','SKU_name','amount_contract_curr','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency','periodicity_cat_id','entry_type']]
         print("df_append_mini_roy3")
@@ -1615,7 +1537,6 @@ def new_report(request):
 
       #         iv.: Invoice  
         df_invoice=pd.merge(df_year_nb_month,df_invoice, how="inner",left_on=['year'], right_on=['year'] )
- 
         df_invoice['entry_type']='Invoice'
         df_invoice['month']=None
         df_invoice['SKU']=None
@@ -1636,6 +1557,7 @@ def new_report(request):
         print("definition of df_append_mini_roy: Done")
 
         #--------------------------------------------
+        '''
         df_invoice["amount_contract_curr"]=np.where( 
           df_invoice["periodicity_cat_id"]==4,
           0,
@@ -1648,28 +1570,31 @@ def new_report(request):
           0,
           df_invoice["amount_contract_curr"]  
         )
+        '''
         #--------------------------------------------
 
-
+        print("df_invoice: Done")
       #         iv.: Detail : 
         df_append_mini_roy=df_append_mini_roy.fillna("")
         df_invoice=df_invoice.fillna("")
         df_detail=df_append_mini_roy.append(df_invoice)
-
+        print("df_detail 0")
         # get last month of the period (i.e. for Q1, it's march)
         df_detail=pd.merge(df_detail,df_periodicity_cat, how="inner",left_on=['periodicity_cat_id'], right_on=['id'] )
         df_detail["day"]="1"
-        df_detail = df_detail.rename(columns={"month":"month_of_sales"})
+        df_detail = df_detail.rename(columns={"month":"month_of_sales","period_month_end_id":"period_month_end"})
+
         df_detail["month"]=df_detail["period_month_end"].astype(str)
+        print("df_detail 01")
         df_detail["date"]= pd.to_datetime(df_detail[['year', 'month','day']], errors = 'coerce')
         df_detail["day_end_period"]= pd.to_datetime(df_detail['date'], format="%Y%m") + MonthEnd(1)
         df_detail=df_detail[['contract_id','year','SKU','SKU_name','month_of_sales','amount_contract_curr','periodicity_cat','market_id','sales_in_market_curr','sales_in_contract_curr','volume','sales_in_contract_curr','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency','entry_type','partner_id','beneficiary_percentage','invoice_detail','day_end_period','invoice_paid']]
-        
+        print("df_detail 1")
         # get contract detail, get the payment terms and calculate the payment date 
         df_detail=pd.merge(df_detail,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
         df_detail["payment_date"]= df_detail["day_end_period"]+  pd.to_timedelta(df_detail['payment_terms'], unit='d')
         df_detail["payment_date"]= pd.to_datetime(df_detail['payment_date'],format='%d.%m.%Y') #needed, otherwise cannot load in system
-    
+        print("df_detail 2")
         # convert in consolidation curr
         df_detail=pd.merge(df_detail,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
         df_detail = df_detail.rename(columns={'exchange_rate': 'exchange_rate_from'})
@@ -1677,7 +1602,7 @@ def new_report(request):
         df_detail=pd.merge(df_detail,df_fx, how="inner",left_on=['year','consolidation_currency'], right_on=['year','currency'] )
         df_detail = df_detail.rename(columns={'exchange_rate': 'exchange_rate_to'})
         df_detail['amount_consolidation_curr']=df_detail['amount_contract_curr']*df_detail['exchange_rate_from']/df_detail['exchange_rate_to']
-
+        print("df_detail 3")
         #get partner detail and brand
         df_detail=pd.merge(df_detail,df_partner, how="inner",left_on=['partner_id'], right_on=['id'] )
         df_detail=pd.merge(df_detail,df_brand, how="inner",left_on=['m3_brand_id'], right_on=['id'] )
@@ -1690,7 +1615,7 @@ def new_report(request):
           df_detail["qty_value"].astype(str)+df_detail["qty_value_currency"] 
         )
         df_detail=df_detail.drop(["qty_value_currency"], axis = 1)
-
+        print("df_detail 4")
 
         #filter
         df_detail=df_detail[['division','division_country_id','division_via_id','field_type','year','month_of_sales','SKU','SKU_name','market_id','sales_in_market_curr','sales_in_contract_curr','volume','sales_in_contract_curr','market_curr','sales_rate','qty_value','beneficiary_percentage','contract_currency','transaction_direction','amount_contract_curr','consolidation_currency','amount_consolidation_curr','contract_id','contract_name','partner_id','ico_3rd','partner_name','partner_country_id','brand_name','m3_brand_code','periodicity_cat','entry_type','invoice_paid','invoice_detail','payment_date']]
@@ -1814,7 +1739,7 @@ def new_report(request):
           df_gls["text_voucherline"]= 'ACCR. '+ df_gls["brand_name"]
           #Get Date
           df_gls["year"]=file.acc_year
-          df_gls["month"]=file.acc_month
+          df_gls["month"]=file.acc_month.month_nb
           df_gls["day"]="1" 
           df_gls["date"]= pd.to_datetime(df_gls[['year', 'month','day']], errors = 'coerce')
           df_gls["accountingdate"]= pd.to_datetime(df_gls['date'], format="%Y%m") + MonthEnd(1)
@@ -1832,6 +1757,7 @@ def new_report(request):
 
         conn = sqlite3.connect('db.sqlite3')
         cur = conn.cursor()
+        
 
         df_sales.to_sql('royalty_app_sale', con=conn,index=False,if_exists="append")
         df_fx.to_sql('royalty_app_fx', con=conn,index=False,if_exists="append")
@@ -2030,12 +1956,15 @@ def save_division(request):
         division_id=d["division_id"]
         division_id_list.append(division_id)
       division_to_delete=Division.objects.exclude(division_id__in=division_id_list)
+      
       division_to_delete.delete()
 
       for d in data :
         division_id=d["division_id"]
+        
         country=Country.objects.get(country_id=d["division_country"])
         division_list_d=Division.objects.filter(division_id=division_id)
+        
         #if the item already exist, we do modify it
         if len(division_list_d)==1:  
 

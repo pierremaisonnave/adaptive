@@ -107,14 +107,14 @@ function isindropdownlist(event){
 
 function hidde_all_dropdows(){
     dd_list= document.querySelectorAll(".comboTreeDropDownContainer")
-    for (i = 0; i < dd_list.length; ++i) {
-        dd_list[i].style.display = "none"
+    for (h = 0; h < dd_list.length; ++h) {
+        dd_list[h].style.display = "none"
     }
     search_list=document.querySelectorAll(".multiplesFilter")
-    for (i = 0; i < search_list.length; ++i) {
+    for (h = 0; h < search_list.length; ++h) {
 
-        var dd_id=search_list[i].getAttribute("dd_id")
-        search_list[i].value=""
+        var dd_id=search_list[h].getAttribute("dd_id")
+        search_list[h].value=""
         hideitemsearch(dd_id,"")
     }
 }

@@ -101,6 +101,9 @@ function add_new_record(){
     year_=document.getElementById("year_")
     year_value=year_.value
 
+    booking_date=document.getElementById("booking_date_")
+    booking_date_value=booking_date.value
+
     period_=document.getElementById("period_")
     period_value=period_.options[period_.selectedIndex].text
     period_id=period_.value
@@ -137,6 +140,7 @@ function add_new_record(){
                 amount_value:amount_value_wo_comma,
                 year_value:year_value,
                 period_id:period_id,
+                booking_date:booking_date_value,
                 comment_value:comment_value,
                 })
             })
@@ -161,6 +165,7 @@ function add_new_record(){
                     `${year_value}`,
                     `${period_value}`,
                     `${comment_value}`,
+                    `${booking_date_value}`,
                     `<input type="checkbox" onclick="save_paid_status(this)">`,
                     `<button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)"><span class="bi bi-trash"></span></button>`,
                 ]).draw( false ).node();

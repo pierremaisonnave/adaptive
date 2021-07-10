@@ -142,7 +142,7 @@ span.comboTreeItemTitle{
 
 @media (min-width: 0px){
     main {
-        margin-left: 50px;
+        padding-left: 60px!important;
 
     }
     .sidebar{
@@ -162,7 +162,7 @@ span.comboTreeItemTitle{
 
 @media (min-width: 992px){
     main {
-        margin-left: 150px;
+        padding-left: 155px!important;
     }
     .sidebar{
         width: 150px;
@@ -173,7 +173,7 @@ span.comboTreeItemTitle{
 }
 @media (min-width: 1200px){
     main {
-        margin-left: 200px;
+        padding-left: 190px!important;
 
     }
     .sidebar{

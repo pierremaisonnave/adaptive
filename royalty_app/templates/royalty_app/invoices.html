@@ -1,4 +1,5 @@
 {% extends "royalty_app/layout.html" %}
+
 {% block content %}
 
 
@@ -70,6 +71,12 @@
           </td>
         </tr >
         <tr > <!--Row 4-->
+          <td><span style="width: 100%; margin-left:5px;" >Booking date:</span></td>
+          <td><!--Year-->
+            <input id="booking_date_" disabled="true" style="width: 100%; margin-left:5px;"  type="date" value="{% now 'Y-m-d' %}">
+          </td>
+        </tr >
+        <tr > <!--Row 5-->
           <td colspan="2"><!--message-->
             <div style="width: 100%; margin-left:5px;">
               <div id="message_save" style="color: green;" hidden > Item saved</div>
@@ -126,7 +133,9 @@
           <td ><input type="checkbox" checked onclick="column_visibility(this,5)"></td>
           <td >Period</td>
           <td ><input type="checkbox" checked onclick="column_visibility(this,6)"></td>
-          <td >comment</td>
+          <td >Comment</td>
+          <td ><input type="checkbox" checked onclick="column_visibility(this,7)"></td>
+          <td >Booking Date</td>
 
         </tr>
         
@@ -146,6 +155,7 @@
           <th style="padding-left:8px"><input  id="column4_search"  class="fname2" placeholder="..." column=4> </th>
           <th style="padding-left:8px"><input  id="column5_search"  class="fname2" placeholder="..." column=5> </th>
           <th style="padding-left:8px"><input  id="column6_search"  class="fname2" placeholder="..." column=6> </th>
+          <th style="padding-left:8px"><input  id="column7_search"  class="fname2" placeholder="..." column=7> </th>
           <th style="padding-left:8px"></th>
           <th style="padding-left:8px"></th>
         </tr>       
@@ -157,6 +167,7 @@
           <th style="border-top:none; padding-left: 8px;">Year</th>
           <th style="border-top:none; padding-left: 8px;">Period</th>
           <th style="border-top:none; padding-left: 8px;">comment</th>
+          <th style="border-top:none; padding-left: 8px;">booking date</th>
           <th style="border-top:none; padding-left: 8px;">paid</th>
           <th style="border-top:none"></th>
         </tr>
@@ -177,6 +188,7 @@
           <td>{{invoice.year}}</td>
           <td>{{invoice.periodicity_cat.periodicity_cat}}</td>
           <td>{{invoice.comment}}</td>
+          <td>{{invoice.booking_date}}</td>
           <td><input  type="checkbox" {% if invoice.paid %} checked {% endif %} onclick="save_paid_status(this)"></td>
           <td><button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)"><span class="bi bi-trash"></span></button></td>
         </tr>

@@ -25,62 +25,77 @@
           <td>
             <!--M3 Brand list-->
             <div style="width: 100%; margin-left:5px;">
-              <div  class="comboTreeInputWrapper" dd_id="m3_brand_new">
-                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Brand Code" readonly dd_id="m3_brand_new" id="displayed_item_name_m3_brand_new" >
+              {% if m3_brand_list %}
+                <div  class="comboTreeInputWrapper" dd_id="m3_brand_new">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Brand Code" readonly dd_id="m3_brand_new" id="displayed_item_name_m3_brand_new" >
+                  <input type="text"   hidden id="hidden_item_code_m3_brand_new">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_m3_brand_new" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="m3_brand_new" >
+                    <ul  >
+                      {% for brand in m3_brand_list %}
+                        <li style="display: block;" class="item_single_select" dd_id="m3_brand_new">
+                          <span hidden>{{ brand.id }}</span><span hidden> : </span><span>{{ brand.brand_name }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+              {% else %}
+                <input type="text" readonly placeholder="Brand: Empty"  style="width:100%" title="please insert brands in static data tab" id="displayed_item_name_m3_brand_new" >
                 <input type="text"   hidden id="hidden_item_code_m3_brand_new">
-              </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_m3_brand_new" style="display: none;">
-                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="m3_brand_new" >
-                  <ul  >
-                    {% for brand in m3_brand_list %}
-                      <li style="display: block;" class="item_single_select" dd_id="m3_brand_new">
-                        <span hidden>{{ brand.id }}</span><span hidden> : </span><span>{{ brand.brand_name }}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-              </div>
+              {% endif %}
             </div>
           </td>
           <td>
             <!--Gald Div list-->
             <div style="width: 100%; margin-left:5px;">
-              <div  class="comboTreeInputWrapper" dd_id="division_new">
-                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Division" readonly dd_id="division_new" id="displayed_item_name_division_new" >
+              {% if division_list %}
+                <div  class="comboTreeInputWrapper" dd_id="division_new">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Division" readonly dd_id="division_new" id="displayed_item_name_division_new" >
+                  <input type="text"   hidden id="hidden_item_code_division_new">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_division_new" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="division_new" >
+                    <ul  >
+                      {% for division in division_list %}
+                        <li style="display: block;" class="item_single_select" dd_id="division_new">
+                          <span >{{ division.division_id }}</span><span > : </span><span>{{ division.division_name }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+              {% else %}
+                <input type="text" readonly placeholder="Division: Empty"  style="width:100%" title="please insert Divisions in static data tab" id="displayed_item_name_division_new">
                 <input type="text"   hidden id="hidden_item_code_division_new">
-              </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_division_new" style="display: none;">
-                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="division_new" >
-                  <ul  >
-                    {% for division in division_list %}
-                      <li style="display: block;" class="item_single_select" dd_id="division_new">
-                        <span >{{ division.division_id }}</span><span > : </span><span>{{ division.division_name }}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-              </div>
+                {% endif %}
             </div>
 
           </td>
           <td>
-            <!--Gald Div via-->
+            <!-- Div via-->
             <div style="width: 100%; margin-left:5px;">
-              <div  class="comboTreeInputWrapper" dd_id="division_via_new">
-                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="pass-through division" readonly dd_id="division_via_new" id="displayed_item_name_division_via_new" >
-                <input type="text"   hidden id="hidden_item_code_division_via_new">
-              </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_division_via_new" style="display: none;">
-                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="division_via_new" >
-                  <ul  >
-                    <li style="display: block;" class="item_single_select" dd_id="division_via_new">
-                      <span></span><span style="color:white"> : </span><span></span>
-                    </li>
-                    {% for division in division_list %}
+              {% if division_list %}
+                <div  class="comboTreeInputWrapper" dd_id="division_via_new">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="pass-through division" readonly dd_id="division_via_new" id="displayed_item_name_division_via_new" >
+                  <input type="text"   hidden id="hidden_item_code_division_via_new">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_division_via_new" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="division_via_new" >
+                    <ul  >
                       <li style="display: block;" class="item_single_select" dd_id="division_via_new">
-                        <span >{{ division.division_id }}</span><span > : </span><span>{{ division.division_name }}</span>
+                        <span></span><span style="color:white"> : </span><span></span>
                       </li>
-                    {% endfor %}
-                  </ul>
-              </div>
+                      {% for division in division_list %}
+                        <li style="display: block;" class="item_single_select" dd_id="division_via_new">
+                          <span >{{ division.division_id }}</span><span > : </span><span>{{ division.division_name }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                  <input type="text"   hidden id="hidden_item_code_division_via_new">
+                  <input type="text" readonly placeholder="pass-through division: Empty"  style="width:100%" title="please insert pass-through division in static data tab" id="displayed_item_name_division_via_new">
+                {% endif %}
             </div>
 
           </td>
@@ -98,40 +113,50 @@
           <td>
             <!--Currency-->
             <div style="width: 100%; margin-left:5px;">
-              <div  class="comboTreeInputWrapper" dd_id="contract_currency_new">
-                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Currency" readonly dd_id="contract_currency_new" id="displayed_item_name_contract_currency_new" >
+              {% if currency_list %}
+                <div  class="comboTreeInputWrapper" dd_id="contract_currency_new">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Currency" readonly dd_id="contract_currency_new" id="displayed_item_name_contract_currency_new" >
+                  <input type="text"   hidden id="hidden_item_code_contract_currency_new">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_contract_currency_new" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="contract_currency_new" >
+                    <ul  >
+                      {% for currency in currency_list %}
+                        <li style="display: block;" class="item_single_select" dd_id="contract_currency_new">
+                          <span hidden>{{ currency.currency }}</span><span hidden> : </span><span>{{ currency.currency }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+              {% else %}
+                <input type="text" readonly placeholder="currency: Empty"  style="width:100%" title="please insert currencies in static data tab" id="displayed_item_name_contract_currency_new">
                 <input type="text"   hidden id="hidden_item_code_contract_currency_new">
-              </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_contract_currency_new" style="display: none;">
-                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="contract_currency_new" >
-                  <ul  >
-                    {% for currency in currency_list %}
-                      <li style="display: block;" class="item_single_select" dd_id="contract_currency_new">
-                        <span hidden>{{ currency.currency }}</span><span hidden> : </span><span>{{ currency.currency }}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-              </div>
+              {% endif %}
             </div>
 
           </td>
           <td>
             <!--periodicity-->
             <div style="width: 100%; margin-left:5px;">
-              <div  class="comboTreeInputWrapper" dd_id="periodicity_new">
-                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Periodicity" readonly dd_id="periodicity_new" id="displayed_item_name_periodicity_new" >
+              {% if periodicity_list %}
+                <div  class="comboTreeInputWrapper" dd_id="periodicity_new">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Periodicity" readonly dd_id="periodicity_new" id="displayed_item_name_periodicity_new" >
+                  <input type="text"   hidden id="hidden_item_code_periodicity_new">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_periodicity_new" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="periodicity_new" >
+                    <ul  >
+                      {% for periodicity in periodicity_list %}
+                        <li style="display: block;" class="item_single_select" dd_id="periodicity_new">
+                          <span hidden>{{ periodicity.id }}</span><span hidden> : </span><span>{{ periodicity.periodicity }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+              {% else %}
+                <input type="text" readonly placeholder="Periodicity: Empty"  style="width:100%" title="please insert periodicity in static data tab" id="displayed_item_name_periodicity_new" >
                 <input type="text"   hidden id="hidden_item_code_periodicity_new">
-              </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_periodicity_new" style="display: none;">
-                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="periodicity_new" >
-                  <ul  >
-                    {% for periodicity in periodicity_list %}
-                      <li style="display: block;" class="item_single_select" dd_id="periodicity_new">
-                        <span hidden>{{ periodicity.id }}</span><span hidden> : </span><span>{{ periodicity.periodicity }}</span>
-                      </li>
-                    {% endfor %}
-                  </ul>
-              </div>
+              {% endif %}
             </div>    
           </td>
 
@@ -155,34 +180,39 @@
         <!--Country List-->
           <td  class="comboTreeWrapper mini_gar_option" hidden>
             <div style="width: 100%; margin-left:5px;" >
-              <div  class="comboTreeInputWrapper" dd_id="country_new">
-                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Country" readonly dd_id="country_new" id="displayed_item_name_country_new" >
+              {% if country_list %}
+                <div  class="comboTreeInputWrapper" dd_id="country_new">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Country" readonly dd_id="country_new" id="displayed_item_name_country_new" >
+                  <input type="text"   hidden id="hidden_item_code_country_new">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_country_new" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="country_new" >
+                    <ul  >
+                      <li style="display: block;" class="item_single_select" dd_id="country_new">
+                        <span></span><span style="color:white"> : </span><span></span>
+                      </li> 
+                    {% for region in region_list %} 
+                      <li  >
+                        <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="country_new" region_id={{region.id}} ></span>
+                        <span class="region" dd_id="country_new">{{region.region}}</span>
+                        <ul style="display: block;" id="country_new_{{region.id}}">
+                            {% for country in country_list %}
+                              {% if region == country.country_region%}
+                              <li style="display: block;" class="item_single_select" dd_id="country_new">
+                                <span>{{ country.country_id }}</span><span> : </span><span>{{ country.country }}</span>
+                              </li>
+                              {% endif %}
+                            {% endfor %}
+                        </ul>
+                      </li>
+                    {% endfor %}
+                      
+                    </ul>
+                </div>
+              {% else %}
+                <input type="text" readonly placeholder="Countries: Empty"  style="width:100%" title="please insert Countries in static data tab" id="displayed_item_name_country_new">
                 <input type="text"   hidden id="hidden_item_code_country_new">
-              </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_country_new" style="display: none;">
-                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="country_new" >
-                  <ul  >
-                    <li style="display: block;" class="item_single_select" dd_id="country_new">
-                      <span></span><span style="color:white"> : </span><span></span>
-                    </li> 
-                  {% for region in region_list %} 
-                    <li  >
-                      <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="country_new" region_id={{region.id}} ></span>
-                      <span class="region" dd_id="country_new">{{region.region}}</span>
-                      <ul style="display: block;" id="country_new_{{region.id}}">
-                          {% for country in country_list %}
-                            {% if region == country.country_region%}
-                            <li style="display: block;" class="item_single_select" dd_id="country_new">
-                              <span>{{ country.country_id }}</span><span> : </span><span>{{ country.country }}</span>
-                            </li>
-                            {% endif %}
-                          {% endfor %}
-                      </ul>
-                    </li>
-                  {% endfor %}
-                    
-                  </ul>
-              </div>
+              {% endif %}
             </div>
           </td>
         </tr>
@@ -509,7 +539,7 @@
 {% load static %}
   
     <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
-    <script src="{% static 'royalty_app/dropdown_single.js'%}"></script> 
+    <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
     <script src="{% static 'royalty_app/contract.js'%}"></script>
     <script src="{% static 'royalty_app/easy-number-separator.js'%}"></script>
   </main>

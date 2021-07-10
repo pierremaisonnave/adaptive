@@ -42,8 +42,8 @@ class Brand(models.Model):
         return f"{self.brand_name}"
 
 class Formulation(models.Model):
-    formula_code= models.CharField(max_length=6, primary_key=True)
-    formula_name= models.CharField(max_length=50)
+    formula_code= models.CharField(max_length=20, primary_key=True)
+    formula_name= models.CharField(max_length=200)
     def __str__(self):
         return f"{self.formula_code}"
 class Currency(models.Model):
@@ -69,43 +69,23 @@ class Periodicity(models.Model):
     def __str__(self):
         return f"{self.periodicity}"
 
+class Month(models.Model):
+    month_nb=models.IntegerField( primary_key=True)
+    month_name= models.CharField(max_length=20)
+    def __str__(self):
+        return f"{self.month_name}"
+
 class Periodicity_cat(models.Model):
-    MONTHS=(
-        (1,"1"),
-        (2,"2"),
-        (3,"3"),
-        (4,"4"),
-        (5,"5"),
-        (6,"6"),
-        (7,"7"),
-        (8,"8"),
-        (9,"9"),
-        (10,"10"),
-        (11,"11"),
-        (12,"12"),
-    )
+
     periodicity_cat= models.CharField(max_length=20)
     periodicity= models.ForeignKey(Periodicity, related_name="periodicity_structure",on_delete=models.PROTECT)
-    period_month_end= models.CharField( max_length=2, choices=MONTHS)
+    period_month_end= models.ForeignKey(Month, related_name="month_periodicity_structure",on_delete=models.PROTECT)
     def __str__(self):
         return f"{self.periodicity}:{self.periodicity_cat}"
 
 class Payment_structure(models.Model):
-    MONTHS=(
-        (1,"1"),
-        (2,"2"),
-        (3,"3"),
-        (4,"4"),
-        (5,"5"),
-        (6,"6"),
-        (7,"7"),
-        (8,"8"),
-        (9,"9"),
-        (10,"10"),
-        (11,"11"),
-        (12,"12"),
-    )
-    sales_month= models.CharField(max_length=2,choices=MONTHS)
+
+    sales_month= models.ForeignKey(Month, related_name="month_payment_structure",on_delete=models.PROTECT)
     periodicity_cat= models.ForeignKey(Periodicity_cat, related_name="periodicity_cat_structure",on_delete=models.PROTECT)
 
 
@@ -169,6 +149,7 @@ class Invoice(models.Model):
     contract=  models.ForeignKey(Contract, related_name="invoice_contract",on_delete=models.PROTECT)
     partner=  models.ForeignKey(Partner, related_name="invoice_partner",on_delete=models.PROTECT)
     amount=models.FloatField(default=0)
+    booking_date=models.DateField(default="1900-01-01")
     year=  models.CharField(max_length=10)
     periodicity_cat=  models.ForeignKey(Periodicity_cat, related_name="invoice_periodicity_cat",on_delete=models.PROTECT)
     comment= models.CharField(max_length=50,null=True,blank=True)
@@ -176,23 +157,10 @@ class Invoice(models.Model):
     def __str__(self):
         return f"{self.id}"
 class File(models.Model):
-    MONTHS=(
-        (1,"1"),
-        (2,"2"),
-        (3,"3"),
-        (4,"4"),
-        (5,"5"),
-        (6,"6"),
-        (7,"7"),
-        (8,"8"),
-        (9,"9"),
-        (10,"10"),
-        (11,"11"),
-        (12,"12"),
-    )
+
     name= models.CharField(max_length=50,null=True,blank=True)
     date=models.DateTimeField(auto_now=True)
-    acc_month= models.CharField(max_length=2,choices=MONTHS)
+    acc_month= models.ForeignKey(Month, related_name="acc_month_file",on_delete=models.PROTECT)
     acc_year= models.CharField(max_length=10)
     dashboard= models.BooleanField(default=False)
     file_type=models.CharField(max_length=20,choices=(('accruals','accruals'),('cash_forecast','cash_forecast'),('partner_report','partner_report')), default='accruals')

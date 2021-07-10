@@ -31,11 +31,22 @@
 
   <body >
     <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar">
-      <H2 style="margin-left:10px">Your Logo</H2> 
+      <H2 style="margin-left:10px">Your Logo 2</H2> 
       
       <ul class="navbar-nav px-3"  style="display: grid; grid-template-columns:auto auto auto" id="nav-top"> 
         
-
+        
+        <!--{% if user.is_authenticated %}-->
+        
+          <li class="nav-item text-nowrap"  style=" margin: auto;">
+            
+            <!--<a class="nav-link" >{{ user.name }} </a>-->
+          </li>
+          
+          <li class="nav-item text-nowrap"  style=" margin: auto;" >
+            <a class="nav-link"  href=""  > </a>
+          </li>
+        <!--{% endif %} -->
 
         <li class="nav-item text-nowrap" >
           <img src="{% static 'royalty_app/logo_me.png' %}" style="width: 100px; margin-left: 10px;  margin-right: 10px;" >
@@ -115,11 +126,13 @@
             </ul>
           </div>
         </nav>
-       
-      
+      </div> 
+    </div>  
+    {% block content %}{% endblock %}
+        <!--{% if user.is_authenticated %}
 
-        {% block content %}{% endblock %}
-
+        
+         {% endif %}-->
 
 
 

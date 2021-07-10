@@ -20,7 +20,7 @@ function save(contract_id){
     } 
 
     import_string="["+import_array+"]"
-    alert(import_string)
+
     // We load it via a fetch in the API
     fetch(`/save_accounting`, {
         method: 'POST',

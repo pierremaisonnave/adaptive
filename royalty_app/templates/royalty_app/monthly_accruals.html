@@ -23,24 +23,15 @@
             <input  type="text"  id="name_" placeholder="name" maxlength="50" style="width: 100%; margin-left:5px;">
           </td>  
           <td><!--Year-->
-            <input id="year_" style="width: 100%; margin-left:5px;"  type="number" placeholder="Year">
+            <input id="year_" style="width: 100%; margin-left:5px;"  type="number" placeholder="Year" onchange="period_message()">
           </td>      
           <td ><!--accruals month-->
             <div style="width: 100%; margin-left:5px;"> 
-              <select id="month_" style="width:100%; padding:2px">
+              <select id="month_" style="width:100%; padding:2px" onchange="period_message()">
                 <option disabled=true selected value="">month</option>
-                <option  value="1" >Jan</option>
-                <option  value="2" >Feb</option>
-                <option  value="3" >Mar</option>
-                <option  value="4">Apr</option>
-                <option  value="5" >May</option>
-                <option  value="6" >Jun</option>
-                <option  value="7" >Jul</option>
-                <option  value="8" >Aug</option>
-                <option  value="9" >Sep</option>
-                <option  value="10" >Oct</option>
-                <option  value="11" >Nov</option>
-                <option  value="12" >Dec</option>
+                {% for m in month_list %}
+                <option  value={{m.month_nb}} >{{m.month_name}}</option>
+                {% endfor %}
               </select>
             </div>
           </td>
@@ -50,13 +41,21 @@
           <td > <!--file selection-->
             <input  type="file" name="loaded_file" id="fileSelect" accept=".xlsx"  style="width: 100%; margin-left:5px;">
           </td>
+          <td>
+            <span style="width: 100%; margin-left:5px;">Import file includes previous year data: </span>
+            <input style="margin-left:5px;" type="checkbox" id="previous_year" onchange="period_message()">
+          </td>
         </tr >
+        <tr>
+        </tr>
         <tr > <!--Row 4-->
           <td colspan="2"><!--message-->
             <div style="width: 100%; margin-left:5px;">
               <div id="message_save" style="color: green;" hidden > Item saved</div>
               <div id="message_error" style="color: red;" hidden > error: some fields are missing</div>
               <div id="message_wait"  hidden > please wait.. : loading and calculating </div>
+              <div id="message_period"  hidden > make sure your import file contains only the FX and Sales for the period: <span id="period_message_date"> tada</span> </div>
+              
           </div>
           </td>
           <td ><!--Button-->

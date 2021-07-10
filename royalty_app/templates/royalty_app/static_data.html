@@ -15,7 +15,7 @@
       <a class="btn btn-sm btn-outline-secondary"  id="button_extract_static" ><span class="bi bi-download"></span> download </a>
     </div>
 
-    <form hidden action="{% url 'import_static' %}" id="button_extract_static" method="post" enctype="multipart/form-data" style=" width:300px  ;display:grid ;grid-template-rows: 30px 20px ">
+    <form  action="{% url 'import_static' %}" id="button_extract_static" method="post" enctype="multipart/form-data" style=" width:300px  ;display:grid ;grid-template-rows: 30px 20px ">
             {% csrf_token %} 
       <div>
           <div id="imput_label_select">
@@ -116,6 +116,10 @@
       <tr>
         <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'sales_breakdown_item' %}">Sales Breakdown Definition</a></td>
         <td ><input type="checkbox" name="sales_breakdown_item"></td>
+      </tr>
+      <tr>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'payment_type' %}">Payment Type</a></td>
+        <td ><input type="checkbox" name="payment_type"></td>
       </tr>
 
     </tbody>

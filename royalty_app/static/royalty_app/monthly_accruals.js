@@ -37,7 +37,7 @@ function add_new_record(){
     year_value=year_.value
 
     month_=document.getElementById("month_")
-    month_value=month_.options[month_.selectedIndex].text
+    month_txt=month_.options[month_.selectedIndex].text
     month_id=month_.value
 
     file_=document.getElementById("fileSelect")
@@ -98,7 +98,7 @@ function add_new_record(){
                         `${name_value}`,
                         `${time_}`,
                         `${year_value}`,
-                        `${month_id}`,
+                        `${month_txt}`,
                         `<input type="checkbox" onclick="save_dashboard(this)">`,
                         `<button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)"><span class="bi bi-trash"></span></button>`,
                     ]).draw( false ).node();
@@ -108,6 +108,7 @@ function add_new_record(){
                         message_save.hidden=false
                         setTimeout(function() {message_save.hidden=true;t.style.backgroundColor=initial_gb_color},1000)
                     //reset for:
+                        message_period.hidden=true 
                         document.getElementById("form_new").reset()
                 }
                 message_wait.hidden=true    
@@ -186,4 +187,23 @@ function save_dashboard(elm){
             })
         })
 
+}
+
+function period_message(){
+    
+    if ( message_save.hidden && message_error.hidden && message_wait.hidden && year_.value!== '' && month_.value!== ''){
+        
+        if (previous_year.checked){
+            to_date=year_.value-1
+        }else{
+            to_date=year_.value
+        }
+        month_txt=month_.options[month_.selectedIndex].text
+        period_message_date=document.getElementById("period_message_date")
+        period_message_date.innerHTML=`from January ${to_date} to ${month_txt} ${year_.value}`
+        message_period.hidden=false
+    }
+    else{
+
+    }
 }
