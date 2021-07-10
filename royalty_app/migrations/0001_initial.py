@@ -96,6 +96,13 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
+            name='test1',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('periodicity', models.CharField(max_length=20)),
+            ],
+        ),
+        migrations.CreateModel(
             name='Region',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -128,13 +135,7 @@ class Migration(migrations.Migration):
                 ('sales_breakdown_definition', models.CharField(max_length=50)),
             ],
         ),
-        migrations.CreateModel(
-            name='test1',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('periodicity', models.CharField(max_length=20)),
-            ],
-        ),
+
         migrations.CreateModel(
             name='test2',
             fields=[
