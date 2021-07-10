@@ -76,10 +76,9 @@ class Month_table(models.Model):
         return f"{self.month_name}"
 
 class Month_table_test(models.Model):
-    month_nb=models.IntegerField()
-    month_name= models.CharField(max_length=20)
+    periodicity= models.CharField(max_length=20)
     def __str__(self):
-        return f"{self.month_name}"
+        return f"{self.periodicity}"
 
 class Periodicity_cat(models.Model):
 
