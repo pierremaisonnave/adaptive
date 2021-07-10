@@ -1,7 +1,10 @@
-Django
-python-dotenv
-whitenoise
-mysqlclient
+django
+gunicorn
+whitenoise #manage static file
+psycopg2 # postgres, not to be install on local environment
+Django-environ #used to grab environment data
+
+django-on-heroku
 numpy
 pandas
 openpyxl
@@ -12,4 +15,7 @@ django-excel
 pyexcel-xlsx
 xlsxwriter
 django-cleanup #deletes the file in Media
+
+python-dateutil
+
 
