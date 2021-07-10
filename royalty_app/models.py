@@ -75,7 +75,13 @@ class Month_table(models.Model):
     def __str__(self):
         return f"{self.month_name}"
 
-class testestes(models.Model):
+class test2(models.Model):
+
+    month_name= models.CharField(max_length=20)
+    def __str__(self):
+        return f"{self.month_name}"
+
+class test1(models.Model):
     periodicity= models.CharField(max_length=20)
     def __str__(self):
         return f"{self.periodicity}"
