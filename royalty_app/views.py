@@ -349,7 +349,7 @@ def settings(request):
 
   return render(request, 'royalty_app/settings.html', {})
 def monthly_accruals(request):
-  month_list=Month.objects.all()
+  month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="accruals")
   return render(request, 'royalty_app/monthly_accruals.html', {"month_list":month_list,"file_list":file_list})
 
@@ -1120,7 +1120,7 @@ def new_report(request):
       file=File(
         name =  request.POST.get("name"),
         acc_year =acc_year,
-        acc_month=Month.objects.get(month_nb=acc_month),
+        acc_month=Month_table.objects.get(month_nb=acc_month),
         file_type=file_type
       )
       file.save()
