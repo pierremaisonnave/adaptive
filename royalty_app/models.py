@@ -69,7 +69,7 @@ class Periodicity(models.Model):
     def __str__(self):
         return f"{self.periodicity}"
 
-class Month(models.Model):
+class Month_table(models.Model):
     month_nb=models.IntegerField( primary_key=True)
     month_name= models.CharField(max_length=20)
     def __str__(self):
@@ -79,13 +79,13 @@ class Periodicity_cat(models.Model):
 
     periodicity_cat= models.CharField(max_length=20)
     periodicity= models.ForeignKey(Periodicity, related_name="periodicity_structure",on_delete=models.PROTECT)
-    period_month_end= models.ForeignKey(Month, related_name="month_periodicity_structure",on_delete=models.PROTECT)
+    period_month_end= models.ForeignKey(Month_table, related_name="month_periodicity_structure",on_delete=models.PROTECT)
     def __str__(self):
         return f"{self.periodicity}:{self.periodicity_cat}"
 
 class Payment_structure(models.Model):
 
-    sales_month= models.ForeignKey(Month, related_name="month_payment_structure",on_delete=models.PROTECT)
+    sales_month= models.ForeignKey(Month_table, related_name="month_payment_structure",on_delete=models.PROTECT)
     periodicity_cat= models.ForeignKey(Periodicity_cat, related_name="periodicity_cat_structure",on_delete=models.PROTECT)
 
 
@@ -160,7 +160,7 @@ class File(models.Model):
 
     name= models.CharField(max_length=50,null=True,blank=True)
     date=models.DateTimeField(auto_now=True)
-    acc_month= models.ForeignKey(Month, related_name="acc_month_file",on_delete=models.PROTECT)
+    acc_month= models.ForeignKey(Month_table, related_name="acc_month_file",on_delete=models.PROTECT)
     acc_year= models.CharField(max_length=10)
     dashboard= models.BooleanField(default=False)
     file_type=models.CharField(max_length=20,choices=(('accruals','accruals'),('cash_forecast','cash_forecast'),('partner_report','partner_report')), default='accruals')

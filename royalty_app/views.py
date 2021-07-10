@@ -9,7 +9,7 @@ from .models import (Invoice,Country,Partner,Region,Payment_type,Brand,
   Payment_structure,Contract,Contract_partner,Rule,Tranche,
   Periodicity_cat,Fx,Sales_breakdown_item,Sales_breakdown_per_contract,Sales_breakdown_item,
   File,Sale, Rule_calc,Periodicity_cat,Consolidation_currency,Cash_flow,Detail,Gls,Conso,Wht,Sales_breakdown_for_contract_report,
-  Contract_file,Month)
+  Contract_file,Month_table)
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 import numpy as np
@@ -1148,7 +1148,7 @@ def new_report(request):
         df_division = pd.DataFrame(list(division_list.values()))
 
         #Month
-        month_list=Month.objects.all()
+        month_list=Month_table.objects.all()
         df_month = pd.DataFrame(list(month_list.values()))
 
         #Periodicity_cat
