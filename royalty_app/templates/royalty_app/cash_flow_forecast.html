@@ -19,21 +19,56 @@
           </td>
         </tr>
         <tr><!--Row 2-->
-          <td colspan="2"><!--accruals Name-->
+          <td colspan="3"><!--file Name-->
             <input  type="text"  id="name_" placeholder="name" maxlength="50" style="width: 100%; margin-left:5px;">
           </td>  
         </tr>
+
         <tr > <!--Row 3-->
-          <td > <!--file selection-->
-            <input  type="file" name="loaded_file" id="fileSelect" accept=".xlsx"  style="width: 100%; margin-left:5px;">
+          <td style="width:100px"> <!--file selection-->
+            <span style=" margin-left:5px">period:from </span>
+          </td >
+          <td >
+            <input  disabled="true" class="number-separator" style="width: 100%; margin-left:5px;"  type="text" value="January">
+          </td >
+          <td >
+            <input  type="number"  id="year_from"   style=" width:100%;margin-left:5px;" value="{% now 'Y' %}" onchange="changeyear(this)" >
           </td>
         </tr >
         <tr > <!--Row 4-->
-          <td><!--message-->
+          <td > <!--file selection-->
+            <span style=" margin-left:5px;">period:to </span>
+          </td >
+          <td ><!-- month to-->
+            <div > 
+              <select id="month_to" style="width:100%; padding:2px; margin-left:5px;" onchange="period_message()" >
+                <option disabled=true selected value="">month</option>
+                {% for m in month_list %}
+                 {% if m.month_nb ==  current_month_nb %}
+                 <option  value={{m.month_nb}} selected="selected">{{m.month_name}}</option>
+                 {% else %}
+                <option  value={{m.month_nb}} >{{m.month_name}}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+          </td>
+          <td  >
+            <input  type="number"  id="year_to"  style=" width:100%;margin-left:5px;" value="{% now 'Y' %}" onchange="changeyear(this)">
+          </td>
+        </tr >
+        <tr > <!--Row 5-->
+          <td colspan="3"> <!--file selection-->
+            <input  type="file" name="loaded_file" id="fileSelect" accept=".xlsx"  style="width: 100%; margin-left:5px;">
+          </td>
+        </tr >        
+        <tr > <!--Row 6-->
+          <td colspan="2"><!--message-->
             <div style="width: 100%; margin-left:5px;">
               <div id="message_save" style="color: green;" hidden > Item saved</div>
               <div id="message_error" style="color: red;" hidden > error: some fields are missing</div>
               <div id="message_wait"  hidden > please wait.. : loading and calculating </div>
+              <div id="message_period"  hidden > make sure your import file contains FX and Sales for the period: <span id="period_message_date"> </span> </div>
           </div>
           </td>
           <td ><!--Button-->

@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         "aaSorting": [[ 1, "desc" ]],
         columnDefs: [{ orderable: false, targets: [0,1,2,3,4] }],
         })
-
+    
     document.querySelector("main").style.visibility = "visible";
     //the datatable automatically generate a filter button, we do not need it ( as we have search bar for each column)
     document.getElementById("file_table_filter").hidden=true
@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } 
         
     );
+    period_message()
     //-
 })
 
@@ -35,7 +36,15 @@ function add_new_record(){
 
     file_=document.getElementById("fileSelect")
     file_value=file_.value
-    
+
+    year_from_=document.getElementById("year_from")
+    year_from=year_from_.value
+
+    year_to_=document.getElementById("year_to")
+    year_to=year_to_.value
+
+    month_to_=document.getElementById("month_to")
+    month_to=month_to_.value
 
     //message
     field_dictionnary=[
@@ -60,6 +69,9 @@ function add_new_record(){
         message_wait.hidden=false
         let formData = new FormData();
         formData.append('name', name_value);
+        formData.append('year_from', year_from);
+        formData.append('year_to', year_to);
+        formData.append('month_to', month_to);
         formData.append('file_type', 'cash_forecast');
         formData.append('file', file_.files[0], file_.files[0].name);
 
@@ -149,9 +161,36 @@ function export_file(){
         }
         table_list_string=JSON.stringify(table_array)
         window.location.replace(`/export_report/files:${file_array}/tables:${table_array}`)
+    }
+}
+
+function changeyear(elm){
+    if ( elm.id=="year_from" && (year_from.value=="" || year_from.value>year_to.value)){
+        alert("cannot be empty or more than year_to")
+        year_from.value=year_to.value}
+    else{
+        period_message()
+    }
+    if ( elm.id=="year_to" && ( year_to.value=="" || year_from.value>year_to.value)){
+        alert("cannot be empty or less than year_from")
+        year_to.value=year_from.value}
+    else{
+        period_message()
+    }
+}
+
+function period_message(){
+    
+    if ( message_save.hidden && message_error.hidden && message_wait.hidden ){
+        month_to=document.getElementById("month_to")
+        year_from=document.getElementById("year_from").value
+        year_to=document.getElementById("year_to").value
+        month_to=month_to.options[month_to.selectedIndex].text
+        period_message_date=document.getElementById("period_message_date")
+        period_message_date.innerHTML=`from January ${year_from} to ${month_to} ${year_to}`
+        message_period.hidden=false
+    }
+    else{
 
     }
-
-    
-
 }

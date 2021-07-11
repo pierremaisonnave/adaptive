@@ -150,7 +150,7 @@ class Invoice(models.Model):
     partner=  models.ForeignKey(Partner, related_name="invoice_partner",on_delete=models.PROTECT)
     amount=models.FloatField(default=0)
     booking_date=models.DateField(default="1900-01-01")
-    year=  models.CharField(max_length=10)
+    year=  models.IntegerField()
     periodicity_cat=  models.ForeignKey(Periodicity_cat, related_name="invoice_periodicity_cat",on_delete=models.PROTECT)
     comment= models.CharField(max_length=50,null=True,blank=True)
     paid=models.BooleanField(default=False)
@@ -161,7 +161,7 @@ class File(models.Model):
     name= models.CharField(max_length=50,null=True,blank=True)
     date=models.DateTimeField(auto_now=True)
     acc_month= models.ForeignKey(Month_table, related_name="acc_month_file",on_delete=models.PROTECT)
-    acc_year= models.CharField(max_length=10)
+    acc_year= models.IntegerField()
     dashboard= models.BooleanField(default=False)
     file_type=models.CharField(max_length=20,choices=(('accruals','accruals'),('cash_forecast','cash_forecast'),('partner_report','partner_report')), default='accruals')
     def __str__(self):

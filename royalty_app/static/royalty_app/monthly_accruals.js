@@ -44,6 +44,7 @@ function add_new_record(){
     file_value=file_.value
     
 
+
     //message
     field_dictionnary=[
         {field_name:'name',value:name_value,object:name_,mandatory:true},
@@ -73,6 +74,7 @@ function add_new_record(){
         formData.append('name', name_value);
         formData.append('acc_year', year_value);
         formData.append('acc_month', month_id);
+        formData.append('previous_year_checked', previous_year.checked);
         formData.append('file', file_.files[0], file_.files[0].name);
 
         //book in database

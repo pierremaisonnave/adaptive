@@ -253,7 +253,7 @@ def chart_accruals(year,contract_id_list):
       -df_data["Ytd_roy"],
       df_data["Ytd_roy"]
     )
-    print(df_data)
+
     df_data=df_data.rename(columns={'acc_month_id':'acc_month'})
   
     df_month = pd.DataFrame({
@@ -263,7 +263,6 @@ def chart_accruals(year,contract_id_list):
     print("chart_accruals 6")
     df_data=pd.merge(df_month,df_data,how="left",left_on=["month_nb"],right_on=["acc_month"])
     df_data["acc_year"]=year
-    df_data["acc_year"]=df_data['acc_year'].astype(int)
     df_data=df_data.groupby(['acc_year','month_nb','month'], as_index=False,dropna=False).agg({"Accruals": "sum","Ytd_roy":"sum"})
     df_data=df_data.sort_values(['acc_year','month_nb'], ascending=[1,1])
     df_data=df_data.drop(['month_nb'], axis = 1)
@@ -351,17 +350,20 @@ def settings(request):
 def monthly_accruals(request):
   month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="accruals")
+
   return render(request, 'royalty_app/monthly_accruals.html', {"month_list":month_list,"file_list":file_list})
 
 def cash_flow_forecast(request):
-
+  month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="cash_forecast")
-  return render(request, 'royalty_app/cash_flow_forecast.html', {"file_list":file_list})
+  current_month_nb=datetime.now().month
+  return render(request, 'royalty_app/cash_flow_forecast.html', {"current_month_nb":current_month_nb,"month_list":month_list,"file_list":file_list})
 
 def partner_report(request):
-
+  month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="partner_report")
-  return render(request, 'royalty_app/partner_report.html', {"file_list":file_list})
+  current_month_nb=datetime.now().month
+  return render(request, 'royalty_app/partner_report.html', {"current_month_nb":current_month_nb,"month_list":month_list,"file_list":file_list})
 
 
 
@@ -639,7 +641,7 @@ def import_static_withinitialiser(request):
 
 @csrf_exempt
 def import_static(request):
-  conn = sqlite3.connect('db.sqlite3')
+  conn = sqlite3.connect('royalty/db.sqlite3')
   
   if request.method == "POST":
     filehandle = request.FILES['loaded_file']
@@ -1109,14 +1111,15 @@ def new_report(request):
     #Save File
     try:
       file_type=request.POST.get("file_type")
-
       if file_type =="accruals":
-        acc_year=request.POST.get("acc_year")
-        acc_month=request.POST.get("acc_month")
+        acc_year=int(request.POST.get("acc_year"))
+        acc_month=int(request.POST.get("acc_month")) 
+
       else:
         acc_year=datetime.now().year
         acc_month=datetime.now().month
-
+       
+    
       file=File(
         name =  request.POST.get("name"),
         acc_year =acc_year,
@@ -1130,6 +1133,37 @@ def new_report(request):
   #   II: Start Calculation Roy 
     #a- definition and import table
         consolidation_currency=Consolidation_currency.objects.all()[:1].get().currency.currency
+
+        #nb month in import file:
+        rows = []
+        if file_type =="accruals":
+          previous_year_checked= request.POST.get("previous_year_checked")
+          
+          if previous_year_checked=="true":
+            previous_year=acc_year-1
+            for i in range(12):
+              rows.append([previous_year, i + 1])
+          for i in range(acc_month):
+            rows.append([acc_year, i + 1])
+
+        else:
+          year_from=int(request.POST.get("year_from"))
+          year_to=int(request.POST.get("year_to"))
+          month_to=int(request.POST.get("month_to"))
+          for year_nb in range(year_from,year_to+1):
+            if year_nb==year_to :
+              for month_nb in range(month_to):
+                rows.append([year_nb, month_nb + 1])
+            else:
+              for month_nb in range(12):
+                rows.append([year_nb, month_nb + 1])  
+
+        df_year_month = pd.DataFrame(rows, columns=["year", "month"])    
+
+        df_year_nb_month=df_year_month.groupby(['year']).size().reset_index(name='month_nb')
+        print("df_year_nb_month : Done")
+        
+
 
         #Rule
         rule_list=Rule.objects.all().values_list('id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value','report_currency','qty_value_currency')
@@ -1204,10 +1238,14 @@ def new_report(request):
         filehandle = request.FILES.get("file")
 
         #FX
-        df_fx = pd.read_excel(filehandle, 'Fx',dtype={'year':str})
+        df_fx = pd.read_excel(filehandle, 'Fx',dtype={'year':int})
         df_fx['import_file_id']=file.id
         df_fx = df_fx[[ 'year','currency','exchange_rate','import_file_id']]
-        
+ 
+        df_fx=pd.merge(df_fx,df_year_nb_month, how="inner",left_on=['year'], right_on=['year'] )
+        df_fx=df_fx.drop(['month_nb'], axis = 1)
+        if df_fx.empty:
+          return JsonResponse({"error": f"No Fx available for the period selected"}, status=201)
 
         #Contract
         contract_list=Contract.objects.all()
@@ -1218,30 +1256,57 @@ def new_report(request):
         contract_partner_list=Contract_partner.objects.all()
         df_contract_partner = pd.DataFrame(list(contract_partner_list.values()))
         #Invoice
+        
         invoice_list=Invoice.objects.all()
         df_invoice = pd.DataFrame(list(invoice_list.values()))
-        if df_invoice.empty:
-          df_invoice=pd.DataFrame({
+          # if the dataframe is empty, we create one --> this step is necessary, as later on we append the table from Invoice + Minigar + Roy on sales
+        df_invoice_empty=pd.DataFrame({
             'id': [0],
             'contract_id': [0],
             'partner_id': [0],
             'amount': [0],
-            'year': ['0'],
+            'month': [0],
+            'year': [0],
             'periodicity_cat_id': [0],
             'comment': [''],
             'paid': [False],
-          })
+          })        
+        if df_invoice.empty:
+          df_invoice=df_invoice_empty
+        else:
+          df_invoice['month_booking']=pd.DatetimeIndex(df_invoice['booking_date']).month # we filter the invoice booked during the period under analysis
+          df_invoice['year_booking']=pd.DatetimeIndex(df_invoice['booking_date']).year
+          df_invoice=pd.merge(df_invoice,df_year_month, how="inner",left_on=['year_booking','month_booking'], right_on=['year','month'] )
+          df_invoice = df_invoice.rename(columns={'year_x': 'year'})
+          df_invoice=df_invoice.drop(['month_booking','year_booking','year_y','month'], axis = 1)
 
+          # if the invoices have been booked at a time not mentionned in the from/to period, the dataframe will be empty- same as mention before, we must fill in the table anyway
+          if df_invoice.empty:
+            df_invoice=df_invoice_empty
+        
         print("definition of DF expect Sale: Done")
 
         #Sale
-        df_sales = pd.read_excel(filehandle, 'Sales',dtype={'SKU':str,'formulation':str,'year':str,'month':int})
-        print("df_sales")
-
-
-
+          #same logic as for the FX
+        df_sales = pd.read_excel(filehandle, 'Sales',dtype={'SKU':str,'formulation':str,'year':int,'month':int})
+        df_sales_empty=pd.DataFrame({
+            'year': [0],
+            'month': [0],
+            'country_id': [''],
+            'formulation': [''],
+            'volume': [0],
+            'sales': [0],
+            'sales_currency': [''],
+          })
+        if df_sales.empty:
+          df_sales=df_sales_empty
+        else: 
+          df_sales=pd.merge(df_sales,df_year_month, how="inner",left_on=['year','month'], right_on=['year','month'] )
+          if df_sales.empty:
+            df_sales=df_sales_empty
+          print("df_sales")
         df_sales['import_file_id']=file.id
-        # in the event the user load a data without the SKU and SKU_name ( for accruals and CCF), we should create the below columns
+          # in the event the user load a data without the SKU and SKU_name ( for accruals and CCF), we should create the below columns
         if 'SKU' not in df_sales.head() :
           df_sales["SKU"]=None
         if 'SKU_name' not in df_sales.head() :
@@ -1255,72 +1320,71 @@ def new_report(request):
 
         #--------Calculate sales break_down so that the user can see the breakdown per contract----------
         #first, break the import
-        df_sales_breakdown=pd.melt(
-          df_sales_breakdown,
-          id_vars=['year','month','country_id','formulation','SKU','SKU_name','sales_currency','import_file_id','volume'],
-          var_name="sales_breakdown_definition",
-          value_name="sales_in_market_curr",
-        )
-        
+        if file.file_type=="partner_report" :
+          df_sales_breakdown=pd.melt(
+            df_sales_breakdown,
+            id_vars=['year','month','country_id','formulation','SKU','SKU_name','sales_currency','import_file_id','volume'],
+            var_name="sales_breakdown_definition",
+            value_name="sales_in_market_curr",
+          )
 
-        #df_sales_breakdown[['sales_in_market_curr']]=df_sales_breakdown[['sales_in_market_curr']].astype(float)
-        df_sales_breakdown[['sales_in_market_curr']] = df_sales_breakdown[['sales_in_market_curr']].fillna(value=0)
-        #remove column with no sales ( only apply for the row that are not Sales)
+          #df_sales_breakdown[['sales_in_market_curr']]=df_sales_breakdown[['sales_in_market_curr']].astype(float)
+          df_sales_breakdown[['sales_in_market_curr']] = df_sales_breakdown[['sales_in_market_curr']].fillna(value=0)
+          #remove column with no sales ( only apply for the row that are not Sales)
 
-        df_sales_breakdown["is_null"]=(df_sales_breakdown["sales_in_market_curr"]==0) & (df_sales_breakdown["sales_breakdown_definition"]!="sales")
-        df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.is_null == False]
-        df_sales_breakdown=df_sales_breakdown.drop(['is_null'], axis = 1)
+          df_sales_breakdown["is_null"]=(df_sales_breakdown["sales_in_market_curr"]==0) & (df_sales_breakdown["sales_breakdown_definition"]!="sales")
+          df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.is_null == False]
+          df_sales_breakdown=df_sales_breakdown.drop(['is_null'], axis = 1)
 
-        #remove duplicate for volume"
-        df_sales_breakdown["volume"]=np.where(
-          df_sales_breakdown["sales_breakdown_definition"]=="sales",
-          df_sales_breakdown["volume"],
-          0,
-        )
+          #remove duplicate for volume"
+          df_sales_breakdown["volume"]=np.where(
+            df_sales_breakdown["sales_breakdown_definition"]=="sales",
+            df_sales_breakdown["volume"],
+            0,
+          )
+  
+          #import contract + contract curr + FX ( for conversion to contract curr): 
+          print("df_sales_breakdown 0")
 
-        #import contract + contract curr + FX ( for conversion to contract curr): 
-        print("df_sales_breakdown 0")
+          df_sales_breakdown=pd.merge(df_rule,df_sales_breakdown, how="inner",left_on=['formulation'], right_on=['formulation'] )
+          if not df_sales_breakdown.empty :
+            df_sales_breakdown['country_validation']=(
+                                        ((df_sales_breakdown.apply(lambda x: x.country_id in x.country_list, axis=1))& (df_sales_breakdown['country_incl_excl'] == "INCLUDE") ) | 
+                                        ((df_sales_breakdown.apply(lambda x: x.country_id not in x.country_list, axis=1))& (df_sales_breakdown['country_incl_excl'] == "EXCLUDE") )
+                                      )
+            print("df_sales_breakdown 1")
 
-        df_sales_breakdown=pd.merge(df_rule,df_sales_breakdown, how="inner",left_on=['formulation'], right_on=['formulation'] )
-        if not df_sales_breakdown.empty :
-          df_sales_breakdown['country_validation']=(
-                                      ((df_sales_breakdown.apply(lambda x: x.country_id in x.country_list, axis=1))& (df_sales_breakdown['country_incl_excl'] == "INCLUDE") ) | 
-                                      ((df_sales_breakdown.apply(lambda x: x.country_id not in x.country_list, axis=1))& (df_sales_breakdown['country_incl_excl'] == "EXCLUDE") )
-                                    )
-          print("df_sales_breakdown 1")
+            df_sales_breakdown['day']="1"
 
-          df_sales_breakdown['day']="1"
+            df_sales_breakdown['date'] = pd.to_datetime(df_sales_breakdown[['year', 'month','day']], errors = 'coerce')
+            df_sales_breakdown['date_validation']=((df_sales_breakdown['date']>=df_sales_breakdown['period_from']) & (df_sales_breakdown['date']<df_sales_breakdown['period_to']))
+            df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.date_validation ==True]
+            df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.country_validation ==True]
 
-          df_sales_breakdown['date'] = pd.to_datetime(df_sales_breakdown[['year', 'month','day']], errors = 'coerce')
-          df_sales_breakdown['date_validation']=((df_sales_breakdown['date']>=df_sales_breakdown['period_from']) & (df_sales_breakdown['date']<df_sales_breakdown['period_to']))
-          df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.date_validation ==True]
-          df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.country_validation ==True]
-          print("df_sales_breakdown 2")
+            print("df_sales_breakdown 2")
 
-          # df_on_sales and contract
-          df_sales_breakdown=pd.merge(df_sales_breakdown,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
-          print("df_sales_breakdown 3")
-          #df_on_sales and fx 
-          df_sales_breakdown=pd.merge(df_sales_breakdown,df_fx, how="inner",left_on=['year','sales_currency'], right_on=['year','currency'] )
-          df_sales_breakdown = df_sales_breakdown.rename(columns={'exchange_rate': 'exchange_rate_sales_curr'})
-          df_sales_breakdown=pd.merge(df_sales_breakdown,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
-          df_sales_breakdown = df_sales_breakdown.rename(columns={'exchange_rate': 'exchange_rate_contract_curr'})
-          print("df_sales_breakdown 4")
-          df_sales_breakdown["sales_in_contract_curr"]=df_sales_breakdown["sales_in_market_curr"]*df_sales_breakdown["exchange_rate_sales_curr"]/df_sales_breakdown["exchange_rate_contract_curr"]
-          df_sales_breakdown=df_sales_breakdown[['contract_id','contract_name','year','month','country_id','formulation','SKU','SKU_name','sales_currency','import_file_id','volume','sales_in_market_curr','sales_in_contract_curr','sales_breakdown_definition','contract_currency']]
+            # df_on_sales and contract
+            df_sales_breakdown=pd.merge(df_sales_breakdown,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
+            print("df_sales_breakdown 3")
+            #df_on_sales and fx 
+            df_sales_breakdown=pd.merge(df_sales_breakdown,df_fx, how="inner",left_on=['year','sales_currency'], right_on=['year','currency'] )
+            df_sales_breakdown = df_sales_breakdown.rename(columns={'exchange_rate': 'exchange_rate_sales_curr'})
+            df_sales_breakdown=pd.merge(df_sales_breakdown,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
+            df_sales_breakdown = df_sales_breakdown.rename(columns={'exchange_rate': 'exchange_rate_contract_curr'})
+            print("df_sales_breakdown 4")
+            df_sales_breakdown["sales_in_contract_curr"]=df_sales_breakdown["sales_in_market_curr"]*df_sales_breakdown["exchange_rate_sales_curr"]/df_sales_breakdown["exchange_rate_contract_curr"]
+            df_sales_breakdown=df_sales_breakdown[['contract_id','contract_name','year','month','country_id','formulation','SKU','SKU_name','sales_currency','import_file_id','volume','sales_in_market_curr','sales_in_contract_curr','sales_breakdown_definition','contract_currency']]
 
-          #link to breakdown def:
+            #link to breakdown def:
 
 
-          df_sales_breakdown=pd.merge(df_sales_breakdown,df_breakdown_per_contract, how="left",left_on=['contract_id','sales_breakdown_definition'], right_on=['contract_id_breakdown','sales_breakdown_definition'] )
-          df_sales_breakdown=df_sales_breakdown[['import_file_id','contract_name','year','month','country_id','formulation','SKU','SKU_name','sales_currency','volume','sales_breakdown_definition','sales_breakdown_contract_definition','contract_currency','sales_in_market_curr','sales_in_contract_curr']]
-        else:
-          pass
-        
+            df_sales_breakdown=pd.merge(df_sales_breakdown,df_breakdown_per_contract, how="left",left_on=['contract_id','sales_breakdown_definition'], right_on=['contract_id_breakdown','sales_breakdown_definition'] )
+            df_sales_breakdown=df_sales_breakdown[['import_file_id','contract_name','year','month','country_id','formulation','SKU','SKU_name','sales_currency','volume','sales_breakdown_definition','sales_breakdown_contract_definition','contract_currency','sales_in_market_curr','sales_in_contract_curr']]       
+          else:
+            return JsonResponse({"error": f"No sales data to display- please make sure you "}, status=201)
+       
     
         #---------------------------------------
-
-        print("definition of DF done")
         
     #b- calculation of rate per country and formulation
       #         i.  : average rate for contract with tranche  
@@ -1387,69 +1451,86 @@ def new_report(request):
 
     #       c-Calculation royalty
       #         i   : Roy on sales
-        #preparation of df_sales : unpivot the data:
-        #df_on_sales=df_sales.melt(id_var[''])
+        #Here we calculate the roy based on the sales reported in the Excel file. i.e. : if roy is 150 USD, and %rate is 10 , then roy=15
+        #If there are no sales on the period, of there are no match between the contract and the sales report, the dataframe ( result) would be empty
+        #we would like to avoid that situation, as the roy calculated on sales are used to calculate the mini gar
+
         df_on_sales=pd.merge(df_rule_calc,df_sales, how="inner",left_on=['formulation'], right_on=['formulation'] )
-        if df_on_sales.empty:
-          return JsonResponse({"error": f"Sales data does not meet any contracts "}, status=201)
-        df_on_sales['country_validation']=(
-                                    ((df_on_sales.apply(lambda x: x.country_id in x.country_list, axis=1))& (df_on_sales['country_incl_excl'] == "INCLUDE") ) | 
-                                    ((df_on_sales.apply(lambda x: x.country_id not in x.country_list, axis=1))& (df_on_sales['country_incl_excl'] == "EXCLUDE") )
-                                  )
-        print("def_on_sales 1")
-        df_on_sales['day']="1"
-        df_on_sales['date'] = pd.to_datetime(df_on_sales[['year', 'month','day']], errors = 'coerce')
-        df_on_sales['date_validation']=((df_on_sales['date']>=df_on_sales['period_from']) & (df_on_sales['date']<df_on_sales['period_to']))
-        df_on_sales=df_on_sales[df_on_sales.date_validation ==True]
-        df_on_sales=df_on_sales[df_on_sales.country_validation ==True]
-        print("def_on_sales 2")
-        # df_on_sales and contract
-        df_on_sales=pd.merge(df_on_sales,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
-        #df_on_sales and fx 
-        df_on_sales=pd.merge(df_on_sales,df_fx, how="inner",left_on=['year','sales_currency'], right_on=['year','currency'] )
-        df_on_sales = df_on_sales.rename(columns={'exchange_rate': 'exchange_rate_sales_curr'})
-        df_on_sales=pd.merge(df_on_sales,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
-        df_on_sales = df_on_sales.rename(columns={'exchange_rate': 'exchange_rate_contract_curr'})
-        df_on_sales=pd.merge(df_on_sales,df_fx, how="inner",left_on=['year','report_currency'], right_on=['year','currency'] )
-        df_on_sales = df_on_sales.rename(columns={'exchange_rate': 'exchange_rate_report'})
-        df_on_sales=pd.merge(df_on_sales,df_fx, how="inner",left_on=['year','qty_value_currency'], right_on=['year','currency'] )
-        df_on_sales = df_on_sales.rename(columns={'exchange_rate': 'exchange_rate_qty_value_curr'})
-        print("def_on_sales 3")
-        df_on_sales = df_on_sales.rename(columns={'country_id': 'market_id'})
-        df_on_sales = df_on_sales.rename(columns={'sales_currency': 'market_curr'})
-        df_on_sales = df_on_sales.rename(columns={'sales': 'sales_in_market_curr'})
+
+        if not df_on_sales.empty:
+          df_on_sales['country_validation']=(
+                                      ((df_on_sales.apply(lambda x: x.country_id in x.country_list, axis=1))& (df_on_sales['country_incl_excl'] == "INCLUDE") ) | 
+                                      ((df_on_sales.apply(lambda x: x.country_id not in x.country_list, axis=1))& (df_on_sales['country_incl_excl'] == "EXCLUDE") )
+                                    )
+          print("def_on_sales 1")
+          df_on_sales['day']="1"
+          df_on_sales['date'] = pd.to_datetime(df_on_sales[['year', 'month','day']], errors = 'coerce')
+          df_on_sales['date_validation']=((df_on_sales['date']>=df_on_sales['period_from']) & (df_on_sales['date']<df_on_sales['period_to']))
+          df_on_sales=df_on_sales[df_on_sales.date_validation ==True]
+          df_on_sales=df_on_sales[df_on_sales.country_validation ==True]
+          print("def_on_sales 2")
+          # df_on_sales and contract
+          df_on_sales=pd.merge(df_on_sales,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
+          #df_on_sales and fx 
+          df_on_sales=pd.merge(df_on_sales,df_fx, how="inner",left_on=['year','sales_currency'], right_on=['year','currency'] )
+          df_on_sales = df_on_sales.rename(columns={'exchange_rate': 'exchange_rate_sales_curr'})
+          df_on_sales=pd.merge(df_on_sales,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
+          df_on_sales = df_on_sales.rename(columns={'exchange_rate': 'exchange_rate_contract_curr'})
+          df_on_sales=pd.merge(df_on_sales,df_fx, how="inner",left_on=['year','report_currency'], right_on=['year','currency'] )
+          df_on_sales = df_on_sales.rename(columns={'exchange_rate': 'exchange_rate_report'})
+          df_on_sales=pd.merge(df_on_sales,df_fx, how="inner",left_on=['year','qty_value_currency'], right_on=['year','currency'] )
+          df_on_sales = df_on_sales.rename(columns={'exchange_rate': 'exchange_rate_qty_value_curr'})
+          print("def_on_sales 3")
+          df_on_sales = df_on_sales.rename(columns={'country_id': 'market_id'})
+          df_on_sales = df_on_sales.rename(columns={'sales_currency': 'market_curr'})
+          df_on_sales = df_on_sales.rename(columns={'sales': 'sales_in_market_curr'})
+
+          # calculate sales amount in contract currency
+          df_on_sales['sales_in_contract_curr']=df_on_sales['sales_in_market_curr']*df_on_sales['exchange_rate_sales_curr']/df_on_sales['exchange_rate_contract_curr']
+        
+          df_on_sales['qty_value_contract_curr']=df_on_sales['qty_value']*df_on_sales['exchange_rate_qty_value_curr']/df_on_sales['exchange_rate_contract_curr']
+          print("def_on_sales 4")
+          df_on_sales['amount_contract_curr']=np.where(
+            df_on_sales['field_type']=='RATE',
+            df_on_sales['sales_rate']*df_on_sales['sales_in_contract_curr']/100,
+            df_on_sales['qty_value_contract_curr']*df_on_sales['volume']
+          )
 
 
+          df_on_sales=df_on_sales[['contract_id','year','month','SKU','SKU_name','amount_contract_curr','payment_periodicity_id','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency']]
+          df_on_sales=df_on_sales.fillna("")
 
-        # calculate sales amount in contract currency
-        df_on_sales['sales_in_contract_curr']=df_on_sales['sales_in_market_curr']*df_on_sales['exchange_rate_sales_curr']/df_on_sales['exchange_rate_contract_curr']
-      
-        df_on_sales['qty_value_contract_curr']=df_on_sales['qty_value']*df_on_sales['exchange_rate_qty_value_curr']/df_on_sales['exchange_rate_contract_curr']
-        print("def_on_sales 4")
-        df_on_sales['amount_contract_curr']=np.where(
-          df_on_sales['field_type']=='RATE',
-          df_on_sales['sales_rate']*df_on_sales['sales_in_contract_curr']/100,
-          df_on_sales['qty_value_contract_curr']*df_on_sales['volume']
-        )
+          print("def_on_sales 5")# // 
+          df_on_sales=df_on_sales.groupby(['contract_id','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency'], as_index=False).agg({"amount_contract_curr": "sum","sales_in_market_curr": "sum","sales_in_contract_curr": "sum","volume":"sum"})
 
-
-        df_on_sales=df_on_sales[['contract_id','year','month','SKU','SKU_name','amount_contract_curr','payment_periodicity_id','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency']]
-        df_on_sales=df_on_sales.fillna("")
-
-        print("def_on_sales 5")# // 
-        df_on_sales=df_on_sales.groupby(['contract_id','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency'], as_index=False).agg({"amount_contract_curr": "sum","sales_in_market_curr": "sum","sales_in_contract_curr": "sum","volume":"sum"})
-
-        df_on_sales['entry_type']='Royalties'
-        print("definition of Sales done")
-
+          df_on_sales['entry_type']='Royalties'
+          print("definition of Sales done")
+        
+        else:
+          df_on_sales=pd.DataFrame({
+            'contract_id': [0],
+            'year': [0],
+            'month': [0],
+            'SKU': [''],
+            'SKU_name': [''],
+            'payment_periodicity_id': [0],
+            'market_id': [''],
+            'market_curr': [''],
+            'field_type': [''],
+            'sales_rate': [0],
+            'qty_value': [0],
+            'report_currency': [''],
+            'qty_value_currency': [0],
+            'amount_contract_curr': [0],
+            'sales_in_market_curr': [0],
+            'sales_in_contract_curr': [0],
+            'volume': [0],
+          })
 
       #         ii. : Mini Gar 
-        #definition year and nb of months per year
-        df_year_nb_month=df_sales[['year','month']].drop_duplicates()
-        print("Mini Gar1")
 
-        df_year_nb_month=df_year_nb_month.fillna("")
-        df_year_nb_month=df_year_nb_month.groupby(['year']).size().reset_index(name='month_nb')
+
+
         print("Mini Gar2")
 
         #get contract with mini gar
@@ -1460,10 +1541,12 @@ def new_report(request):
 
         #df_year_nb_month and df_mini_gar
         df_mini_gar=df_mini_gar.merge(df_year_nb_month,how='cross')
+
         print("Mini Gar4")
 
         #df_on_sales with group on country_id
-        df_on_sales_group=df_on_sales.groupby(['contract_id','year']).sum()
+        df_on_sales_group=df_on_sales.groupby(['contract_id','year'], as_index=False).sum()
+        df_on_sales_group['year']=df_on_sales_group['year'].astype(int)
         #  df_mini_gar and sales
         df_mini_gar= pd.merge(df_mini_gar,df_on_sales_group, how="left",left_on=['contract_id','year'], right_on=['contract_id','year'] )
         #  calculate remaining gar
@@ -1498,7 +1581,6 @@ def new_report(request):
         df_mini_gar=df_mini_gar.fillna("")
         df_mini_gar=df_mini_gar.groupby(['contract_id','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency'], as_index=False).agg({"amount_contract_curr": "sum","sales_in_market_curr": "sum","sales_in_contract_curr":"sum"})
         df_mini_gar['entry_type']='Royalties- mini gar'
-        print(df_mini_gar)
         print("Mini Gar7")
 
 
@@ -1513,11 +1595,9 @@ def new_report(request):
 
 
         df_payment_structure=df_payment_structure.rename(columns={'sales_month_id': 'sales_month'})#.astype(str)
-
         df_payment_terms=pd.merge(df_periodicity_cat,df_payment_structure, how="inner",left_on=['id'], right_on=['periodicity_cat_id'] )
-        
         df_append_mini_roy=pd.merge(df_append_mini_roy,df_payment_terms, how="inner",left_on=['payment_periodicity_id','month'], right_on=['periodicity_id','sales_month'] )  
-        print(df_append_mini_roy)
+  
         print("df_append_mini_roy2")    
         df_append_mini_roy=df_append_mini_roy[['contract_id','year','month','SKU','SKU_name','amount_contract_curr','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency','periodicity_cat_id','entry_type']]
         print("df_append_mini_roy3")
@@ -1556,52 +1636,46 @@ def new_report(request):
         df_invoice=df_invoice[['contract_id','year','month','SKU','SKU_name','amount_contract_curr','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency','periodicity_cat_id','entry_type','partner_id','beneficiary_percentage','invoice_detail','invoice_paid']]
         print("definition of df_append_mini_roy: Done")
 
-        #--------------------------------------------
-        '''
-        df_invoice["amount_contract_curr"]=np.where( 
-          df_invoice["periodicity_cat_id"]==4,
-          0,
-          df_invoice["amount_contract_curr"]  
-        )
 
-
-        df_invoice["amount_contract_curr"]=np.where( 
-          df_invoice["periodicity_cat_id"]==17,
-          0,
-          df_invoice["amount_contract_curr"]  
-        )
-        '''
         #--------------------------------------------
 
         print("df_invoice: Done")
       #         iv.: Detail : 
         df_append_mini_roy=df_append_mini_roy.fillna("")
         df_invoice=df_invoice.fillna("")
+
         df_detail=df_append_mini_roy.append(df_invoice)
+
         print("df_detail 0")
         # get last month of the period (i.e. for Q1, it's march)
         df_detail=pd.merge(df_detail,df_periodicity_cat, how="inner",left_on=['periodicity_cat_id'], right_on=['id'] )
         df_detail["day"]="1"
         df_detail = df_detail.rename(columns={"month":"month_of_sales","period_month_end_id":"period_month_end"})
-
         df_detail["month"]=df_detail["period_month_end"].astype(str)
+
         print("df_detail 01")
         df_detail["date"]= pd.to_datetime(df_detail[['year', 'month','day']], errors = 'coerce')
         df_detail["day_end_period"]= pd.to_datetime(df_detail['date'], format="%Y%m") + MonthEnd(1)
-        df_detail=df_detail[['contract_id','year','SKU','SKU_name','month_of_sales','amount_contract_curr','periodicity_cat','market_id','sales_in_market_curr','sales_in_contract_curr','volume','sales_in_contract_curr','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency','entry_type','partner_id','beneficiary_percentage','invoice_detail','day_end_period','invoice_paid']]
+        df_detail=df_detail[['contract_id','year','SKU','SKU_name','month_of_sales','amount_contract_curr','periodicity_cat','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency','entry_type','partner_id','beneficiary_percentage','invoice_detail','day_end_period','invoice_paid']]
+ 
         print("df_detail 1")
         # get contract detail, get the payment terms and calculate the payment date 
         df_detail=pd.merge(df_detail,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
         df_detail["payment_date"]= df_detail["day_end_period"]+  pd.to_timedelta(df_detail['payment_terms'], unit='d')
         df_detail["payment_date"]= pd.to_datetime(df_detail['payment_date'],format='%d.%m.%Y') #needed, otherwise cannot load in system
+
         print("df_detail 2")
+        
         # convert in consolidation curr
+
         df_detail=pd.merge(df_detail,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
         df_detail = df_detail.rename(columns={'exchange_rate': 'exchange_rate_from'})
         df_detail['consolidation_currency']=consolidation_currency
+        
         df_detail=pd.merge(df_detail,df_fx, how="inner",left_on=['year','consolidation_currency'], right_on=['year','currency'] )
         df_detail = df_detail.rename(columns={'exchange_rate': 'exchange_rate_to'})
         df_detail['amount_consolidation_curr']=df_detail['amount_contract_curr']*df_detail['exchange_rate_from']/df_detail['exchange_rate_to']
+
         print("df_detail 3")
         #get partner detail and brand
         df_detail=pd.merge(df_detail,df_partner, how="inner",left_on=['partner_id'], right_on=['id'] )
@@ -1615,97 +1689,101 @@ def new_report(request):
           df_detail["qty_value"].astype(str)+df_detail["qty_value_currency"] 
         )
         df_detail=df_detail.drop(["qty_value_currency"], axis = 1)
+
         print("df_detail 4")
 
         #filter
-        df_detail=df_detail[['division','division_country_id','division_via_id','field_type','year','month_of_sales','SKU','SKU_name','market_id','sales_in_market_curr','sales_in_contract_curr','volume','sales_in_contract_curr','market_curr','sales_rate','qty_value','beneficiary_percentage','contract_currency','transaction_direction','amount_contract_curr','consolidation_currency','amount_consolidation_curr','contract_id','contract_name','partner_id','ico_3rd','partner_name','partner_country_id','brand_name','m3_brand_code','periodicity_cat','entry_type','invoice_paid','invoice_detail','payment_date']]
+        df_detail=df_detail[['division','division_country_id','division_via_id','field_type','year','month_of_sales','SKU','SKU_name','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','sales_rate','qty_value','beneficiary_percentage','contract_currency','transaction_direction','amount_contract_curr','consolidation_currency','amount_consolidation_curr','contract_id','contract_name','partner_id','ico_3rd','partner_name','partner_country_id','brand_name','m3_brand_code','periodicity_cat','entry_type','invoice_paid','invoice_detail','payment_date']]
         df_detail = df_detail.rename(columns={'division_via_id': 'division_via',"periodicity_cat":"period","year":"year_of_sales"})
 
         df_detail["payment_date"]=df_detail["payment_date"].astype(str)
         df_detail["invoice_paid"]=df_detail["invoice_paid"].astype(str)
+
+
         print("definition of Detail: Done")
 
-        #Tax impact---------------------   
-        df_wht=  df_detail.copy()
-        df_wht['entry_type']=(df_wht['entry_type']=="Invoice")
-        df_wht=df_wht[df_wht.entry_type ==False]
-        df_wht=df_wht.fillna("")
-        df_wht=df_wht.groupby(['division','division_country_id','partner_country_id','ico_3rd','partner_name','contract_currency','transaction_direction'], as_index=False).agg({"amount_contract_curr": "sum"})    
+        #Tax impact--------------------- 
+        if file.file_type=="cash_forecast": 
+          df_wht=  df_detail.copy()
+          df_wht['entry_type']=(df_wht['entry_type']=="Invoice")
+          df_wht=df_wht[df_wht.entry_type ==False]
+          df_wht=df_wht.fillna("")
+          df_wht=df_wht.groupby(['division','division_country_id','partner_country_id','ico_3rd','partner_name','contract_currency','transaction_direction'], as_index=False).agg({"amount_contract_curr": "sum"})    
 
-        
-        df_wht["country_from"]=np.where(
-                                df_wht["transaction_direction"]=="PAY",
-                                np.where(
-                                  df_wht["amount_contract_curr"]>0,
-                                  df_wht["division_country_id"],
-                                  df_wht["partner_country_id"],
-                                ),
-                                np.where(
-                                  df_wht["amount_contract_curr"]>0,
-                                  df_wht["partner_country_id"],
-                                  df_wht["division_country_id"] ,
+          
+          df_wht["country_from"]=np.where(
+                                  df_wht["transaction_direction"]=="PAY",
+                                  np.where(
+                                    df_wht["amount_contract_curr"]>0,
+                                    df_wht["division_country_id"],
+                                    df_wht["partner_country_id"],
+                                  ),
+                                  np.where(
+                                    df_wht["amount_contract_curr"]>0,
+                                    df_wht["partner_country_id"],
+                                    df_wht["division_country_id"] ,
+                                  )
                                 )
+          df_wht["country_to"]=np.where(
+                                df_wht["country_from"]==df_wht["division_country_id"],
+                                df_wht["partner_country_id"],
+                                df_wht["division_country_id"],
                               )
-        df_wht["country_to"]=np.where(
-                              df_wht["country_from"]==df_wht["division_country_id"],
-                              df_wht["partner_country_id"],
-                              df_wht["division_country_id"],
-                            )
-        df_wht["from_payor"]=np.where(
-                                df_wht["transaction_direction"]=="PAY",
-                                np.where(
-                                  df_wht["amount_contract_curr"]>0,
-                                  "ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")",
+          df_wht["from_payor"]=np.where(
+                                  df_wht["transaction_direction"]=="PAY",
                                   np.where(
-                                    df_wht["ico_3rd"]=="ICO",
-                                    "ICO-" + df_wht["partner_name"] + "(" + df_wht["partner_country_id"]+ ")",
-                                    "3rd " + "(" + df_wht["partner_country_id"]+ ")"
-                                  )  
-                                ),
-                                np.where(
-                                  df_wht["amount_contract_curr"]>0,
-                                  np.where(
-                                    df_wht["ico_3rd"]=="ICO",
-                                    "ICO-" + df_wht["partner_name"] + "(" + df_wht["partner_country_id"]+ ")",
-                                    "3rd " + "(" + df_wht["partner_country_id"]+ ")"
-                                  ) ,
-                                  "ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")"
-                                )
-                              )
-        df_wht["to_payee"]=np.where(
-                                  df_wht["from_payor"]=="ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")",
-                                  np.where(
-                                    df_wht["ico_3rd"]=="ICO",
-                                    "ICO-" + df_wht["partner_name"] + "(" + df_wht["partner_country_id"]+ ")",
-                                    "3rd " + "(" + df_wht["partner_country_id"]+ ")"
-                                  ) ,
-                                  "ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")"
-                            )
-        df_wht['amount_contract_curr']=abs(df_wht['amount_contract_curr'])
-
-        df_wht=df_wht.fillna("")
-        df_wht=df_wht.groupby(['country_from','country_to','from_payor','to_payee','contract_currency'], as_index=False).agg({"amount_contract_curr": "sum"})
-
-        df_wht=pd.merge(df_wht,df_tax, how="left",left_on=['country_from','country_to'], right_on=['country_from_id','country_to_id'] )
-        df_wht["wht_rate"]=df_wht["wht_rate"].astype(str)
-        df_wht["wht_rate"]=np.where(df_wht["country_from"]==df_wht["country_to"],
-                                    "0.00%",
+                                    df_wht["amount_contract_curr"]>0,
+                                    "ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")",
                                     np.where(
-                                      df_wht["wht_rate"]=="nan",
-                                      "Not defined",
-                                      df_wht["wht_rate"]+"%"
-                                    )
-        )
+                                      df_wht["ico_3rd"]=="ICO",
+                                      "ICO-" + df_wht["partner_name"] + "(" + df_wht["partner_country_id"]+ ")",
+                                      "3rd " + "(" + df_wht["partner_country_id"]+ ")"
+                                    )  
+                                  ),
+                                  np.where(
+                                    df_wht["amount_contract_curr"]>0,
+                                    np.where(
+                                      df_wht["ico_3rd"]=="ICO",
+                                      "ICO-" + df_wht["partner_name"] + "(" + df_wht["partner_country_id"]+ ")",
+                                      "3rd " + "(" + df_wht["partner_country_id"]+ ")"
+                                    ) ,
+                                    "ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")"
+                                  )
+                                )
+          df_wht["to_payee"]=np.where(
+                                    df_wht["from_payor"]=="ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")",
+                                    np.where(
+                                      df_wht["ico_3rd"]=="ICO",
+                                      "ICO-" + df_wht["partner_name"] + "(" + df_wht["partner_country_id"]+ ")",
+                                      "3rd " + "(" + df_wht["partner_country_id"]+ ")"
+                                    ) ,
+                                    "ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")"
+                              )
+          df_wht['amount_contract_curr']=abs(df_wht['amount_contract_curr'])
 
-        df_wht=df_wht[['from_payor','to_payee','contract_currency','amount_contract_curr','wht_rate']]
+          df_wht=df_wht.fillna("")
+          df_wht=df_wht.groupby(['country_from','country_to','from_payor','to_payee','contract_currency'], as_index=False).agg({"amount_contract_curr": "sum"})
 
-        if file.file_type=="cash_forecast":
-        #         iv.:  summary cash flow--------------------- 
+          df_wht=pd.merge(df_wht,df_tax, how="left",left_on=['country_from','country_to'], right_on=['country_from_id','country_to_id'] )
+          df_wht["wht_rate"]=df_wht["wht_rate"].astype(str)
+          df_wht["wht_rate"]=np.where(df_wht["country_from"]==df_wht["country_to"],
+                                      "0.00%",
+                                      np.where(
+                                        df_wht["wht_rate"]=="nan",
+                                        "Not defined",
+                                        df_wht["wht_rate"]+"%"
+                                      )
+          )
+
+          df_wht=df_wht[['from_payor','to_payee','contract_currency','amount_contract_curr','wht_rate']]
+          print("WHT Done")
+          #         iv.:  summary cash flow--------------------- 
           # if REC, them - + if invoice -
           df_cash_flow= df_detail.copy()
           df_cash_flow=df_cash_flow.fillna("")
           df_cash_flow=df_cash_flow.groupby(['division','contract_currency','payment_date','entry_type','invoice_paid','transaction_direction'], as_index=False).agg({"amount_contract_curr": "sum"})
-        else:
+
+        if file.file_type=="accruals":
         #          v.:  Conso for accruals--------------------- 
           df_conso= df_detail.copy()
           df_conso['entry_type']=(df_conso['entry_type']=="Invoice")
@@ -1722,7 +1800,7 @@ def new_report(request):
           #sum and group
           df_conso=df_conso.fillna("")
           df_conso=df_conso.groupby(['year_of_sales','division','brand_name','country','consolidation_currency'], as_index=False).sum()     
-
+          print("df_conso")
         #          v.:  GLS for accruals--------------------- 
           df_gls= df_detail.copy()
           df_gls["accruals_contract_curr"]=np.where(df_gls["entry_type"]=="Invoice",-df_gls["amount_contract_curr"],df_gls["amount_contract_curr"])
@@ -1751,20 +1829,22 @@ def new_report(request):
           df_gls["sheet_name"]= "Accounting_" +df_gls["division"]+"_"+df_gls["contract_currency"]
           df_gls=df_gls.sort_values(['sheet_name','pl_bs','brand_name'], ascending=[1,0,1])
           df_gls=df_gls[['sheet_name','division','contract_currency','accountingdate','reverseDate','dim1','dim2','dim3','dim4','accruals_contract_curr','d_c','text_voucherline']]
-
+          print("df_gls")
 
         #---------------Save in database----------------
 
-        conn = sqlite3.connect('db.sqlite3')
-        cur = conn.cursor()
+        conn = sqlite3.connect('royalty/db.sqlite3')
         
 
         df_sales.to_sql('royalty_app_sale', con=conn,index=False,if_exists="append")
+    
+        print("df_sales loaded succesfully")
         df_fx.to_sql('royalty_app_fx', con=conn,index=False,if_exists="append")
-
+        print("df_fx loaded succesfully")
         df_rule_calc['import_file_id']=file.id
         #we import the contract name
         df_rule_calc=pd.merge(df_rule_calc,df_contract, how="left",left_on=['contract_id'], right_on=['contract_id'] )
+        
         # we insert the curr of the qty
         df_rule_calc["qty_value"]=np.where(
           df_rule_calc["qty_value"]==0,
@@ -1775,28 +1855,30 @@ def new_report(request):
 
         df_rule_calc=df_rule_calc[['import_file_id','contract_id','contract_name','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','qty_value','sales_rate']]
         df_rule_calc.to_sql('royalty_app_rule_calc', con=conn, index=False, if_exists="append")
-        
+        print("df_rule_calc loaded succesfully")
+
+
         df_detail['import_file_id']=file.id
         df_detail.to_sql('royalty_app_detail', con=conn, index=False, if_exists="append")
-
+        print("df_detail loaded succesfully")
 
         if file.file_type=="cash_forecast":
           df_cash_flow["import_file_id"]=file.id
           df_cash_flow.to_sql('royalty_app_cash_flow', con=conn, index=False, if_exists="append")
-
+          print("df_cash_flow loaded succesfully")
           df_wht['import_file_id']=file.id
           df_wht.to_sql('royalty_app_wht', con=conn, index=False, if_exists="append")
-
+          print("df_wht loaded succesfully")
         elif file.file_type=="accruals":
           df_conso['import_file_id']=file.id
           df_conso.to_sql('royalty_app_conso', con=conn, index=False, if_exists="append")
-
+          print("df_conso loaded succesfully")
           df_gls['import_file_id']=file.id
           df_gls.to_sql('royalty_app_gls', con=conn, index=False, if_exists="append")
-
-        else: # Sales_breakdown_for_contract_report
+          print("df_gls loaded succesfully")
+        elif file.file_type=="partner_report":
           df_sales_breakdown.to_sql('royalty_app_sales_breakdown_for_contract_report', con=conn, index=False, if_exists="append") 
-        
+          print("df_sales_breakdown loaded succesfully")
       except Exception as e:
         file.delete()
         return JsonResponse({"error": f"something went wrong with the import file- please check that the format is respected-   server message: {e}"}, status=201)

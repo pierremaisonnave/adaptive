@@ -61,7 +61,7 @@ function onchange_contract(elm){
         transaction_direction=elm.options[elm.selectedIndex].getAttribute("transaction_direction")
         document.getElementById("transaction_direction_").innerHTML=transaction_direction+':'
     // year
-        document.getElementById("year_").value=new Date().getFullYear()-1
+        document.getElementById("year_").value=new Date().getFullYear()
     //periodicity- same logic as above
         ps_list=form.querySelectorAll('[periodicity_of_ps_id]')
         n=0
@@ -75,6 +75,11 @@ function onchange_contract(elm){
     // currency
         currency_id=elm.options[elm.selectedIndex].getAttribute("currency")
         document.getElementById("currency_contract_").innerHTML=currency_id
+    // comment
+        contract_value=contract_.options[partner_.selectedIndex].text
+        partner_value=partner_.options[partner_.selectedIndex].text
+        period_value=period_.options[period_.selectedIndex].text
+        document.getElementById("comment_").value=contract_value+ "/" + partner_value + " : " +document.getElementById("year_").value+ " " + period_value
 
 }
 
