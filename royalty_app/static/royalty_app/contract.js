@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
         columnDefs: [{ orderable: false, targets: [0,1,2,3,4,5,6,7,8,9,10,11,12] }],
     })
 
-    document.querySelector("main").style.visibility = "visible";
+
     //the datatable automatically generate a filter button, we do not need it ( as we have search bar for each column)
     document.getElementById("contracts_table_filter").hidden=true
     var table = $('#contracts_table').DataTable();

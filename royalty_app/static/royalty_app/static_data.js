@@ -1,7 +1,7 @@
 
 
 document.addEventListener('DOMContentLoaded', function() {
-  
+
     document.addEventListener('click', event => {
      
         var element=event.target

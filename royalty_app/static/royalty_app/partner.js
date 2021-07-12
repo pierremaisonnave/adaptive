@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         columnDefs: [{ orderable: false, targets: [0,1,2,3,4,5,6,7] }],
         })
     console.log("initialization partner_table done" + ( performance.now() - t0) + " milliseconds.")
-    document.querySelector("main").style.visibility = "visible";
+
     //the datatable automatically generate a filter button, we do not need it ( as we have search bar for each column)
     document.getElementById("partners_table_filter").hidden=true
     var table = $('#partners_table').DataTable();

@@ -1,5 +1,4 @@
 
-
 function accruals_change(elm){
     myChart.reset()
     //make sure we are not missing any field
