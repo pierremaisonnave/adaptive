@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import os
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -139,11 +144,24 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = 'media/'
 
-'''
+
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'heb8ab9md',
     'API_KEY': '826471698252942',
     'API_SECRET': 'rkOC3zdEmILXcGYxhg3sdiNmF9M',
 }
+
+
+
+
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
+'''
+cloudinary.config( 
+  cloud_name = "heb8ab9md", 
+  api_key = "826471698252942", 
+  api_secret = "rkOC3zdEmILXcGYxhg3sdiNmF9M",
+  secure = True
+)
 '''
