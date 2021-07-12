@@ -2,15 +2,14 @@
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    var t0 = performance.now()
-    console.log("beginning DOMContentLoaded " + ( performance.now() - t0) + " milliseconds.")
+
     //--------------------Initialization of Datatable ---------------------
     //the datatable is imported, and ordered
     $('#partners_table').DataTable({
         "aaSorting": [[ 0, "desc" ]],
         columnDefs: [{ orderable: false, targets: [0,1,2,3,4,5,6,7] }],
         })
-    console.log("initialization partner_table done" + ( performance.now() - t0) + " milliseconds.")
+
 
     //the datatable automatically generate a filter button, we do not need it ( as we have search bar for each column)
     document.getElementById("partners_table_filter").hidden=true

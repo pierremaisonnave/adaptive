@@ -1,6 +1,6 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-    var t0 = performance.now()
+
     document.addEventListener('click', event => {
         var element = event.target;
         
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
          }
      })
-    console.log("dd  " + ( performance.now() - t0) + " milliseconds.")
+
 })
 
 function hideitemsearch(dd_id,searched_value){

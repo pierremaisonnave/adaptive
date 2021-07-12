@@ -1,6 +1,6 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-    var t0 = performance.now()
+
 
     //--------------------Initialization of Datatable ---------------------
     //the datatable is imported, and ordered

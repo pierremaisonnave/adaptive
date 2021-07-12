@@ -166,9 +166,18 @@ select.fname{
   cursor:pointer;
 }
 
+.user_section{
+  cursor:pointer;
+}
+
+.user_section:hover{
+  background-color: #efefef
+}
+
 .item_single_select{
   cursor:pointer;
 }
+
 
 #form_new{
   min-width:500px;

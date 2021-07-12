@@ -39,10 +39,11 @@
         {% if user.is_authenticated %}
         
 
-          <div style="width: 100%; padding:10px;">
+          <div style="width: 100%; margin:10px;" class="user_section">
 
-              <div  class="comboTreeInputWrapper" dd_id="user">
-                <span   class="justAnInputBox comboTreeInputBox" id="displayed_item_name_user" dd_id="user">{{ user.username }} session  </span>
+              <div  class="comboTreeInputWrapper" dd_id="user" style="display: grid; grid-template-columns:auto auto ">
+                <span class="bi bi-gear  comboTreeInputBox "  style="margin:2px"  dd_id="user"></span>
+                <span   class="justAnInputBox comboTreeInputBox  user_gear" id="displayed_item_name_user" dd_id="user" >{{ user.username }} session  </span>
               </div>
               <div  class="comboTreeDropDownContainer" id="dropdown_user" style="display: none;">
 
@@ -57,7 +58,7 @@
         {% endif %}
 
         <li class="nav-item text-nowrap" >
-          <img src="{% static 'royalty_app/logo_me.png' %}" style="width: 100px; margin-left: 10px;  margin-right: 10px;" >
+          <img src="{% static 'royalty_app/logo_me.png' %}" style="width: 100px;margin: 10px " >
         </li>
 
       </ul>
@@ -153,6 +154,7 @@
     <script src="{% static 'royalty_app/layout.js'%}"></script> 
     <script type="text/javascript" src="{% static 'royalty_app/jquery.min.js'%}"></script>     
     <script type="text/javascript" src="{% static 'royalty_app/jquery.dataTables.min.js'%}"></script> 
+
     
 
     

@@ -145,6 +145,9 @@ span.comboTreeItemTitle{
         padding-left: 60px!important;
 
     }
+    .user_gear{
+        display: None;
+        }   
     .sidebar{
         width: 50px;
         display: block!important;
@@ -158,6 +161,11 @@ span.comboTreeItemTitle{
     .nav-item{
         display: block;
         }
+}
+@media (min-width: 500px){
+    .user_gear{
+        display: Block;
+        }   
 }
 
 @media (min-width: 992px){
