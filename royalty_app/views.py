@@ -357,20 +357,15 @@ def chart_accruals(year,contract_id_list):
   #-----------------------------------
 @login_required(login_url='/login')
 def partners(request):
-
-
-
   partner_list=Partner.objects.all()
   payment_type_list=Payment_type.objects.all()
   region_list=Region.objects.all()
   country_list=Country.objects.all().order_by("country")
   
-
   return render(request, 'royalty_app/partners.html',  { "payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list})
 
+@login_required(login_url='/login')
 def contracts(request):
-
-  
   contract_list=Contract.objects.all()
   region_list=Region.objects.all()
   country_list=Country.objects.all().order_by("country")
@@ -381,6 +376,7 @@ def contracts(request):
 
   return render(request, 'royalty_app/contracts.html',  {"periodicity_list":periodicity_list,"currency_list":currency_list,"division_list":division_list,"m3_brand_list":m3_brand_list, "contract_list":contract_list, "country_list":country_list ,"region_list":region_list})
 
+@login_required(login_url='/login')
 def rules(request,contract_id):
 
   contract=Contract.objects.get(id=contract_id)
@@ -411,35 +407,41 @@ def rules(request,contract_id):
       
   return render(request, 'royalty_app/rules.html', {"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"currency_list":currency_list,"tranche_list":tranche_list,"formulation_list":formulation_list,"region_list":region_list,"country_list":country_list,"contract":contract,"contract_partner_list":contract_partner_list,"partner_list":partner_list})
 
+@login_required(login_url='/login')
 def analytics(request):
-
   return render(request, 'royalty_app/analytics.html', {})
+
+@login_required(login_url='/login')
 def invoices(request):
   contract_list=Contract.objects.all().order_by("contract_name")
   payment_structure_list=Payment_structure.objects.all()
   contract_partner_list=Contract_partner.objects.all()
   periodicity_cat_list=Periodicity_cat.objects.all()
   invoice_list=Invoice.objects.all()
-
   return render(request, 'royalty_app/invoices.html', {"invoice_list":invoice_list,"periodicity_cat_list":periodicity_cat_list,"contract_partner_list":contract_partner_list,"payment_structure_list":payment_structure_list,"contract_list":contract_list})
+
+@login_required(login_url='/login')
 def static_data(request):
-
   return render(request, 'royalty_app/static_data.html', {})
-def settings(request):
 
+@login_required(login_url='/login')
+def settings(request):
   return render(request, 'royalty_app/settings.html', {})
+
+@login_required(login_url='/login')
 def monthly_accruals(request):
   month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="accruals")
-
   return render(request, 'royalty_app/monthly_accruals.html', {"month_list":month_list,"file_list":file_list})
 
+@login_required(login_url='/login')
 def cash_flow_forecast(request):
   month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="cash_forecast")
   current_month_nb=datetime.now().month
   return render(request, 'royalty_app/cash_flow_forecast.html', {"current_month_nb":current_month_nb,"month_list":month_list,"file_list":file_list})
 
+@login_required(login_url='/login')
 def partner_report(request):
   month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="partner_report")
@@ -2050,9 +2052,8 @@ def export_report(request,file_array,table_array):
 #----------Static Data ---------------
 #-------------------------------------
 
-
+@login_required(login_url='/login')
 def modif_static(request,table_name):
-
 
   if table_name == "division" :
     country_list=Country.objects.all().order_by("country_id")
