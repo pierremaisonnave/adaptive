@@ -13,11 +13,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 import os
 
-'''
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-'''
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -49,13 +45,13 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    #'cloudinary_storage',  Media on Cloud
+
     'django.contrib.staticfiles',
 
 
     'whitenoise.runserver_nostatic',
     'royalty_app',
-    'cloudinary',# Media on Cloud
+
   
 ]
 
@@ -143,18 +139,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 #DataFlair File uploading
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = 'media/'
+#MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+#MEDIA_URL = 'media/'
+
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+AWS_ACCESS_KEY_ID='AKIAVSQBJQKAD7GQE7H7'
+AWS_SECRET_ACCESS_KEY='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'
+AWS_STORAGE_BUCKET_NAME='suissroypublic'
+AWS_QUERYSTRING_AUTH = False
 
 
 
-
-'''
-
-cloudinary.config( 
-  cloud_name = "heb8ab9md", 
-  api_key = "826471698252942", 
-  api_secret = "rkOC3zdEmILXcGYxhg3sdiNmF9M",
-  secure = True
-)
-'''

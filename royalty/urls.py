@@ -23,4 +23,4 @@ from django.conf.urls.static import static# so as to save pdf to Media forder
 urlpatterns = [
     path('', include('royalty_app.urls')),
     path('admin/', admin.site.urls),
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+]#+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

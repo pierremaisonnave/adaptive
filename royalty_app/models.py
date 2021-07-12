@@ -113,7 +113,7 @@ class Contract(models.Model):
 class Contract_file(models.Model):
     name = models.CharField(max_length=255)
     contract=  models.ForeignKey(Contract,on_delete=models.CASCADE)
-    upload = models.FileField()
+    upload = models.FileField(upload_to='media/')
 
 class Contract_partner(models.Model):
     contract=  models.ForeignKey(Contract,on_delete=models.CASCADE)
