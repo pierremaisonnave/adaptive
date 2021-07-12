@@ -18,4 +18,6 @@ django-cleanup #deletes the file in Media
 
 python-dateutil
 
+cloudinary==1.17.0 # Media file on the cloud
+django-cloudinary-storage==0.2.3
 
