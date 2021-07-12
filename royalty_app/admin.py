@@ -5,8 +5,12 @@ from .models import (Invoice,Country,Region,Partner,
     Contract_partner,Rule,Tranche,Periodicity_cat,
     File,Sale,Fx,Rule_calc,Conso,Gls,Consolidation_currency,
     Detail,Wht,Sales_breakdown_for_contract_report,Sales_breakdown_per_contract,
-    Contract_file,Month_table)
-#from import_export.admin import ImportExportModelAdmin
+    Contract_file,Month_table,User)
+
+
+
+
+
 
 # Register your models here.
 class CountryAdmin(admin.ModelAdmin):
@@ -105,3 +109,4 @@ admin.site.register(Contract_file)
 admin.site.register(Sales_breakdown_per_contract,Sales_breakdown_per_contractAdmin)
 admin.site.register(Sales_breakdown_for_contract_report)
 admin.site.register(Month_table)
+admin.site.register(User)

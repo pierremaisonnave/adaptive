@@ -45,14 +45,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-
     'django.contrib.staticfiles',
-
 
     'whitenoise.runserver_nostatic',
     'royalty_app',
 
-  
 ]
 
 MIDDLEWARE = [
@@ -96,7 +93,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
+AUTH_USER_MODEL = 'royalty_app.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

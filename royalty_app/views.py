@@ -9,7 +9,7 @@ from .models import (Invoice,Country,Partner,Region,Payment_type,Brand,
   Payment_structure,Contract,Contract_partner,Rule,Tranche,
   Periodicity_cat,Fx,Sales_breakdown_item,Sales_breakdown_per_contract,Sales_breakdown_item,
   File,Sale, Rule_calc,Periodicity_cat,Consolidation_currency,Cash_flow,Detail,Gls,Conso,Wht,Sales_breakdown_for_contract_report,
-  Contract_file,Month_table)
+  Contract_file,Month_table,User)
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 import numpy as np
@@ -17,68 +17,149 @@ import json
 import sqlite3
 from io import BytesIO
 from django.db.models import ProtectedError
-
-# for MySql impot : https://www.dataquest.io/blog/sql-insert-tutorial/
-
 import django_excel as excel
 import pyexcel as p
 
+from django.contrib.auth import authenticate, login , logout
+from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
+from django.contrib.auth import password_validation
 
 
+def login_view(request):
+    if request.method == "POST":
+
+        # Attempt to sign user in
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+
+        # Check if authentication successful
+        if user is not None:
+          login(request, user)
+          redirect=request.POST.get('next')
+          if redirect=="":
+            redirect="/"
+          return HttpResponseRedirect(redirect) 
+          # If the user clicked on "Partner", and if he is not logged in, he is automatically redirected t
+          #..on the loggin page thanks to the "login_required", the login page keeps tracks of the original URL
+          #i.e. "/login?next=/partners"- In order for the user to be directed on the "Partner" page rigth after entering the password
+          #we must utilise request.POST.get('next')
+
+        else:
+          return render(request, "royalty_app/login.html", {
+              "message": "Invalid username and/or password."
+          })
+    else:
+        return render(request, "royalty_app/login.html")
+
+def login_page(request):
+  return render(request, "royalty_app/login.html")
+def register_page(request):
+  return render(request, "royalty_app/register.html")
+
+
+def register(request):
+  if request.method == "POST":
+    username = request.POST["username"]
+    email = request.POST["email"]
+
+    # Ensure password matches confirmation
+    password = request.POST["password"]
+    confirmation = request.POST["confirmation"]
+    if password != confirmation:
+        return render(request, "royalty_app/register.html", {
+            "message": "Passwords must match."
+        })
+    if User.objects.filter(email=email):
+        return render(request, "royalty_app/register.html", {
+            "message": "Email already exists"
+        })
+    try:
+        
+      password_validation.validate_password(password, request)
+    except Exception as e:
+
+      return render(request, "royalty_app/register.html",{
+        "password_warning_list":e }
+        )
+
+    # Attempt to create new user
+    try:
+        user = User.objects.create_user(username, email, password)
+        user.save()
+    except IntegrityError:
+        return render(request, "royalty_app/register.html", {
+            "message": "Username already taken."
+        })
+    login(request, user)
+    return HttpResponseRedirect(reverse('home'))
+  else:
+    return render(request, "royalty_app/register.html")
+
+
+
+
+def logout_view(request):
+  logout(request)
+  return HttpResponseRedirect(reverse("home"))    
+
+
+
+@login_required(login_url='/login')
 def home(request):
 
+    #---------------calculation for Accruals graph------------
+    current_year=datetime.now().year
+    year_list=File.objects.filter(file_type="accruals").values_list('acc_year')
+    year_list=list(dict.fromkeys(year_list))
+    year_list=[int(y[0]) for y in year_list]
+    #if the current year does not exist, insert it in the list
+    if current_year not in year_list:
+      year_list.append(current_year)
+    year_list.sort()
 
-  #---------------calculation for Accruals graph------------
-  current_year=datetime.now().year
-  year_list=File.objects.filter(file_type="accruals").values_list('acc_year')
-  year_list=list(dict.fromkeys(year_list))
-  year_list=[int(y[0]) for y in year_list]
-  #if the current year does not exist, insert it in the list
-  if current_year not in year_list:
-    year_list.append(current_year)
-  year_list.sort()
-
-  consolidation_currency=Consolidation_currency.objects.all().first()
-  contract_list=Contract.objects.all()
-  contract_id_list=contract_list.values_list('id')
-  contract_id_list=[c[0] for c in contract_id_list]
+    consolidation_currency=Consolidation_currency.objects.all().first()
+    contract_list=Contract.objects.all()
+    contract_id_list=contract_list.values_list('id')
+    contract_id_list=[c[0] for c in contract_id_list]
 
 
-  result=chart_accruals(current_year,contract_id_list)
-  labels=result[0]
-  data_accruals=result[1]
-  data_roy_ytd=result[2]
+    result=chart_accruals(current_year,contract_id_list)
+    labels=result[0]
+    data_accruals=result[1]
+    data_roy_ytd=result[2]
 
-  result=chart_accruals(current_year-1,contract_id_list)
-  data_accruals_last_year=result[1]
-  data_roy_ytd_last_year=result[2]
+    result=chart_accruals(current_year-1,contract_id_list)
+    data_accruals_last_year=result[1]
+    data_roy_ytd_last_year=result[2]
 
- #---------------calculation for CFF graph------------
-  CFF_report_list=File.objects.filter(file_type="cash_forecast").order_by('-id')[:30]
-  #Get the list of cash flow report, and select the latest
-  if not CFF_report_list :
-    CFF_report_id=0
-    year_list_cash_forecast=[current_year]
-  else:
-    CFF_report=CFF_report_list.first()
-    CFF_report_id=CFF_report.id
+  #---------------calculation for CFF graph------------
+    CFF_report_list=File.objects.filter(file_type="cash_forecast").order_by('-id')[:30]
+    #Get the list of cash flow report, and select the latest
+    if not CFF_report_list :
+      CFF_report_id=0
+      year_list_cash_forecast=[current_year]
+    else:
+      CFF_report=CFF_report_list.first()
+      CFF_report_id=CFF_report.id
+      
+
+    #get the currency list from the contract
+    currency_list=contract_list.values_list('contract_currency')
+    currency_list=list(dict.fromkeys(currency_list))
+    currency_list=[str(c[0]) for c in currency_list]
     
+    #get the label, data as well as the
+    result=chart_cash_forecast(CFF_report_id,currency_list,current_year)
+    labels_cash_forecast=result[0]
+    data_cash_forecast=result[1] 
+    year_list_cash_forecast=result[2]
 
-  #get the currency list from the contract
-  currency_list=contract_list.values_list('contract_currency')
-  currency_list=list(dict.fromkeys(currency_list))
-  currency_list=[str(c[0]) for c in currency_list]
-  
-  #get the label, data as well as the
-  result=chart_cash_forecast(CFF_report_id,currency_list,current_year)
-  labels_cash_forecast=result[0]
-  data_cash_forecast=result[1] 
-  year_list_cash_forecast=result[2]
+    result=chart_cash_forecast(CFF_report_id,currency_list,current_year-1)
+    data_cash_forecast_last_year=result[1] 
 
-  result=chart_cash_forecast(CFF_report_id,currency_list,current_year-1)
-  data_cash_forecast_last_year=result[1] 
-
-  return render(request, 'royalty_app/home.html', {"CFF_report_list":CFF_report_list,"CFF_report_id":CFF_report_id,"currency_list":currency_list,"year_list_cash_forecast":year_list_cash_forecast,"data_cash_forecast_last_year":data_cash_forecast_last_year,"data_cash_forecast":data_cash_forecast,"labels_cash_forecast":labels_cash_forecast,"data_accruals_last_year":data_accruals_last_year,"data_roy_ytd_last_year":data_roy_ytd_last_year,"contract_id_list":contract_id_list,"contract_list":contract_list,"consolidation_currency":consolidation_currency,"labels":labels,"data_accruals":data_accruals,"data_roy_ytd":data_roy_ytd,"year_list":year_list,"current_year":current_year})
+    return render(request, 'royalty_app/home.html', {"CFF_report_list":CFF_report_list,"CFF_report_id":CFF_report_id,"currency_list":currency_list,"year_list_cash_forecast":year_list_cash_forecast,"data_cash_forecast_last_year":data_cash_forecast_last_year,"data_cash_forecast":data_cash_forecast,"labels_cash_forecast":labels_cash_forecast,"data_accruals_last_year":data_accruals_last_year,"data_roy_ytd_last_year":data_roy_ytd_last_year,"contract_id_list":contract_id_list,"contract_list":contract_list,"consolidation_currency":consolidation_currency,"labels":labels,"data_accruals":data_accruals,"data_roy_ytd":data_roy_ytd,"year_list":year_list,"current_year":current_year})
 
 
 
@@ -274,7 +355,7 @@ def chart_accruals(year,contract_id_list):
     data_roy_ytd=[ d[3] for d in datas]
   return [labels, data_accruals,data_roy_ytd]
   #-----------------------------------
-
+@login_required(login_url='/login')
 def partners(request):
 
 

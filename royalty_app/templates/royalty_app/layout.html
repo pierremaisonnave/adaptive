@@ -14,7 +14,7 @@
 
     {% load static %}
     <link rel="icon" href="{% static 'royalty_app/minilogo.png' %}">   <!-- logo on page title -->
-  
+    
     <!-- dataTables CSS- used to design the datatables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css" >
 
@@ -36,17 +36,25 @@
       <ul class="navbar-nav px-3"  style="display: grid; grid-template-columns:auto auto auto" id="nav-top"> 
         
         
-        <!--{% if user.is_authenticated %}-->
+        {% if user.is_authenticated %}
         
-          <li class="nav-item text-nowrap"  style=" margin: auto;">
-            
-            <!--<a class="nav-link" >{{ user.name }} </a>-->
-          </li>
-          
-          <li class="nav-item text-nowrap"  style=" margin: auto;" >
-            <a class="nav-link"  href=""  > </a>
-          </li>
-        <!--{% endif %} -->
+
+          <div style="width: 100%; padding:10px;">
+
+              <div  class="comboTreeInputWrapper" dd_id="user">
+                <span   class="justAnInputBox comboTreeInputBox" id="displayed_item_name_user" dd_id="user">{{ user.username }} session  </span>
+              </div>
+              <div  class="comboTreeDropDownContainer" id="dropdown_user" style="display: none;">
+
+                <li style="display: block;" class="item_single_select" dd_id="user">
+                  <span class="bi bi-box-arrow-right"></span><a  href="{% url 'logout' %}"  > logout</a>
+                </li>
+
+              </div>
+            </div>
+
+
+        {% endif %}
 
         <li class="nav-item text-nowrap" >
           <img src="{% static 'royalty_app/logo_me.png' %}" style="width: 100px; margin-left: 10px;  margin-right: 10px;" >
@@ -127,8 +135,10 @@
           </div>
         </nav>
       </div> 
-    </div>  
-    {% block content %}{% endblock %}
+    </div>
+      
+    {% block content %}{% endblock %}  
+
         <!--{% if user.is_authenticated %}
 
         
