@@ -26,12 +26,13 @@ DATABASES = {
     'default': env.db(),
 }
 
+'''
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': 'heb8ab9md',
     'API_KEY': '826471698252942',
     'API_SECRET': 'rkOC3zdEmILXcGYxhg3sdiNmF9M',
 }
-
+'''
 
 
 
