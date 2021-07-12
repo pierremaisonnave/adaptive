@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cloudinary_storage', # Media on Cloud
+    #'cloudinary_storage',  Media on Cloud
 
     'whitenoise.runserver_nostatic',
     'royalty_app',
