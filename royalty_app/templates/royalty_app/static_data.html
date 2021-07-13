@@ -14,40 +14,17 @@
     <div>
       <a class="btn btn-sm btn-outline-secondary"  id="button_extract_static" ><span class="bi bi-download"></span> download </a>
     </div>
-
-    <form  action="{% url 'import_static' %}" id="button_extract_static" method="post" enctype="multipart/form-data" style=" width:300px  ;display:grid ;grid-template-rows: 30px 20px ">
-            {% csrf_token %} 
-      <div>
-          <div id="imput_label_select">
-              <input  type="file" name="loaded_file" id="fileSelect" accept=".xlsx" onchange="processSelectedFiles(this)"  hidden >
-              <input  type="text" name="sheet_list_to_upload" id="sheet_list_to_upload"  hidden >
-              <label for="fileSelect" class="btn btn-sm btn-outline-secondary" > <span class="bi bi-upload"  ></span > Select upload File</label>
-          </div>
-          <div style=" display:grid ; grid-template-columns: 70px 70px auto "  >
-            <button type="submit" value="Upload"   id="load_file" class="btn btn-sm btn-sm btn-outline-secondary" onclick="loadSelectedFiles(this)"  hidden >
-              <span class="bi bi-upload" ></span>
-              <span>Load</span>            
-            </button>
-            <button  type="reset" id="cancel_file" class="btn btn-sm btn-outline-secondary" hidden onclick="cancelload()"style="margin-left:7px" > Cancel</button>
-             <!-- here the css code nowwrap prevent the text from wrapping, elipsis and overflow prevent the text from overlapping-->
-          </div>
-      </div>
-      <div id="file_name" style="font-family: arial; font-size: 0.725rem; color:#6c757d; white-space: nowrap; overflow:hidden;text-overflow:ellipsis;"></div>       
-    </form>
-  </div>
   <div style="color:red" id='error_message_load'>{{error}}</div>
 
 
 
                
-  <table class="table table-striped table-sm " style="max-width:500px; width:auto" id="static_data_table">
+  <table class="table table-striped table-sm " style="max-width:500px" id="static_data_table">
     <thead>
-
       <tr>
-        <th >File Name</th>
-        <th >
-          <span class="select_all" id="select_all" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d">(select all)</span> 
-          
+        <th>File Name</th>
+        <th style="min-width:80px;" >
+          <span class="select_all" id="select_all" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d">select_all</span> 
          </th>
       </tr>
     </thead>
@@ -130,9 +107,9 @@
 {% load static %}
 
   <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
-  <script src="{% static 'royalty_app/dropdown_multiple.js'%}"></script> 
-  <script src="{% static 'royalty_app/static_data.js'%}"></script>
 
+  <script src="{% static 'royalty_app/static_data.js'%}"></script>
+  <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
 
 
 

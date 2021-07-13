@@ -19,7 +19,9 @@
     --ct-padding: 8px;
 }
 
-
+#user_photo_on_layout{
+    cursor: pointer;
+}
 .comboTreeWrapper{
 	position: relative;
 	text-align: left !important;
@@ -148,6 +150,9 @@ span.comboTreeItemTitle{
     .user_gear{
         display: None;
         }   
+    #your_logo{
+        display: None;
+        }   
     .sidebar{
         width: 50px;
         display: block!important;
@@ -162,6 +167,12 @@ span.comboTreeItemTitle{
         display: block;
         }
 }
+@media (min-width: 400px){
+    #your_logo{
+        display: Block;
+        }   
+}
+
 @media (min-width: 500px){
     .user_gear{
         display: Block;

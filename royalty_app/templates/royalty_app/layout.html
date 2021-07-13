@@ -13,6 +13,8 @@
     <title>Royalty</title>
 
     {% load static %}
+
+
     <link rel="icon" href="{% static 'royalty_app/minilogo.png' %}">   <!-- logo on page title -->
     
     <!-- dataTables CSS- used to design the datatables -->
@@ -31,29 +33,57 @@
 
   <body >
     <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar">
-      <H2 style="margin-left:10px">Your Logo 2</H2> 
+      <H2 style="margin-left:10px" id="your_logo"> YourLogo</H2> 
       
       <ul class="navbar-nav px-3"  style="display: grid; grid-template-columns:auto auto auto" id="nav-top"> 
         
         
+
         {% if user.is_authenticated %}
         
 
-          <div style="width: 100%; margin:10px;" class="user_section">
+          <div style="background-color: #f8f9fa! ;">
 
-              <div  class="comboTreeInputWrapper" dd_id="user" style="display: grid; grid-template-columns:auto auto ">
-                <span class="bi bi-gear  comboTreeInputBox "  style="margin:2px"  dd_id="user"></span>
-                <span   class="justAnInputBox comboTreeInputBox  user_gear" id="displayed_item_name_user" dd_id="user" >{{ user.username }} session  </span>
+              <div id="user_photo_on_layout" class="comboTreeInputWrapper" dd_id="user" style="display: grid; grid-template-columns:auto  auto; margin: 10px ">
+        
+                  {% if  user.user_profile_picture %}
+                    <img class="comboTreeInputBox user_img" dd_id="user"  src="{{ user.user_profile_picture.profile_picture.url}}" style="border-radius: 50%; width:40px; height:40px">
+                  {% else %}
+                    <img class="comboTreeInputBox user_img " dd_id="user"  src="{% static 'default.png'%}"  style="border-radius: 50%; width:40px; height:40px">
+                  {% endif %}
+       
+
+                  <span   class=" justAnInputBox comboTreeInputBox  user_gear" style="min-width: 70px;margin:10px 0" id="displayed_item_name_user" dd_id="user" >{{ user.username }}   </span>
+              
               </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_user" style="display: none;">
+              <div  class="comboTreeDropDownContainer" id="dropdown_user" style="display: none;margin-top: 9px;border-radius: 0.35rem;width:250px">
+                <H6 style="display: grid; grid-template-columns:45px auto" >
+                  
+                    <div id="imput_label_select">
+                      <input  type="file" name="loaded_file" id="fileSelect" accept="image/png, image/jpeg" onchange="change_profile_picture(this)"  hidden >
+                      <input  type="text" name="sheet_list_to_upload" id="sheet_list_to_upload"  hidden >
+                      <label for="fileSelect" title ="Change picture" style="margin: 2px;"> 
+                        {% if  user.user_profile_picture %}
+                        <img class="user_img" src="{{ user.user_profile_picture.profile_picture.url}}" style="border-radius: 50%; width:40px; height:40px">
+                      {% else %}
+                        <img class="user_img" src="{% static 'default.png'%}"  style="border-radius: 50%; width:40px; height:40px">
+                      {% endif %}
+                      </label>
+                  </div>
 
-                <li style="display: block;" class="item_single_select" dd_id="user">
-                  <span class="bi bi-box-arrow-right"></span><a  href="{% url 'logout' %}"  > logout</a>
+              
+                  <div class="dropdown-user-details">
+                    <div >{{ user.username }}</div>
+                    <div style="color:#69707a;    font-size: 11px" >{{ user.email }}</div>
+                  </div>
+                </H6>
+                <li style="display: block;" class="item_single_select" dd_id="user" >
+                  <a  href="{% url 'logout' %}"  > <span class="bi bi-box-arrow-right" style="margin-right: 4px;"></span>logout</a>
                 </li>
 
               </div>
             </div>
-
+            
 
         {% endif %}
 

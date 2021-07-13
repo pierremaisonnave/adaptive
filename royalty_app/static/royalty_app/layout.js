@@ -6,3 +6,34 @@ document.addEventListener('DOMContentLoaded', function() {
     var page_path=window.location.pathname.split("/")[1] //the windows location is like: /contracts/22 , so to grab partner, we need to split by /, and take the second element
     document.getElementById(`item_in_sidebar_${dictionary_[page_path]}`).className += " active"
 })
+
+function change_profile_picture(){
+
+    //definition od the elements
+
+    file_=document.getElementById("fileSelect")
+    name_file=file_.files[0].name
+
+    
+    let formData = new FormData();
+    formData.append('file', file_.files[0], name_file);
+
+    //book in database
+    fetch('/new_profile_pict', {
+        method: 'POST',
+        body: formData
+        })
+    //retreive the partner ID  (result.partner_id ) and create the additional row
+        .then(response => response.json())
+        .then(result => {
+            if (result.error){
+            }else{
+                //change the profile pict of the current page
+                img_list=document.querySelectorAll('.user_img') 
+                for ( var img = 0; img < img_list.length; img++){
+                    img_list[img].src=result.new_picture_url
+                }
+                }   
+        })
+    
+}

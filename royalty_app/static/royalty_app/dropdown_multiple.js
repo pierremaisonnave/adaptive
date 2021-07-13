@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         //hide all dp 
-        if (!isindropdownlist()){  //we verify if the user click inside a dd OR on a cell with class "hidden_dd_"- if not, we  hide all dd
+        if (!isindropdownlist(event)){  //we verify if the user click inside a dd OR on a cell with class "hidden_dd_"- if not, we  hide all dd
 
             dd_list= document.querySelectorAll(".comboTreeDropDownContainer")
 
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var dd_id = element.getAttribute("dd_id")
         const group_id = element.getAttribute("group_id")
         
-        if (isindropdownlist() ){ 
+        if (isindropdownlist(event) ){ 
             
             // if click on a checkbox
             if (element.matches('[type="checkbox"]')){
@@ -118,7 +118,7 @@ function unhidegroup(dd_id,group_id,element){
 }
 
  
-function isindropdownlist(){
+function isindropdownlist(event){
     var e= event.target;
     if (e.className.includes("comboTreeInputBox")){
         grandparentelement=e.parentElement.parentElement

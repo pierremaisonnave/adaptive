@@ -19,5 +19,8 @@ django-cleanup #deletes the file in Media
 python-dateutil
 
 django_storages
-boto3
+boto3 #to use WSL to store PDF file
+
+pillow #to handle image
+django_resized #resize the profile picture
 

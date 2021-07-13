@@ -397,13 +397,13 @@ function new_contract_file(contract_id){
     //definition od the elements
 
     file_=document.getElementById("fileSelect")
-    name=file_.files[0].name
+    name_file=file_.files[0].name
     file_value=file_.value
   
     let formData = new FormData();
-    formData.append('name', name);
+    formData.append('name', name_file);
     formData.append('contract_id', contract_id);
-    formData.append('file', file_.files[0], file_.files[0].name);
+    formData.append('file', file_.files[0], name_file);
 
     //book in database
     fetch('/new_contract_file', {
@@ -426,7 +426,7 @@ function new_contract_file(contract_id){
                     var newRow = table.insertRow(-1);
                 // column 0 select, clone and insert Select
                     newCell = newRow.insertCell(0);
-                    newCell.innerHTML=`<a href="${cf_url}"><span class="fname">${name}</span></a>`  
+                    newCell.innerHTML=`<a href="${cf_url}"><span class="fname">${name_file}</span></a>`  
                 // column 1 select, clone and insert input
                     newCell = newRow.insertCell(1);
                     newCell.innerHTML=`<button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_contract_file(this,${cf_id})" style="border:0px" ><span class="bi bi-trash"></span></button>`

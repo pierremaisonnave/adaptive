@@ -9,7 +9,7 @@ from .models import (Invoice,Country,Partner,Region,Payment_type,Brand,
   Payment_structure,Contract,Contract_partner,Rule,Tranche,
   Periodicity_cat,Fx,Sales_breakdown_item,Sales_breakdown_per_contract,Sales_breakdown_item,
   File,Sale, Rule_calc,Periodicity_cat,Consolidation_currency,Cash_flow,Detail,Gls,Conso,Wht,Sales_breakdown_for_contract_report,
-  Contract_file,Month_table,User)
+  Contract_file,Month_table,User,User_profile_picture)
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 import numpy as np
@@ -55,6 +55,27 @@ def login_view(request):
 
 def login_page(request):
   return render(request, "royalty_app/login.html")
+
+@csrf_exempt
+def new_profile_pict(request):
+  if request.method == "POST":
+    try:
+      if User_profile_picture.objects.filter(user=request.user):
+        user_profile_picture=User_profile_picture.objects.get(user=request.user)
+        user_profile_picture.profile_picture=request.FILES.get("file")
+        user_profile_picture.save()
+      else:  
+        user_profile_picture=User_profile_picture(
+          user =request.user,
+          profile_picture=request.FILES.get("file"),
+        )
+        user_profile_picture.save()
+      return JsonResponse({"new_picture_url":user_profile_picture.profile_picture.url}, status=201)
+    except Exception as e:
+      return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
+
+
+
 def register_page(request):
   return render(request, "royalty_app/register.html")
 

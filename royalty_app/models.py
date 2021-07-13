@@ -1,9 +1,14 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from django_resized import ResizedImageField
 
 class User(AbstractUser):
     pass
+
+class User_profile_picture(models.Model):
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    profile_picture = ResizedImageField(size=[150, 100],upload_to='media/profile_picture/', default='royalty_app/static/default.png')
 
 class Payment_type(models.Model):
     payment_type = models.CharField(max_length=100)
@@ -118,6 +123,8 @@ class Contract_file(models.Model):
     name = models.CharField(max_length=255)
     contract=  models.ForeignKey(Contract,on_delete=models.CASCADE)
     upload = models.FileField(upload_to='media/')
+
+
 
 class Contract_partner(models.Model):
     contract=  models.ForeignKey(Contract,on_delete=models.CASCADE)

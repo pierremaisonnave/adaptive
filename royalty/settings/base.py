@@ -147,4 +147,4 @@ AWS_STORAGE_BUCKET_NAME='suissroypublic'
 AWS_QUERYSTRING_AUTH = False
 
 
-
+DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {'PNG': ".png"} #used in order for the profile pict to be saved as PNG and not APNG
