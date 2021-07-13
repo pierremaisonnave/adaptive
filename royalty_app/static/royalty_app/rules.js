@@ -397,6 +397,7 @@ function new_contract_file(contract_id){
     //definition od the elements
 
     file_=document.getElementById("fileSelect")
+
     name_file=file_.files[0].name
     file_value=file_.value
   
@@ -413,7 +414,7 @@ function new_contract_file(contract_id){
     //retreive the partner ID  (result.partner_id ) and create the additional row
         .then(response => response.json())
         .then(result => {
-            var file_id=result.file_id
+
             if (result.error){
                 alert(result.error)
             }else{

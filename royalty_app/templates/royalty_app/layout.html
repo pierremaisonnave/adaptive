@@ -60,9 +60,9 @@
                 <H6 style="display: grid; grid-template-columns:45px auto" >
                   
                     <div id="imput_label_select">
-                      <input  type="file" name="loaded_file" id="fileSelect" accept="image/png, image/jpeg" onchange="change_profile_picture(this)"  hidden >
+                      <input  type="file" name="loaded_file" id="fileSelect_pic" accept="image/png, image/jpeg" onchange="change_profile_picture(this)"  hidden >
                       <input  type="text" name="sheet_list_to_upload" id="sheet_list_to_upload"  hidden >
-                      <label for="fileSelect" title ="Change picture" style="margin: 2px;"> 
+                      <label for="fileSelect_pic" title ="Change picture" style="margin: 2px;"> 
                         {% if  user.user_profile_picture %}
                         <img class="user_img" src="{{ user.user_profile_picture.profile_picture.url}}" style="border-radius: 50%; width:40px; height:40px">
                       {% else %}

@@ -11,7 +11,7 @@ function change_profile_picture(){
 
     //definition od the elements
 
-    file_=document.getElementById("fileSelect")
+    file_=document.getElementById("fileSelect_pic")
     name_file=file_.files[0].name
 
     
