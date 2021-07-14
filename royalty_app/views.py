@@ -127,7 +127,7 @@ def register(request):
       password_validation.validate_password(password, request)
     except Exception as e:
       return render(request, "royalty_app/register.html",{
-        "password_warning_list":e }
+        "error_message":e }
         )
     # Attempt to create new user
     try:
