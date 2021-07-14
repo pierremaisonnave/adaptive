@@ -15,7 +15,7 @@
     {% load static %}
 
 
-    <link rel="icon" href="{% static 'royalty_app/minilogo.png' %}">   <!-- logo on page title -->
+    <link rel="icon" href="{% static 'photo/minilogo.png' %}">   <!-- logo on page title -->
     
     <!-- dataTables CSS- used to design the datatables -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css" >
@@ -49,11 +49,11 @@
                   {% if  user.user_profile_picture %}
                     <img class="comboTreeInputBox user_img" dd_id="user"  src="{{ user.user_profile_picture.profile_picture.url}}" style="border-radius: 50%; width:40px; height:40px">
                   {% else %}
-                    <img class="comboTreeInputBox user_img " dd_id="user"  src="{% static 'default.png'%}"  style="border-radius: 50%; width:40px; height:40px">
+                    <img class="comboTreeInputBox user_img " dd_id="user"  src="{% static 'photo/default.png'%}"  style="border-radius: 50%; width:40px; height:40px">
                   {% endif %}
        
 
-                  <span   class=" justAnInputBox comboTreeInputBox  user_gear" style="min-width: 70px;margin:10px 0" id="displayed_item_name_user" dd_id="user" >{{ user.username }}   </span>
+                  <span   class=" justAnInputBox comboTreeInputBox  user_gear" style="min-width: 70px;margin:10px 0" id="displayed_item_name_user" dd_id="user" >{{ user.first_name }}   </span>
               
               </div>
               <div  class="comboTreeDropDownContainer" id="dropdown_user" style="display: none;margin-top: 9px;border-radius: 0.35rem;width:250px">
@@ -66,14 +66,14 @@
                         {% if  user.user_profile_picture %}
                         <img class="user_img" src="{{ user.user_profile_picture.profile_picture.url}}" style="border-radius: 50%; width:40px; height:40px">
                       {% else %}
-                        <img class="user_img" src="{% static 'default.png'%}"  style="border-radius: 50%; width:40px; height:40px">
+                        <img class="user_img" src="{% static 'photo/default.png'%}"  style="border-radius: 50%; width:40px; height:40px">
                       {% endif %}
                       </label>
                   </div>
 
               
                   <div class="dropdown-user-details">
-                    <div >{{ user.username }}</div>
+                    <div >{{ user.first_name }} {{ user.last_name }}  </div>
                     <div style="color:#69707a;    font-size: 11px" >{{ user.email }}</div>
                   </div>
                 </H6>

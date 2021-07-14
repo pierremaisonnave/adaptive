@@ -1,0 +1,21 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+    {% if success %}
+        <h4> Welcome {{ user.first_name }}</h4>
+        <div> your account is confirmed!, click <a href="{% url 'login' %}" > here</a>  to login</div>
+    {% else %}
+        <div>Error, invalid token!</div>
+        <div>Make sure your link is not expired, otherwise contact your administrator</div>
+    {% endif %}
+    
+    {% load static %}
+
+
+
+
+    <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+    <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
+{% endblock %}
+

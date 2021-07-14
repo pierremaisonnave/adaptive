@@ -48,8 +48,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'whitenoise.runserver_nostatic',
-    'royalty_app',
+    'royalty_app',  
 
+    'django_email_verification',
 ]
 
 MIDDLEWARE = [
@@ -148,3 +149,26 @@ AWS_QUERYSTRING_AUTH = False
 
 
 DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {'PNG': ".png"} #used in order for the profile pict to be saved as PNG and not APNG
+
+# Steps to verify your email:
+def verified_callback(user):
+    user.is_active = True
+
+EMAIL_VERIFIED_CALLBACK = verified_callback
+EMAIL_FROM_ADDRESS =os.getenv('EMAIL_ID')
+EMAIL_MAIL_SUBJECT = 'SwissRoy- Confirm your email'
+EMAIL_MAIL_HTML = 'password_confirmation/mail_body.html'
+EMAIL_MAIL_PLAIN = 'password_confirmation/mail_body.txt'
+EMAIL_TOKEN_LIFE = 60 * 60
+EMAIL_PAGE_TEMPLATE = 'password_confirmation/confirm_template.html'
+EMAIL_PAGE_DOMAIN = 'http://127.0.0.1:8000'
+
+# For Django Email Backend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_ID') 
+DEFAULT_FROM_EMAIL= os.getenv('EMAIL_ID') 
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PW')
+

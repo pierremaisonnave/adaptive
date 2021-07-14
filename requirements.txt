@@ -24,3 +24,4 @@ boto3 #to use WSL to store PDF file
 pillow #to handle image
 django_resized #resize the profile picture
 
+django-email-verification

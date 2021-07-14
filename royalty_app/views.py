@@ -26,20 +26,38 @@ from django.db import IntegrityError
 from django.contrib.auth import password_validation
 
 
-def login_view(request):
-    if request.method == "POST":
 
-        # Attempt to sign user in
+
+def login_view(request):
+    
+    if request.method == "POST":
+        #check if user is active:
         username = request.POST["username"]
         password = request.POST["password"]
+        # Attempt to sign user in
+        active_user=User.objects.filter(username=username)
+        if active_user :
+          
+          error_message=[]
+          if active_user[0].is_active == False:
+            error_message.append(f"An email was sent on ${active_user[0].date_joined} to ${active_user[0].email} to verify your account")
+            error_message.append("If your token expired, or you did not receid the email, please contact your administrator")
+            return render(request, "royalty_app/login.html", {
+              "error_message": error_message
+            })
         user = authenticate(request, username=username, password=password)
+  
+
+
 
         # Check if authentication successful
         if user is not None:
+          print(user.last_login) # if None, then it's a first time user, I should redirect him to a welcome page
           login(request, user)
           redirect=request.POST.get('next')
           if redirect=="":
             redirect="/"
+          
           return HttpResponseRedirect(redirect) 
           # If the user clicked on "Partner", and if he is not logged in, he is automatically redirected t
           #..on the loggin page thanks to the "login_required", the login page keeps tracks of the original URL
@@ -48,12 +66,13 @@ def login_view(request):
 
         else:
           return render(request, "royalty_app/login.html", {
-              "message": "Invalid username and/or password."
+              "error_message": ['Invalid username and/or password.']
           })
     else:
         return render(request, "royalty_app/login.html")
 
 def login_page(request):
+
   return render(request, "royalty_app/login.html")
 
 @csrf_exempt
@@ -80,41 +99,50 @@ def register_page(request):
   return render(request, "royalty_app/register.html")
 
 
+from django.shortcuts import render
+from django.contrib.auth import get_user_model
+from django_email_verification import send_email
+
+
+@csrf_exempt
 def register(request):
   if request.method == "POST":
-    username = request.POST["username"]
+    username = request.POST["email"]
     email = request.POST["email"]
+    first_name = request.POST["first_name"]
+    last_name = request.POST["last_name"]
 
     # Ensure password matches confirmation
     password = request.POST["password"]
     confirmation = request.POST["confirmation"]
     if password != confirmation:
         return render(request, "royalty_app/register.html", {
-            "message": "Passwords must match."
+            "error_message": ["Passwords must match."]
         })
     if User.objects.filter(email=email):
         return render(request, "royalty_app/register.html", {
-            "message": "Email already exists"
+            "error_message": ["Email already exists"]
         })
-    try:
-        
+    try: 
       password_validation.validate_password(password, request)
     except Exception as e:
-
       return render(request, "royalty_app/register.html",{
         "password_warning_list":e }
         )
-
     # Attempt to create new user
     try:
-        user = User.objects.create_user(username, email, password)
-        user.save()
+      user = User.objects.create_user(username, email, password)
+      user.first_name=first_name
+      user.last_name=last_name
+      user.is_active = False
+      user.save()
+      send_email(user)
+      pass#return HttpResponseRedirect(reverse("login"))     
     except IntegrityError:
-        return render(request, "royalty_app/register.html", {
-            "message": "Username already taken."
-        })
-    login(request, user)
-    return HttpResponseRedirect(reverse('home'))
+      return render(request, "royalty_app/register.html", {
+          "error_message": ["Username already taken"]
+      })
+    return render(request, "royalty_app/login.html", {"message_confirmation": "email for confimation has been sent"})
   else:
     return render(request, "royalty_app/register.html")
 

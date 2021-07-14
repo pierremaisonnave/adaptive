@@ -1,6 +1,6 @@
 {% extends "royalty_app/layout.html" %}
 {% block content %}
-
+{% load static %}
 
 
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
@@ -11,32 +11,48 @@
   <!----------------------------------------------------------------------------->
   <!----------------------------Main table-------------------------------->
   <!----------------------------------------------------------------------------->
-  {% if message %}
-  <div>{{ message }}</div>
-  {% endif %}
-  <form action="{% url 'login_view' %}" method="post" style="max-width:500px">
-    {% csrf_token %}
-    <div class="form-group">
-        <input autofocus class="form-control" type="username" name="username" placeholder="Username">
-    </div>
-    <div class="form-group">
-        <input class="form-control" type="password" name="password" placeholder="Password">
-    </div>
-    <div class="form-group">
-      <input class="btn btn-primary form-control " type="submit" value="Login">
-    </div>
-    <input type="hidden" name="next" value="{{ request.GET.next }}"/>
-  </form>
-  Don't have an account? <a href="{% url 'register' %}">Register here.</a>  
-   
+
+
+  {% if user.is_authenticated %}
+    <span>log out to login again</span>
+  {% else %}
+    {% if error_message %}
+      {% for mess in error_message %}
+        <div style="color:red">{{ mess }}</div>
+      {% endfor %} 
+    {% endif %}
+    {% if message_confirmation %}
+    <div style="color:green">{{ message_confirmation }}</div>
+     {% endif %}
+    <form action="{% url 'login_view' %}" method="post" style="max-width:500px">
+      {% csrf_token %}
+      <div class="form-group">
+          <input autofocus class="form-control" type="email" name="username" placeholder="Email">
+      </div>
+      <div class="form-group">
+          <input class="form-control" type="password" name="password" placeholder="Password">
+      </div>
+      <div class="form-group">
+        <input class="btn btn-primary form-control " type="submit" value="Login">
+      </div>
+      <input type="hidden" name="next" value="{{ request.GET.next }}"/>
+    </form>
+    Don't have an account? <a href="{% url 'register' %}">Register here.</a>  
+  {% endif %} 
 
 
 
 
-{% load static %}
-<script src="{% static 'royalty_app/region.js'%}"></script>
-<link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+  
 
+  
+
+
+
+  
+
+  <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+  <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
 
 {% endblock %}
 
