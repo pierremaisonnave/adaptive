@@ -28,7 +28,7 @@ DATABASES = {
 
 
 
-EMAIL_PAGE_DOMAIN = env('ALLOWED_HOSTS')
+EMAIL_PAGE_DOMAIN = 'http://swissroy-public.herokuapp.com'
 EMAIL_FROM_ADDRESS =env('EMAIL_ID')
 
 EMAIL_HOST_USER = env('EMAIL_ID') 
