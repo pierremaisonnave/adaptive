@@ -41,6 +41,8 @@ def login_view(request):
         if active_user :
           user=get_user_model().objects.get(username=username)
           error_message=[]
+          if user.is_active == True:
+            user.is_active = False
           if user.is_active == False:
             error_message.append(f"your email has not been verified yet- another token was sent to {username}")
             error_message.append("If your token expired, or you did not receid the email, please contact your administrator")

@@ -27,7 +27,7 @@ DATABASES = {
 }
 
 
-
+'''
 EMAIL_PAGE_DOMAIN ='https://swissroy-public.herokuapp.com/' 
 EMAIL_FROM_ADDRESS =env('EMAIL_ID')
 
@@ -56,3 +56,4 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
+'''
