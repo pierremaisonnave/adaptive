@@ -8,7 +8,7 @@
 <body>
     {% load static %}
 <div>You are almost there, {{ user.first_name }}!</div><br>
-<div>Please click <a href="{{ link }}">here</a> to confirm your account</div> 
+<div>Please click <a href="{{ link }}">here</a> to confirm your account</div> {{ link }}
 <div>The token expires on {{ expiry|time:"TIME_FORMAT" }}</div>
 <br>
 <div>______________________________________<div>

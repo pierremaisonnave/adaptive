@@ -161,7 +161,7 @@ EMAIL_MAIL_HTML = 'password_confirmation/mail_body.html'
 EMAIL_MAIL_PLAIN = 'password_confirmation/mail_body.txt'
 EMAIL_TOKEN_LIFE = 60 * 60
 EMAIL_PAGE_TEMPLATE = 'password_confirmation/confirm_template.html'
-EMAIL_PAGE_DOMAIN = 'http://localhost:8000/' #'swissroy-public.herokuapp.com'
+EMAIL_PAGE_DOMAIN = 'http://localhost:8000/' 
 
 # For Django Email Backend
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
