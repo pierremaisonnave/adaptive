@@ -22,9 +22,38 @@ from django.conf.urls.static import static# so as to save pdf to Media forder
 
 from django_email_verification import urls as email_urls
 
+from django.contrib.auth import views as auth_views#for pass reset
+
 urlpatterns = [
     path('', include('royalty_app.urls')),
     path('admin/', admin.site.urls),
     path('email/', include(email_urls)),
+
+    # Password reset links (ref: https://github.com/django/django/blob/master/django/contrib/auth/views.py)
+    path('password_change/done/', auth_views.PasswordChangeDoneView.as_view(template_name='password_reset/password_change_done.html'), 
+        name='password_change_done'),
+
+    path('password_change/', auth_views.PasswordChangeView.as_view(template_name='password_reset/password_change.html'), 
+        name='password_change'),
+
+    path('password_reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset/password_reset_done.html'),
+        name='password_reset_done'),
+
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='password_reset/password_reset_confirm.html',
+    ), name='password_reset_confirm'),
+
+    #path('password_reset/', auth_views.PasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/',
+        auth_views.PasswordResetView.as_view(
+            template_name='password_reset/password_reset_form.html',
+            subject_template_name='password_reset/password_reset_subject.txt',
+            email_template_name='password_reset/password_reset_email.html',
+        ),
+        name='password_reset'),
+    
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset/password_reset_complete.html'),
+        name='password_reset_complete'),
+
 
 ]#+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

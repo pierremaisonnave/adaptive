@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 urlpatterns = [
   # /
 
@@ -84,6 +85,9 @@ urlpatterns = [
   path("cash_forecast_change", views.cash_forecast_change, name="cash_forecast_change"),
   
   #-----------------------------------------------------
+
+
+
   #-----------------------------------------------------
   
 ]

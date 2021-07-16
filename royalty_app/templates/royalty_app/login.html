@@ -39,19 +39,11 @@
       </div>
       <input type="hidden" name="next" value="{{ request.GET.next }}"/>
     </form>
-    Don't have an account? <a href="{% url 'register' %}">Register here.</a>  
+    <div>Don't have an account? <a href="{% url 'register' %}">Register here.</a> </div> 
+    <div> Forgot Password? <a href="{% url 'password_reset' %}">click here.</a> </div> 
+
   {% endif %} 
 
-
-
-
-  
-
-  
-
-
-
-  
 
   <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
   <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
