@@ -6,14 +6,14 @@
     <title>Email Confirmation</title>
 </head>
 <body>
-    {% load static %}
-<div style="color:green">You are almost there, {{ user.first_name }}!</div><br>
+{% load static %}
+<div>You are almost there, {{ user.first_name }}!</div><br>
 <div>Please click on the link below to confirm your account</div> 
 <div>The token expires on {{ expiry|time:"TIME_FORMAT" }}</div>
 <div>{{ link }}</div>
 <br>
 <div>______________________________________<div>
-<img src="https://static.wixstatic.com/media/40566b_18659aa8769a4fe0b90d1dc9b99d440b~mv2.png" style="width: 200px;" >
+<img src="https://swissroy-public.herokuapp.com/static/photo/logo_me_email.png" style="width: 200px;" >
 <div>PM-Conculting</div>
 
 <div>tel: <a href="tel:+41782672050">+41 78 267 20 50<a></div>
@@ -21,26 +21,11 @@
 <div  style="width:200px; background-color:Tomato">Hello </div> 
     
 <div>email: <a href="mailto: pierre.maisonnave.consulting@gmail.com">pierre.maisonnave.consulting@gmail.com<a></div>
-<a  href="https://www.linkedin.com/in/maisonnave"><img style="width:21px" src="https://content.linkedin.com/content/dam/me/business/en-us/amp/brand-site/v2/bg/LI-Bug.svg.original.svg"  ></a>
-<a href="https://www.pierre-maisonnave-consulting.ch"><img src="https://static.wixstatic.com/media/40566b_ad18b6bb0b3e43d3a05bf4814a5abd2a~mv2.png" style="width:21px">  </a>
+<a  href="https://www.linkedin.com/in/maisonnave"><img style="width:21px" src="https://swissroy-public.herokuapp.com/static/photo/linkedin.png"  ></a>
+<a href="https://www.pierre-maisonnave-consulting.ch"><img src="https://swissroy-public.herokuapp.com/static/photo/minilogo_email.png" style="width:21px">  </a>
 
 
-<table>
-    <tr>
-        <td style="width: 140px">Test<td>
-        <td style="width: 140px">Test<td>
-        <td style="width: 140px">Test<td>
-        <td style="width: 140px">{% static 'photo/linkedin.png' %}<td>
-    </tr>
-    <tr>
-        <td style="width: 140px">Test<td>
-        <td style="width: 140px">Test<td>
-        <td style="width: 140px"><img src="{% static 'photo/linkedin.png' %}"><td>
-        
-        <td style="width: 140px"><img src="https://swissroy-public.herokuapp.com/static/photo/linkedin.png"><td>
-    </tr>
-</table>
-       
+
 
 
 </body>
