@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'royalty_app',  
 
     'django_email_verification',
+    'storages',#AWS 
 ]
 
 MIDDLEWARE = [
@@ -140,7 +141,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 #MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 #MEDIA_URL = 'media/'
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
 
 AWS_ACCESS_KEY_ID='AKIAVSQBJQKAD7GQE7H7'
 AWS_SECRET_ACCESS_KEY='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'
@@ -172,3 +173,12 @@ EMAIL_HOST_USER = os.getenv('EMAIL_ID')
 DEFAULT_FROM_EMAIL= os.getenv('EMAIL_ID') 
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PW')
 
+'''
+#access for AWS
+AWS_ACCESS_KEY_ID= os.getenv('AWS_ACCESS_KEY_ID') 
+AWS_ACCESS_KEY_ID= os.getenv('AWS_SECRET_ACCESS_KEY') 
+AWS_STORAGE_BUCKET_NAME= os.getenv('AWS_STORAGE_BUCKET_NAME') 
+AWS_S3_FILE_OVERWITE = False # prevent user from overwritting
+AWS_DEFAUT_ACL= None
+DEFAULT_FILE_STORAGE ='storages.backends.s3boto3.S3Boto3Storage'
+'''

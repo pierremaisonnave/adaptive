@@ -25,3 +25,4 @@ pillow #to handle image
 django_resized #resize the profile picture
 
 django-email-verification
+#django-storages#access to AWS
