@@ -1,21 +1,60 @@
-{% extends "royalty_app/layout.html" %}
-{% block content %}
-
-
-    {% if success %}
-        <h4> Welcome {{ user.first_name }}</h4>
-        <div> your account is confirmed!, click <a href="{% url 'login' %}" > here</a>  to login</div>
-    {% else %}
-        <div>Error, invalid token!</div>
-        <div>Make sure your link is not expired, otherwise contact your administrator</div>
-    {% endif %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
     
+
+    <title>Royalty</title>
+
     {% load static %}
 
 
+    <link rel="icon" href="{% static 'photo/minilogo.png' %}">   <!-- logo on page title -->
 
 
-    <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
-    <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
-{% endblock %}
+    <!-- Bootstrap core CSS- used to design the frame of the webpage
+    <link href="https://getbootstrap.com/docs/4.5/dist/css/bootstrap.min.css" rel="stylesheet"> --> 
+    <link href="{% static 'royalty_app/layout.css' %}" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="{% static 'royalty_app/app.css' %}" rel="stylesheet">
+    
+    <!-- Boostrap ICON -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+
+  </head>
+
+  <body >
+    <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar">
+      <H2 style="margin-left:10px" id="your_logo"> YourLogo</H2> 
+      
+      <ul class="navbar-nav px-3"  style="display: grid; grid-template-columns:auto auto auto" id="nav-top"> 
+        
+    
+        <li class="nav-item text-nowrap" >
+          <img src="{% static 'photo/logo_me.png' %}" style="width: 100px;margin: 10px " >
+        </li>
+
+      </ul>
+
+    </nav>
+    <body>
+        <div style="margin:10px">
+        {% if success %}
+            <h4> Welcome {{ user.first_name }}</h4>
+            <div> your account is confirmed!, click <a href="{% url 'login' %}" > here</a>  to login</div>
+        {% else %}
+            <div>Error, invalid token!</div>
+            <div>Make sure your link is not expired, otherwise contact your administrator</div>
+        {% endif %}
+        </div>
+    </body>
+
+</html>
+
+
+
+
 

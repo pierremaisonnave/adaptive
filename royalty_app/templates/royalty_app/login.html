@@ -17,9 +17,11 @@
     <span>log out to login again</span>
   {% else %}
     {% if error_message %}
-      {% for mess in error_message %}
-        <div style="color:red">{{ mess }}</div>
-      {% endfor %} 
+      <div style="margin-bottom:10px">
+        {% for mess in error_message %}
+          <div style="color:red">{{ mess }}</div>
+        {% endfor %} 
+      </div>
     {% endif %}
     {% if message_confirmation %}
     <div style="color:green">{{ message_confirmation }}</div>

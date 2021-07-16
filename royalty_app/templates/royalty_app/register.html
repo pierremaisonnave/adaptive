@@ -16,9 +16,11 @@
     {% else %}
 
         {% if error_message %}
-            {% for mess in error_message %}
-            <div style="color:red">{{ mess }}</div>
-            {% endfor %} 
+            <div style="margin-bottom:10px">
+                {% for mess in error_message %}
+                <div style="color:red">{{ mess }}</div>
+                {% endfor %} 
+            </div>
         {% endif %}
         <form action="{% url 'register' %}" method="post" style="max-width:500px">
             {% csrf_token %}
