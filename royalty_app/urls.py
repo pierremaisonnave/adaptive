@@ -34,7 +34,7 @@ urlpatterns = [
   #-----------------------------------------------------
   #static_file
   path('export/<str:file>', views.export, name='export'), 
-  path("import_static", views.import_static, name="import_static"),
+
 
   #Partner
   path("change_row/<int:partner_id>", views.change_row, name="change_row"),

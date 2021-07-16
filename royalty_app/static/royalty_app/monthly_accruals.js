@@ -169,6 +169,7 @@ function export_file(){
             table_array.push(file_id)
         }
         table_list_string=JSON.stringify(table_array)
+        alert(`/export_report/files:${file_array}/tables:${table_array}`)
         window.location.replace(`/export_report/files:${file_array}/tables:${table_array}`)
 
     }

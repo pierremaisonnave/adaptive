@@ -25,11 +25,13 @@ from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.contrib.auth import password_validation
 
-
+# bunch of import used to send confirmatrion email
+from django.shortcuts import render
+from django.contrib.auth import get_user_model
+from django_email_verification import send_email
 
 
 def login_view(request):
-    
     if request.method == "POST":
         #check if user is active:
         username = request.POST["username"]
@@ -37,19 +39,17 @@ def login_view(request):
         # Attempt to sign user in
         active_user=User.objects.filter(username=username)
         if active_user :
-          
+          user=get_user_model().objects.get(username=username)
           error_message=[]
-          if active_user[0].is_active == False:
-            error_message.append(f"An email was sent on ${active_user[0].date_joined} to ${active_user[0].email} to verify your account")
+          if user.is_active == False:
+            error_message.append(f"your email has not been verified yet- another token was sent to {username}")
             error_message.append("If your token expired, or you did not receid the email, please contact your administrator")
+            send_email(user)
             return render(request, "royalty_app/login.html", {
               "error_message": error_message
             })
+            
         user = authenticate(request, username=username, password=password)
-  
-
-
-
         # Check if authentication successful
         if user is not None:
           print(user.last_login) # if None, then it's a first time user, I should redirect him to a welcome page
@@ -72,10 +72,10 @@ def login_view(request):
         return render(request, "royalty_app/login.html")
 
 def login_page(request):
-
   return render(request, "royalty_app/login.html")
 
 @csrf_exempt
+@login_required
 def new_profile_pict(request):
   if request.method == "POST":
     try:
@@ -99,12 +99,6 @@ def register_page(request):
   return render(request, "royalty_app/register.html")
 
 
-from django.shortcuts import render
-from django.contrib.auth import get_user_model
-from django_email_verification import send_email
-
-
-@csrf_exempt
 def register(request):
   if request.method == "POST":
     username = request.POST["email"]
@@ -132,6 +126,7 @@ def register(request):
     # Attempt to create new user
     try:
       user = User.objects.create_user(username, email, password)
+      #user = get_user_model().objects.create(username=username, password=password, email=email)
       user.first_name=first_name
       user.last_name=last_name
       user.is_active = False
@@ -148,7 +143,7 @@ def register(request):
 
 
 
-
+@login_required
 def logout_view(request):
   logout(request)
   return HttpResponseRedirect(reverse("home"))    
@@ -213,8 +208,8 @@ def home(request):
 
 
 @csrf_exempt
+#@login_required
 def chart_cash_forecast(CFF_report_id,currency_list,year):
-
   #get Year List
   current_year=datetime.now().year
   detail_list=Detail.objects.filter(import_file=CFF_report_id)
@@ -280,6 +275,7 @@ def chart_cash_forecast(CFF_report_id,currency_list,year):
 
 
 @csrf_exempt
+@login_required
 def accruals_change(request):
   if request.method == "POST":
     #Save File
@@ -304,6 +300,7 @@ def accruals_change(request):
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 
 @csrf_exempt
+@login_required
 def cash_forecast_change(request):
   if request.method == "POST":
     #Save File
@@ -333,7 +330,7 @@ def cash_forecast_change(request):
 
 
 
-
+#@login_required
 def chart_accruals(year,contract_id_list):
   #-----------Default Chart JS-----------
   #create the list of available year
@@ -481,6 +478,7 @@ def settings(request):
 def monthly_accruals(request):
   month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="accruals")
+
   return render(request, 'royalty_app/monthly_accruals.html', {"month_list":month_list,"file_list":file_list})
 
 @login_required(login_url='/login')
@@ -504,7 +502,7 @@ def partner_report(request):
 #------------------------------------------------------------------------
 #API Static Data
 
-
+@login_required
 def export(request,file):
   file_list=file.split(',')
 
@@ -734,61 +732,9 @@ def export(request,file):
     response['Content-Disposition'] = 'attachment; filename="' + filename + '.xlsx"'
     return response
 
-
-
-def import_static_Sales(request):
-  filehandle = request.FILES['loaded_file']
-  sheet_=filehandle.get_sheet(sheet_name="Sales",name_columns_by_row=0)
-  file_=File.objects.filter(id="30")[0]
-  def choice_func(row):
-      row[7] = file_
-      
-      return row
-  sheet_.save_to_django_model(
-    model=Sale,
-    initializer=choice_func,
-  )
-   
-  return HttpResponseRedirect(reverse('static_data'))
-
-def import_static_withinitialiser(request):
-
-  if request.method == "POST":
-    filehandle = request.FILES['loaded_file']
-    sheet_=filehandle.get_sheet(sheet_name="Tax",name_columns_by_row=0)
-
-    def choice_func(row):
-
-        c1 = Country.objects.filter(country_id=row[0])[0]
-        c2 = Country.objects.filter(country_id=row[1])[0]
-        row[0] = c1
-        row[1] = c2
-        return row
-    sheet_.save_to_django_model(
-      model=Tax,
-      initializer=choice_func,
-    )
-  
-  return HttpResponseRedirect(reverse('static_data'))
-
-@csrf_exempt
-def import_static(request):
-  conn = sqlite3.connect('royalty/db.sqlite3')
-  
-  if request.method == "POST":
-    filehandle = request.FILES['loaded_file']
-   
-    country_list = pd.read_excel(filehandle, 'Countries')#,dtype={'country_region_id':str,'country_id':str})#
-    country_list.to_sql('royalty_app_country', con=conn, index=False, if_exists="replace")
-  
-  conn.close()
- 
-  
-  return HttpResponseRedirect(reverse('static_data'))
-
-  #----------------------------------------------------------
   #API Partner:
 @csrf_exempt 
+@login_required
 def change_row(request,partner_id):
 
   try:
@@ -814,7 +760,7 @@ def change_row(request,partner_id):
   else:
     return JsonResponse({"error": "GET or PUT request required."}, status=400)
 
-
+@login_required
 def cancel_row_partner(request,partner_id):
   try:
     partner = Partner.objects.get( id=partner_id)
@@ -838,6 +784,7 @@ def cancel_row_partner(request,partner_id):
     return JsonResponse({"error": "GET or PUT request required."}, status=400) 
 
 @csrf_exempt 
+@login_required
 def delete_row_partner(request,partner_id):
 
   if request.method == "POST":
@@ -857,6 +804,7 @@ def delete_row_partner(request,partner_id):
 
 #API to save new partner
 @csrf_exempt 
+@login_required
 def new_partner(request):
   if request.method == "POST":
     try:
@@ -874,6 +822,7 @@ def new_partner(request):
       return JsonResponse({"partner_id": partner.id}, status=201)
     except: return JsonResponse({"error": "data not loaded"}, status=404)
 @csrf_exempt
+@login_required
 def save_paid_status(request):
   if request.method == "POST":  
     data = json.loads(request.body)
@@ -885,7 +834,8 @@ def save_paid_status(request):
     return JsonResponse({"message": "all done"}, status=201)
   #----------------------------------------------------------
   #API Contracts:
-@csrf_exempt 
+@csrf_exempt
+@login_required 
 def change_row_contract(request,contract_id):
 
   try:
@@ -927,7 +877,8 @@ def change_row_contract(request,contract_id):
     return JsonResponse({"error": "GET or PUT request required."}, status=400)
 
 #API to save new contract
-@csrf_exempt 
+@csrf_exempt
+@login_required 
 def new_contract(request):
   if request.method == "POST":
     data = json.loads(request.body)
@@ -963,6 +914,7 @@ def new_contract(request):
     except: return JsonResponse({"error": "data not loaded"}, status=404)
 
 @csrf_exempt 
+@login_required
 def delete_row_contract(request,contract_id):
   if request.method == "POST":
     try:
@@ -978,7 +930,7 @@ def delete_row_contract(request,contract_id):
       return JsonResponse({"error": "somthing went wrong"}, status=400) 
   else:
     return JsonResponse({"error": "GET or PUT request required."}, status=400)
-
+@login_required
 def cancel_row_contract(request,contract_id):
   try:
     contract = Contract.objects.get( id=contract_id)
@@ -1026,6 +978,7 @@ def cancel_row_contract(request,contract_id):
     return JsonResponse({"error": "GET or PUT request required."}, status=400) 
 
 @csrf_exempt 
+@login_required
 def save_contract_partner(request,contract_id):
   if request.method == "POST":
     contract=Contract.objects.get(id=contract_id)
@@ -1050,6 +1003,7 @@ def save_contract_partner(request,contract_id):
     return JsonResponse({"error": "GET or PUT request required."}, status=400)
 
 @csrf_exempt
+@login_required
 def save_rule(request,contract_id):
 
   if request.method == "POST":
@@ -1113,6 +1067,7 @@ def save_rule(request,contract_id):
 
 
 @csrf_exempt 
+@login_required
 def save_invoice_breakdown(request,contract_id):
   if request.method == "POST":
     contract=Contract.objects.get(id=contract_id)
@@ -1136,6 +1091,7 @@ def save_invoice_breakdown(request,contract_id):
 
 
 @csrf_exempt
+@login_required
 def new_invoice(request):
   if request.method == "POST":
     data = json.loads(request.body)
@@ -1157,6 +1113,7 @@ def new_invoice(request):
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 
 @csrf_exempt
+@login_required
 def new_contract_file(request): 
   if request.method == "POST":
     try:  
@@ -1171,6 +1128,7 @@ def new_contract_file(request):
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 
 @csrf_exempt
+@login_required
 def delete_contract_file(request,cf_id):
   if request.method == "POST":
     contract_file=Contract_file.objects.get(pk=cf_id)
@@ -1181,6 +1139,7 @@ def delete_contract_file(request,cf_id):
 
 
 @csrf_exempt
+@login_required
 def delete_row_invoice(request,invoice_id):
   if request.method == "POST":
     invoice=Invoice.objects.get(pk=invoice_id)
@@ -1191,6 +1150,7 @@ def delete_row_invoice(request,invoice_id):
 
 
 @csrf_exempt
+@login_required
 def delete_row_file(request,file_id):
   if request.method == "POST":
     try:
@@ -1207,6 +1167,7 @@ def delete_row_file(request,file_id):
     return JsonResponse({"error": "GET or PUT request required."}, status=400)
 
 @csrf_exempt
+@login_required
 def save_dashboard(request):
   if request.method == "POST":  
     data = json.loads(request.body)
@@ -1220,6 +1181,7 @@ def save_dashboard(request):
 
 #Reports
 @csrf_exempt
+@login_required
 def new_report(request):
 # Index:
   #   I: book file name in database
@@ -2017,7 +1979,7 @@ def new_report(request):
       return JsonResponse({"file_id": file.id,"date":file.date}, status=201)
     except: return JsonResponse({"error": "data not loaded"}, status=404)
 
-
+@login_required
 def export_report(request,file_array,table_array):
   file_nb_list=file_array.split(',')
   table_name_list=table_array.split(',')
@@ -2157,6 +2119,7 @@ def modif_static(request,table_name):
 
 
 @csrf_exempt
+@login_required
 def save_division(request):
   if request.method == "POST":
     #Save File
@@ -2199,6 +2162,7 @@ def save_division(request):
 
 
 @csrf_exempt
+@login_required
 def save_country(request):
   if request.method == "POST":
     #Save File
@@ -2238,6 +2202,7 @@ def save_country(request):
 
 
 @csrf_exempt
+@login_required
 def save_region(request):
   if request.method == "POST":
     #Save File
@@ -2272,6 +2237,7 @@ def save_region(request):
 
 
 @csrf_exempt
+@login_required
 def save_brand(request):
   if request.method == "POST":
     #Save File
@@ -2309,6 +2275,7 @@ def save_brand(request):
 
 
 @csrf_exempt
+@login_required
 def save_formulation(request):
   if request.method == "POST":
     #Save File
@@ -2347,6 +2314,7 @@ def save_formulation(request):
 
 
 @csrf_exempt
+@login_required
 def save_currency(request):
   if request.method == "POST":
     #Save File
@@ -2384,6 +2352,7 @@ def save_currency(request):
 
 
 @csrf_exempt
+@login_required
 def save_payment_type(request):
   if request.method == "POST":
     #Save File
@@ -2421,6 +2390,7 @@ def save_payment_type(request):
 
 
 @csrf_exempt
+@login_required
 def save_consolidation_currency(request):
   if request.method == "POST":
     #Save File
@@ -2443,6 +2413,7 @@ def save_consolidation_currency(request):
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 
 @csrf_exempt
+@login_required
 def save_accounting(request):
   if request.method == "POST":
     #Save File
@@ -2466,6 +2437,7 @@ def save_accounting(request):
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 
 @csrf_exempt
+@login_required
 def save_tax(request):
   if request.method == "POST":
     #Save File
@@ -2491,6 +2463,7 @@ def save_tax(request):
 
 
 @csrf_exempt
+@login_required
 def save_sales_breakdown_item(request):
   if request.method == "POST":
     #Save File

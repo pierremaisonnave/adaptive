@@ -28,9 +28,31 @@ DATABASES = {
 
 
 
-#EMAIL_PAGE_DOMAIN ='https://swissroy-public.herokuapp.com/'
+EMAIL_PAGE_DOMAIN ='https://swissroy-public.herokuapp.com/' 
 EMAIL_FROM_ADDRESS =env('EMAIL_ID')
 
 EMAIL_HOST_USER = env('EMAIL_ID') 
 DEFAULT_FROM_EMAIL= env('EMAIL_ID') 
 EMAIL_HOST_PASSWORD = env('EMAIL_PW')
+
+
+
+# Steps to verify your email:
+def verified_callback(user):
+    user.is_active = True
+
+EMAIL_VERIFIED_CALLBACK = verified_callback
+
+EMAIL_MAIL_SUBJECT = 'SwissRoy- Confirm your email'
+EMAIL_MAIL_HTML = 'password_confirmation/mail_body.html'
+EMAIL_MAIL_PLAIN = 'password_confirmation/mail_body.txt'
+EMAIL_TOKEN_LIFE = 60 * 60
+EMAIL_PAGE_TEMPLATE = 'password_confirmation/confirm_template.html'
+
+
+# For Django Email Backend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
