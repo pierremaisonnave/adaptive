@@ -10,7 +10,7 @@
     <title>Royalty</title>
 
     {% load static %}
-
+    <link rel="stylesheet" href="{% static 'css/loged_out_form.css'%}">
 
     <link rel="icon" href="{% static 'photo/minilogo.png' %}">   <!-- logo on page title -->
 
@@ -41,7 +41,9 @@
 
     </nav>
     <body>
-        <div style="margin:10px">
+      <form id="id_password_reset_form" class="form_log">
+        <h1 class="h3 mb-3 font-weight-normal">Confirmation new user</h1>
+        <div style="margin:10px" class="form-signin">
         {% if success %}
             <h4> Welcome {{ user.first_name }}</h4>
             <div> your account is confirmed!, click <a href="{% url 'login' %}" > here</a>  to login</div>
@@ -50,6 +52,7 @@
             <div>Make sure your link is not expired, otherwise contact your administrator</div>
         {% endif %}
         </div>
+      </form>
     </body>
 
 </html>
