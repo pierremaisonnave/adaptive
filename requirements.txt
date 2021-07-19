@@ -18,7 +18,7 @@ django-cleanup #deletes the file in Media
 
 python-dateutil
 
-#django-storages== 1.11# #access to AWS
+django-storages== 1.11# #access to AWS
 
 boto3 #to use WSL to store PDF file
 
