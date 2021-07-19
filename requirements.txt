@@ -18,11 +18,11 @@ django-cleanup #deletes the file in Media
 
 python-dateutil
 
-django_storages
+django_storages#access to AWS
 boto3 #to use WSL to store PDF file
 
 pillow #to handle image
 django_resized #resize the profile picture
 
+django_filters
 django-email-verification
-#django-storages#access to AWS
