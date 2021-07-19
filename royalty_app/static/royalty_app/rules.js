@@ -189,6 +189,11 @@ function delete_rule(elm){
     elm.parentElement.parentElement.remove()
 }
 function save_rule(contract_id){
+    //Select the spinner
+    spinner_top=document.getElementById('central_spinner')
+    spinner_top.style.display = "Block"
+
+    
     main_list=[]
     sub_list=[]
     table=document.getElementById(id="rule_table").children[1]
@@ -219,8 +224,14 @@ function save_rule(contract_id){
         // tranche_type
             tranche_type= row.cells[5].children[0].value
         // value
-            rate_value= Number(row.cells[6].children[0].value)
-            qty_value= Number(row.cells[8].children[0].value.split(',').join(""))
+            rate_value=0
+            qty_value=0
+            if ((field_type =="RATE")&&(tranche_type=="NO")){
+                rate_value= Number(row.cells[6].children[0].value)
+            }
+            if ((field_type =="QTY")&&(tranche_type=="NO")){
+                qty_value= Number(row.cells[8].children[0].value.split(',').join(""))
+            }
         //Report_currency
             qty_value_currency=row.cells[8].children[1].value
         //tranches
@@ -238,8 +249,12 @@ function save_rule(contract_id){
                         "to_tranche":${to_tranche},
                         "rate_tranche":${rate_tranche}
                     }`)
+                    if (r==0){
+                        rate_value=rate_tranche
+                    }
                 }
             }
+        
         //create sublist before looping 
             sub_list.push(`{
                 "Report_currency":"${Report_currency}",
@@ -258,7 +273,7 @@ function save_rule(contract_id){
         }  
     //create main list before Fetch
     main_list.push('['+ sub_list+ ']')
-     
+    alert(main_list) 
     fetch(`/save_rule/${contract_id}`, {
         method: 'POST',
         body: main_list
@@ -272,6 +287,7 @@ function save_rule(contract_id){
             setTimeout(function() { 
                 saved_message.innerHTML=""},
             1000)
+            spinner_top.style.display = "None"
         })
 }
 
@@ -393,6 +409,9 @@ function save_invoice_breakdown(contract_id){
 
 
 function new_contract_file(contract_id){
+    //Select the spinner
+    spinner_top=document.getElementById('central_spinner')
+    spinner_top.style.display = "Block"
 
     //definition od the elements
 
@@ -427,11 +446,12 @@ function new_contract_file(contract_id){
                     var newRow = table.insertRow(-1);
                 // column 0 select, clone and insert Select
                     newCell = newRow.insertCell(0);
-                    newCell.innerHTML=`<a href="${cf_url}"><span class="fname">${name_file}</span></a>`  
+                    newCell.innerHTML=`<a href="${cf_url}" target="_blank" ><span class="fname">${name_file}</span></a>`  
                 // column 1 select, clone and insert input
                     newCell = newRow.insertCell(1);
                     newCell.innerHTML=`<button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_contract_file(this,${cf_id})" style="border:0px" ><span class="bi bi-trash"></span></button>`
-            }   
+            }
+            spinner_top.style.display = "None"     
         })
     } 
 

@@ -8,7 +8,9 @@ class User(AbstractUser):
 
 class User_profile_picture(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
-    profile_picture = ResizedImageField(size=[150, 100],upload_to='media/profile_picture/', default='royalty_app/static/default.png')
+    profile_picture = ResizedImageField(size=[150, 100],upload_to='profile_picture/', default='royalty_app/static/default.png')
+    #profile_picture = models.ImageField(default="royalty_app/static/default.png", null=True, blank=True)
+
 
 class Payment_type(models.Model):
     payment_type = models.CharField(max_length=100)
@@ -122,7 +124,7 @@ class Contract(models.Model):
 class Contract_file(models.Model):
     name = models.CharField(max_length=255)
     contract=  models.ForeignKey(Contract,on_delete=models.CASCADE)
-    upload = models.FileField(upload_to='media/')
+    upload = models.FileField(upload_to='contracts/')
 
 
 
@@ -139,7 +141,7 @@ class Rule(models.Model):
     country_list=models.CharField(max_length=2000,null=True,blank=True)
     field_type=models.CharField(max_length=7,choices=(('RATE','RATE'),('QTY','QTY')), default='RATE')
     period_from=models.DateField(default="1900-01-01")
-    period_to=models.DateField(default="2999-01-01")
+    period_to=models.DateField(default="2100-01-01")
     tranche_type=models.CharField(max_length=7,choices=(('YES','YES'),('NO','NO')), default='NO')
     rate_value=models.FloatField(null=True,blank=True)
     qty_value=models.FloatField(null=True,blank=True)
@@ -199,6 +201,7 @@ class Fx(models.Model):
 class Rule_calc(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
     contract_id= models.CharField(max_length=100,null=True,blank=True)
+    year= models.CharField(max_length=6,null=True,blank=True)
     contract_name= models.CharField(max_length=100,null=True,blank=True)
     country_incl_excl= models.CharField(max_length=100,null=True,blank=True)
     country_list= models.CharField(max_length=2000,null=True,blank=True)

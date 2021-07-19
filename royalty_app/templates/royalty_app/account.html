@@ -1,0 +1,36 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+
+<div class="row">
+	<div class="col-md-3">
+		<div class="card card-body">
+			<hr>
+			<h3 style="text-align: center">Account Settings</h3>
+			<hr>
+			<img class="profile-pic" src="{{ user.user_profile_picture.profile_picture.url}}" >
+		
+		</div>
+	</div>
+	<div class="col-md-9">
+		<div class="card card-body">
+			
+			<form method="POST" action="" enctype="multipart/form-data">
+				{% csrf_token %}
+				{{form.as_p}}
+		
+			<input class="btn btn-primary" type="submit" name="Update Information">
+			</form>
+		</div>
+	</div>
+</div>
+
+
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+<script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
+
+{% endblock %}
+

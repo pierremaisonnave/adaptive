@@ -13,6 +13,7 @@ urlpatterns = [
   path("logout", views.logout_view, name="logout"),
   path("new_profile_pict", views.new_profile_pict, name="new_profile_pict"),
   #pages
+  path('account/', views.accountSettings, name="account"),
 
   path('partners', views.partners, name='partners'),
   path('contracts', views.contracts, name='contracts'),

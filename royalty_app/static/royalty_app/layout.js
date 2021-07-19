@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function change_profile_picture(){
 
     //definition od the elements
+    
+    spinner_top=document.getElementById('central_spinner')
+    spinner_top.style.display = "Block"
 
     file_=document.getElementById("fileSelect_pic")
     name_file=file_.files[0].name
@@ -27,13 +30,16 @@ function change_profile_picture(){
         .then(response => response.json())
         .then(result => {
             if (result.error){
+                spinner_top.style.display = "None"  
             }else{
                 //change the profile pict of the current page
                 img_list=document.querySelectorAll('.user_img') 
                 for ( var img = 0; img < img_list.length; img++){
                     img_list[img].src=result.new_picture_url
                 }
-                }   
+                spinner_top.style.display = "None"  
+            }
+             
         })
     
 }

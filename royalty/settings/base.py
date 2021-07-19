@@ -32,9 +32,7 @@ DEBUG =True#os.getenv('DEBUG')
 
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST'), '127.0.0.1','localhost']
 
-# to be loaded in order to use pyexcel :http://django.pyexcel.org/en/latest/
-FILE_UPLOAD_HANDLERS = ("django_excel.ExcelMemoryFileUploadHandler",
-                        "django_excel.TemporaryExcelFileUploadHandler")
+
 
 # Application definition
 
@@ -47,15 +45,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+
+
     'whitenoise.runserver_nostatic',
     'royalty_app',  
 
     'django_email_verification',
     'storages',#AWS 
+    'django_filters',
 ]
 
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    #'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -133,20 +134,52 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
-#DataFlair File uploading
-#MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-#MEDIA_URL = 'media/'
 
 
-DEFAULT_FILE_STORAGE ='storages.backends.s3boto3.S3Boto3Storage'
-AWS_ACCESS_KEY_ID='AKIAVSQBJQKAD7GQE7H7'
-AWS_SECRET_ACCESS_KEY='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'
-AWS_STORAGE_BUCKET_NAME='suissroypublic'
-AWS_QUERYSTRING_AUTH = False
+
+
+
+
+#S3 BUCKETS CONFIG
+
+
+AWS_ACCESS_KEY_ID=os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY=os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME=os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_FILE_OVERWRITE = False # prevent user from overwritting
+AWS_DEFAULT_ACL= None
+
+use_aws = True
+if use_aws:
+    #static file
+
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+    '''
+    The below code can be used. it helps secure the static file. Yet, it slow down the app
+    STATIC_URL = 'static/'
+    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'staticfiles')]
+    STATICFILES_STORAGE = 'royalty_app.storage_backends.StaticRootS3BotoStorage'
+    '''
+
+    #Media file
+    MEDIA_URL = 'media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    DEFAULT_FILE_STORAGE = 'royalty_app.storage_backends.MediaRootS3BotoStorage'
+ 
+else:
+    #static file
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    #Media file
+
+    MEDIA_ROOT = os.path.join(BASE_DIR.parent, 'media')
+    MEDIA_URL = 'media/' # on the display, "media" appear in the url , it's just a question of appearance, 
+
+#AWS_QUERYSTRING_AUTH = False
 
 
 DJANGORESIZED_DEFAULT_FORMAT_EXTENSIONS = {'PNG': ".png"} #used in order for the profile pict to be saved as PNG and not APNG
@@ -173,12 +206,5 @@ EMAIL_HOST_USER = os.getenv('EMAIL_ID')
 DEFAULT_FROM_EMAIL= os.getenv('EMAIL_ID') 
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PW')
 
-'''
-#access for AWS
-AWS_ACCESS_KEY_ID= os.getenv('AWS_ACCESS_KEY_ID') 
-AWS_ACCESS_KEY_ID= os.getenv('AWS_SECRET_ACCESS_KEY') 
-AWS_STORAGE_BUCKET_NAME= os.getenv('AWS_STORAGE_BUCKET_NAME') 
-AWS_S3_FILE_OVERWITE = False # prevent user from overwritting
-AWS_DEFAUT_ACL= None
 
-'''
+

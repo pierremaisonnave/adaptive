@@ -143,7 +143,7 @@ span.comboTreeItemTitle{
 
 
 @media (min-width: 0px){
-    main {
+    .main_authentificated {
         padding-left: 60px!important;
 
     }
@@ -180,7 +180,7 @@ span.comboTreeItemTitle{
 }
 
 @media (min-width: 992px){
-    main {
+    .main_authentificated {
         padding-left: 155px!important;
     }
     .sidebar{
@@ -191,7 +191,7 @@ span.comboTreeItemTitle{
     }
 }
 @media (min-width: 1200px){
-    main {
+    .main_authentificated {
         padding-left: 190px!important;
 
     }
@@ -203,3 +203,19 @@ span.comboTreeItemTitle{
     }
 }
 
+.nav-item:hover{
+    background-color:white;
+    color:red
+}
+.nav-item:hover span{
+
+    color:red
+}
+#user_menu:hover{
+    background-color:white;
+    
+}
+#user_menu:hover  #displayed_item_name_user{
+
+    color:red
+}
