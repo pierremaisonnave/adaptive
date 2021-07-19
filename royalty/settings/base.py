@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'royalty_app',  
 
     'django_email_verification',
-    #'storages',#AWS 
+    'storages', #AWS 
     'django_filters',
 ]
 
