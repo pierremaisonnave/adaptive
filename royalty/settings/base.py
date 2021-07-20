@@ -163,7 +163,7 @@ AWS_STORAGE_BUCKET_NAME=os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_FILE_OVERWRITE = False # prevent user from overwritting
 AWS_DEFAULT_ACL= None
 
-use_aws = False
+use_aws = True
 if use_aws:
     #static file
 
