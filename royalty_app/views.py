@@ -1247,7 +1247,7 @@ def new_report(request):
     #a- definition and import table
         consolidation_currency=Consolidation_currency.objects.all()[:1].get().currency.currency
 
-        #nb month in import file:
+        #nb month in import file: the goal is to specify the period under analysis
         rows = []
         if file_type =="accruals":
           previous_year_checked= request.POST.get("previous_year_checked")
@@ -1272,7 +1272,6 @@ def new_report(request):
                 rows.append([year_nb, month_nb + 1])  
 
         df_year_month = pd.DataFrame(rows, columns=["year", "month"])    
-
         df_year_nb_month=df_year_month.groupby(['year']).size().reset_index(name='month_nb')
         print("df_year_nb_month : Done")
    
@@ -1285,13 +1284,12 @@ def new_report(request):
         #Rule
         rule_list=Rule.objects.all().values_list('id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value','report_currency','qty_value_currency')
         df_rule = pd.DataFrame.from_records(list(rule_list), columns=['rule_id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value','report_currency','qty_value_currency'])
-        df_rule= df_year_nb_month.merge(df_rule, how="cross" ) 
-  
         
-        filtered_values = np.where((pd.DatetimeIndex(df_rule['period_from']).year <= df_rule['year']) & (pd.DatetimeIndex(df_rule['period_to']).year >= df_rule['year']) )
+          #Each rule is composed on a beginning and end date. If the period goes across different years, we must break the row- i.e. 01/01/2019 to 10/10/2020 --> 01/01/2019 to 31/12/2019 // 01/01/2020 to 10/10/2020
+        df_rule= df_year_nb_month.merge(df_rule, how="cross" ) #some contracts have a long period (i.e. 01/01/1990 to 01/01/2030), while the period under analysis only concernd a few years- do that reason, we utilise the "df_year_nb_month", which is the period chosen by the user for the analysis 
+        filtered_values = np.where((pd.DatetimeIndex(df_rule['period_from']).year <= df_rule['year']) & (pd.DatetimeIndex(df_rule['period_to']).year >= df_rule['year']) ) 
         df_rule=df_rule.loc[filtered_values]
-       
-
+      
         df_rule['month']='1'
         df_rule['day']='1'
         df_rule['period_from']=np.where(
@@ -1309,13 +1307,9 @@ def new_report(request):
         )
      
         df_rule['period_from']=pd.to_datetime(df_rule['period_from'],format='%d.%m.%Y')
-
         df_rule['period_to']=pd.to_datetime(df_rule['period_to'],format='%d.%m.%Y')
-        print(df_rule)
 
         df_rule=df_rule.drop(['month_nb','month','day'], axis = 1)
-        
-        print(df_rule.dtypes)
 
         if df_rule.empty: 
           df_rule=pd.DataFrame({
@@ -1335,7 +1329,6 @@ def new_report(request):
             'qty_value_currency': [''],
           })
         print('df_rule')
-        print(df_rule)
 
         #Payment_structure
         payment_structure_list=Payment_structure.objects.all()
@@ -1527,7 +1520,7 @@ def new_report(request):
             df_sales_breakdown['day']="1"
 
             df_sales_breakdown['date'] = pd.to_datetime(df_sales_breakdown[['year', 'month','day']], errors = 'coerce')
-            df_sales_breakdown['date_validation']=((df_sales_breakdown['date']>=df_sales_breakdown['period_from']) & (df_sales_breakdown['date']<df_sales_breakdown['period_to']))
+            df_sales_breakdown['date_validation']=((df_sales_breakdown['date']>=df_sales_breakdown['period_from']) & (df_sales_breakdown['date']<=df_sales_breakdown['period_to']))
             df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.date_validation ==True]
             df_sales_breakdown=df_sales_breakdown[df_sales_breakdown.country_validation ==True]
 
@@ -1577,7 +1570,7 @@ def new_report(request):
                                     )
             t2['day']="1"
             t2['date'] = pd.to_datetime(t2[['year', 'month','day']], errors = 'coerce')
-            t2['date_validation']=((t2['date']>=t2['period_from']) & (t2['date']<t2['period_to']))
+            t2['date_validation']=((t2['date']>=t2['period_from']) & (t2['date']<=t2['period_to']))
 
             t2=t2[t2.date_validation ==True]
             t2=t2[t2.country_validation ==True]
@@ -1661,7 +1654,7 @@ def new_report(request):
           print("def_on_sales 1")
           df_on_sales['day']="1"
           df_on_sales['date'] = pd.to_datetime(df_on_sales[['year', 'month','day']], errors = 'coerce')
-          df_on_sales['date_validation']=((df_on_sales['date']>=df_on_sales['period_from']) & (df_on_sales['date']<df_on_sales['period_to']))
+          df_on_sales['date_validation']=((df_on_sales['date']>=df_on_sales['period_from']) & (df_on_sales['date']<=df_on_sales['period_to']))
           df_on_sales=df_on_sales[df_on_sales.date_validation ==True]
           df_on_sales=df_on_sales[df_on_sales.country_validation ==True]
           print("def_on_sales 2")

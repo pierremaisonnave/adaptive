@@ -25,8 +25,14 @@ document.addEventListener('DOMContentLoaded', function() {
             .draw();
         } 
     );
-    //----------------------------------------------------------------------   
-  
+    //---------------------Filter-----------------------------------   
+    column_selection=document.getElementById("column_selection")
+    unchecked_list = column_selection.querySelectorAll('input[type="checkbox"]:not(:checked)')
+    for (var j = 0, unchecked_item; unchecked_item = unchecked_list[j]; j++) {
+        column_visibility(unchecked_item,unchecked_item.value)
+    }
+
+
     // event to be taken when an object in the table is modified:
     document.addEventListener('change', event => {
         

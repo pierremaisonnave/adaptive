@@ -28,7 +28,7 @@
         {% for p in payment_type_list %}
         <tr >
           <td><!--column0-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{p.payment_type}}" value="{{p.payment_type}}">
+            <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{p.payment_type}}" value="{{p.payment_type}}" maxlength="50">
           </td>
 
           <td ><!--column1-->
@@ -40,7 +40,7 @@
         <tr id="new_tr">
 
           <td><!--column0-->
-            <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" >
+            <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" maxlength="50">
           </td>
 
           <td ><!--column1-->
@@ -53,7 +53,7 @@
      <!--dd for new beneficiary--> 
       <div hidden>
         <div id="column_0">
-          <input onchange="add_new_row(this)" primary_key="True" style="width:100%;background-color: transparent;border-style: hidden" placeholder="new"> 
+          <input onchange="add_new_row(this)" primary_key="True" style="width:100%;background-color: transparent;border-style: hidden" placeholder="new" maxlength="50"> 
         </div>
 
         <div id="column_1">

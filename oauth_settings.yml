@@ -1,8 +1,0 @@
-app_id: "0caa0111-59c4-46fd-b532-085d82f6a811"
-app_secret: "C4.JXa~Oe4eiIBBQpU8G.-5aCcK~52_lI~"
-redirect:  "http://localhost:8000/callback" #"https://django-c9419.azurewebsites.net/callback" 
-scopes:
-  - user.read
-  - mailboxsettings.read
-  - calendars.readwrite
-authority: "https://login.microsoftonline.com/common"

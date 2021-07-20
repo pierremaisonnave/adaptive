@@ -4,13 +4,16 @@ function add_new_row(elm){
             alert("this primary key already exist, please choose another one");
             elm.value="" ;
             return}
-    //set a new"previous value" this value will be used to reset the imput in case of wrong typing        
-        elm.setAttribute('previous_value',elm.value) 
-    // verify that from and two are not empty
+    //define the elements        
         elm_tr=elm.parentElement.parentElement
         elm_from=elm_tr.children[0].children[0]
         elm_to=elm_tr.children[1].children[0]
         elm_rate=elm_tr.children[2].children[0]
+    //we change the value in decimal        
+        change_to_decimal(elm_rate)
+    //set a new"previous value" this value will be used to reset the imput in case of wrong typing        
+        elm.setAttribute('previous_value',elm.value) 
+    // verify that from and two are not empty
         if ((elm_from.value=="")||(elm_to.value=="")||(elm_rate.value=="")){return}
     //select the row and table
         new_tr=document.getElementById(id="new_tr")
@@ -22,6 +25,8 @@ function add_new_row(elm){
         elm_to.removeAttribute('onchange')
         elm_to.setAttribute('onchange', "is_unique_key(this)") 
         elm_rate.removeAttribute('onchange')
+        elm_rate.setAttribute('oninput', `rate_correct(this,0.01,999.999)`) 
+        elm_rate.setAttribute('onchange', "rate_correct(this)") 
         new_tr.children[3].children[0].hidden=false
     //create new row
         var newRow = main_table.insertRow(-1);
@@ -141,3 +146,35 @@ function is_unique_key(elm){
         }
 }
 
+function rate_correct(elm_rate,from_rate,to_rate){
+    elm_rate_value=Number(elm_rate.value)
+    elm_rate_value_dec=elm_rate_value.toFixed(2)
+    elm_rate_prev_value=elm_rate.getAttribute("previous_value")
+    //check decimal, no more than 2
+    if (elm_rate_value_dec!=elm_rate_value){
+        elm_rate.value=elm_rate_prev_value
+        return
+    }
+    if (elm_rate_value!== null ){
+        if ( elm_rate_value>=from_rate && elm_rate_value<=to_rate || elm_rate_value==0)
+            {return_value= true}
+        else
+            {return_value = false} 
+    }
+    else {
+        {return_value = true}
+    }
+    if(! return_value){
+
+        alert(`Rate must be between ${from_rate} and ${to_rate}`);
+        elm_rate.value=elm_rate.getAttribute("previous_value");
+    }
+    else{
+        elm_rate.setAttribute('previous_value',elm_rate_value)
+    }
+    return
+}
+
+function change_to_decimal(elm_rate){
+    elm_rate.value=Number(elm_rate.value).toFixed(2)
+}

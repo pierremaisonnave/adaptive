@@ -90,12 +90,31 @@ WSGI_APPLICATION = 'royalty.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+#postgres://atzrmjyxcymhtd:c73ec4bb9461274ff04a5fad3951cb0da2b0fcd13c60936d86b5d1cb69905b71@ec2-54-83-82-187.compute-1.amazonaws.com:5432/db309563b7l4j5
+
+#see https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
+'''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('POSTGRES_NAME'),#'db309563b7l4j5',
+        'USER': os.getenv('POSTGRES_USER'),#'atzrmjyxcymhtd',
+        'PASSWORD': os.getenv('POSTGRES_PWD'),#'c73ec4bb9461274ff04a5fad3951cb0da2b0fcd13c60936d86b5d1cb69905b71',
+        'HOST': os.getenv('POSTGRES_HOST'),#'ec2-54-83-82-187.compute-1.amazonaws.com',
+        'PORT': '5432',
+    }
+}
+'''
+
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
 AUTH_USER_MODEL = 'royalty_app.User'
 
 # Password validation
@@ -144,7 +163,7 @@ AWS_STORAGE_BUCKET_NAME=os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_FILE_OVERWRITE = False # prevent user from overwritting
 AWS_DEFAULT_ACL= None
 
-use_aws = True
+use_aws = False
 if use_aws:
     #static file
 
@@ -170,10 +189,9 @@ else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     #Media file
-
-    MEDIA_ROOT = os.path.join(BASE_DIR.parent, 'media')
     MEDIA_URL = 'media/' # on the display, "media" appear in the url , it's just a question of appearance, 
-
+    MEDIA_ROOT = os.path.join(BASE_DIR.parent, 'media')
+ 
 #AWS_QUERYSTRING_AUTH = False
 
 

@@ -73,7 +73,7 @@
           </td>
           <td>
             <!-- Div via-->
-            <div style="width: 100%; margin-left:5px;">
+            <div style="width: 100%; margin-left:5px; display: None;">
               {% if division_list %}
                 <div  class="comboTreeInputWrapper" dd_id="division_via_new">
                   <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="pass-through division" readonly dd_id="division_via_new" id="displayed_item_name_division_via_new" >
@@ -275,8 +275,8 @@
           <td ><input type="checkbox" checked value=3 onclick="column_visibility(this,3)"></td>
           <td >Division</td>
 
-          <td ><input type="checkbox" checked value=4 onclick="column_visibility(this,4)"></td>
-          <td >Division via</td>
+          <td ><input style="display: None;" type="checkbox"  value=4 onclick="column_visibility(this,4)"></td>
+          <td ><span style="display: None;">Division via</span></td>
         </tr>
         <tr >
           <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5)"></td>
@@ -291,12 +291,14 @@
           <td >payment terms:nb days</td>
         </tr>
         <tr >
-          <td ><input type="checkbox"  checked value=9 onclick="column_visibility(this,9)"></td>
+          <td ><input type="checkbox"   value=9 onclick="column_visibility(this,9)"></td>
           <td >Minimum Guarantee:Yes/No</td>
-          <td ><input type="checkbox"  checked value=10 onclick="column_visibility(this,10)"></td>
+          <td ><input type="checkbox"   value=10 onclick="column_visibility(this,10)"></td>
           <td >Minimum Guarantee:Amount</td>
-          <td ><input type="checkbox"  checked value=11 onclick="column_visibility(this,11)"></td>
+          <td ><input type="checkbox"   value=11 onclick="column_visibility(this,11)"></td>
           <td >Minimum Guarantee:Country</td>
+          <td></td>
+          <td></td>
         </tr>
         
       </tbody>

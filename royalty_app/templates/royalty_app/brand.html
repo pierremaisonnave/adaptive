@@ -35,11 +35,11 @@
           </td>
 
           <td><!--column1-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{b.m3_brand_code}}" type="text">
+            <input style="width:100%;background-color: transparent;border-style: hidden;" maxlength="20" value="{{b.m3_brand_code}}" type="text">
           </td>
 
           <td><!--column2-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{b.brand_name}}" type="text">
+            <input style="width:100%;background-color: transparent;border-style: hidden;"  maxlength="50" value="{{b.brand_name}}" type="text">
           </td>
           <td ><!--column3-->
             <button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
@@ -54,11 +54,11 @@
           </td>
 
           <td><!--column1-->
-            <input onchange="add_new_row(this)" style="width:100%;background-color: transparent;border-style: hidden;" >
+            <input onchange="add_new_row(this)" style="width:100%;background-color: transparent;border-style: hidden;" maxlength="20" >
           </td>
 
           <td><!--column2-->
-            <input  style="width:100%;background-color: transparent;border-style: hidden;" >
+            <input  style="width:100%;background-color: transparent;border-style: hidden;" maxlength="50">
           </td>
           <td ><!--column3-->
             <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
@@ -70,14 +70,14 @@
      <!--dd for new beneficiary--> 
       <div hidden>
         <div id="column_0">
-          <input disabled style="width:100%;background-color: transparent;border-style: hidden" placeholder="new"> 
+          <input disabled style="width:100%;background-color: transparent;border-style: hidden"  placeholder="new"> 
         </div>
         <div id="column_1">
-          <input onchange="add_new_row(this)" style="width:100%;background-color: transparent;border-style: hidden" > 
+          <input onchange="add_new_row(this)" style="width:100%;background-color: transparent;border-style: hidden" maxlength="20"> 
         </div>
 
         <div id="column_2">
-          <input  style="width:100%;background-color: transparent;border-style: hidden" > 
+          <input  style="width:100%;background-color: transparent;border-style: hidden"maxlength="50"> 
         </div>
 
         <div id="column_3">

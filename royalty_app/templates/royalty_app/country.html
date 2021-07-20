@@ -31,11 +31,11 @@
         {% for c in country_list %}
         <tr >
           <td><!--column0-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{c.country_id}}" value="{{c.country_id}}">
+            <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{c.country_id}}" value="{{c.country_id}}" maxlength="10">
           </td>
 
           <td><!--column1-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{c.country}}" type="text">
+            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{c.country}}" type="text" maxlength="100">
           </td>
 
           <td ><!--column2-->
@@ -58,11 +58,11 @@
         <tr id="new_tr">
 
           <td><!--column0-->
-            <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" >
+            <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" maxlength="10" >
           </td>
 
           <td><!--column1-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" >
+            <input style="width:100%;background-color: transparent;border-style: hidden;" maxlength="100">
           </td>
 
           <td ><!--column2-->

@@ -13,11 +13,11 @@ class User_profile_picture(models.Model):
 
 
 class Payment_type(models.Model):
-    payment_type = models.CharField(max_length=100)
+    payment_type = models.CharField(max_length=50)
     def __str__(self):
         return f"{self.payment_type} "
 class Region(models.Model):
-    region = models.CharField(max_length=100)
+    region = models.CharField(max_length=50)
     def __str__(self):
         return f"{self.region} "
 
@@ -39,9 +39,9 @@ class Partner(models.Model):
         return f"{self.partner_name}"
 class Accounting(models.Model):
     transaction_direction= models.CharField(max_length=3,choices=(('PAY','PAY'),('REC','REC')), default='PAY')
-    dim1= models.CharField(max_length=10,null=True,blank=True)
-    dim2= models.CharField(max_length=10,null=True,blank=True)
-    dim4= models.CharField(max_length=10,null=True,blank=True)
+    dim1= models.CharField(max_length=20,null=True,blank=True)
+    dim2= models.CharField(max_length=20,null=True,blank=True)
+    dim4= models.CharField(max_length=20,null=True,blank=True)
     pl_bs= models.CharField(max_length=2,choices=(('PL','PL'),('BS','BS')), default='PL')
     d_c_if_amount_positiv= models.CharField(max_length=1,choices=(('D','D'),('C','C')), default='C')
 
@@ -58,12 +58,12 @@ class Formulation(models.Model):
     def __str__(self):
         return f"{self.formula_code}"
 class Currency(models.Model):
-    currency= models.CharField(max_length=3, primary_key=True)
+    currency= models.CharField(max_length=10, primary_key=True)
     def __str__(self):
         return f"{self.currency}"
 
 class Division(models.Model):
-    division_id= models.CharField(max_length=5, primary_key=True)
+    division_id= models.CharField(max_length=20 , primary_key=True)
     division_name= models.CharField(max_length=50)
     division_country=models.ForeignKey(Country, on_delete=models.PROTECT)
     def __str__(self):
@@ -138,7 +138,7 @@ class Rule(models.Model):
     formulation=models.ManyToManyField(Formulation, related_name="rule_formulation")
     country_incl_excl=models.CharField(max_length=7,choices=(('EXCLUDE','EXCLUDE'),('INCLUDE','INCLUDE')), default='INCLUDE')
     country=models.ManyToManyField(Country, related_name="rule_country",blank=True)
-    country_list=models.CharField(max_length=2000,null=True,blank=True)
+    country_list=models.CharField(max_length=10000,null=True,blank=True)
     field_type=models.CharField(max_length=7,choices=(('RATE','RATE'),('QTY','QTY')), default='RATE')
     period_from=models.DateField(default="1900-01-01")
     period_to=models.DateField(default="2100-01-01")

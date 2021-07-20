@@ -32,7 +32,7 @@
         <tr >
 
           <td ><!--column0-->
-            <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="is_unique_key(this)" previous_value="{{c.country_id}}">
+            <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="is_unique_key(this)" previous_value="{{t.country_from.country_id}}">
               {% for c in country_list %}
                 {% if c == t.country_from %}
                   <option value={{c.country_id}} selected="selected">{{c.country_id}}</option>
@@ -43,7 +43,7 @@
             </select>
           </td>
           <td ><!--column1-->
-            <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="is_unique_key(this)" previous_value="{{c.country_id}}">
+            <select style="width:100%;background-color: transparent;border-style: hidden;" onchange="is_unique_key(this)" previous_value="{{t.country_to.country_id}}">
               {% for c in country_list %}
                 {% if c == t.country_to %}
                   <option value={{c.country_id}} selected="selected">{{c.country_id}}</option>
@@ -54,7 +54,7 @@
             </select>
           </td>
           <td><!--column2-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" value="{{t.wht_rate}}">
+            <input style="width:100%;background-color: transparent;border-style: hidden;" value="{{t.wht_rate}}" maxlength="10" previous_value="{{t.wht_rate}}" oninput="rate_correct(this,0.01,999.999)" onchange="change_to_decimal(this)">
           </td>
           <td ><!--column3-->
             <button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
@@ -83,7 +83,7 @@
           </td>
 
           <td><!--column2-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" onchange="add_new_row(this)"   value="{{t.wht_rate}}">
+            <input style="width:100%;background-color: transparent;border-style: hidden;" onchange="add_new_row(this)"   value="{{t.wht_rate}}" previous_value="" oninput="rate_correct(this,0.01,999.999)"  >
           </td>
 
           <td ><!--column3-->
@@ -112,7 +112,7 @@
             </select>  
         </div>
         <div id="column_2" >
-          <input style="width:100%;background-color: transparent;border-style: hidden;"  onchange="add_new_row(this)" value="{{t.wht_rate}}"> 
+          <input style="width:100%;background-color: transparent;border-style: hidden;"  onchange="add_new_row(this)" value="{{t.wht_rate}}" previous_value="" oninput="rate_correct(this,0.01,999.999)"> 
         </div>
 
         <div id="column_3">

@@ -29,7 +29,7 @@
         {% for c in currency_list %}
         <tr >
           <td><!--column0-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{c.currency}}" value="{{c.currency}}">
+            <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{c.currency}}" value="{{c.currency}}" maxlength="10">
           </td>
 
           <td ><!--column1-->
@@ -41,7 +41,7 @@
         <tr id="new_tr">
 
           <td><!--column0-->
-            <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" >
+            <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" maxlength="10">
           </td>
 
           <td ><!--column1-->
@@ -54,7 +54,7 @@
      <!--dd for new beneficiary--> 
       <div hidden>
         <div id="column_0">
-          <input onchange="add_new_row(this)" primary_key="True" style="width:100%;background-color: transparent;border-style: hidden" placeholder="new"> 
+          <input onchange="add_new_row(this)" primary_key="True" style="width:100%;background-color: transparent;border-style: hidden" placeholder="new"maxlength="10"> 
         </div>
 
         <div id="column_1">

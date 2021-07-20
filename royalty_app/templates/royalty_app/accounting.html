@@ -44,13 +44,13 @@
             <input disabled style="width:100%;background-color: transparent;border-style: hidden;"  value="{{a.pl_bs}}">
           </td>
           <td><!--Column3-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{a.dim1|default_if_none:''}}">
+            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{a.dim1|default_if_none:''}}" maxlength="20">
           </td>
           <td><!--Column4-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{a.dim2|default_if_none:''}}">
+            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{a.dim2|default_if_none:''}}" maxlength="20">
           </td>
           <td><!--Column5-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{a.dim4|default_if_none:''}}">
+            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{a.dim4|default_if_none:''}}" maxlength="20">
           </td>
 
           <td  title=" D or C when amount positive: "><!--Column6-->

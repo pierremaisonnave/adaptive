@@ -31,11 +31,11 @@
         {% for d in division_list %}
         <tr >
           <td><!--division_id-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{d.division_id}}" value="{{d.division_id}}">
+            <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{d.division_id}}" value="{{d.division_id}}" maxlength="20">
           </td>
 
           <td><!--division_name-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{d.division_name}}" type="text">
+            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{d.division_name}}" type="text" maxlength="50">
           </td>
 
           <td ><!--country-->
@@ -57,11 +57,11 @@
         <tr id="new_tr">
 
           <td><!--division_id-->
-            <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" >
+            <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" maxlength="20">
           </td>
 
           <td><!--division_name-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" >
+            <input style="width:100%;background-color: transparent;border-style: hidden;" maxlength="50">
           </td>
 
           <td ><!--country-->
@@ -82,10 +82,10 @@
      <!--dd for new beneficiary--> 
       <div hidden>
         <div id="column_0">
-          <input onchange="add_new_row(this)" primary_key="True" style="width:100%;background-color: transparent;border-style: hidden" placeholder="new"> 
+          <input onchange="add_new_row(this)" primary_key="True" style="width:100%;background-color: transparent;border-style: hidden" placeholder="new" maxlength="20"> 
         </div>
         <div id="column_1">
-          <input style="width:100%;background-color: transparent;border-style: hidden" > 
+          <input style="width:100%;background-color: transparent;border-style: hidden" maxlength="50"> 
         </div>
         <div id="column_2" >
           <select  style="width:100%;background-color: transparent;border-style: hidden;">

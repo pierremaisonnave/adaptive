@@ -34,7 +34,7 @@
           </td>
 
           <td><!--column1-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{r.region}}" type="text">
+            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{r.region}}" type="text" maxlength="50">
           </td>
           <td ><!--column2-->
             <button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
@@ -49,7 +49,7 @@
           </td>
 
           <td><!--column1-->
-            <input onchange="add_new_row(this)" style="width:100%;background-color: transparent;border-style: hidden;" >
+            <input onchange="add_new_row(this)" style="width:100%;background-color: transparent;border-style: hidden;"maxlength="50" >
           </td>
           <td ><!--column2-->
             <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
@@ -64,7 +64,7 @@
           <input disabled style="width:100%;background-color: transparent;border-style: hidden" placeholder="new"> 
         </div>
         <div id="column_1">
-          <input onchange="add_new_row(this)" style="width:100%;background-color: transparent;border-style: hidden" > 
+          <input onchange="add_new_row(this)" style="width:100%;background-color: transparent;border-style: hidden" maxlength="50" > 
         </div>
 
         <div id="column_2">
