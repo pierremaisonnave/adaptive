@@ -56,7 +56,14 @@ function save_contract_partner(contract_id){
             return
         }
     }
-    
+    //Select the spinner, save button and message
+    spinner_beneficiary=document.getElementById("spinner_beneficiary")
+    saved_button_beneficiary=document.getElementById(id="saved_button_beneficiary")
+    saved_message_beneficiary=document.getElementById(id="saved_message_beneficiary")
+    spinner_beneficiary.style.display = "Block"
+    saved_button_beneficiary.style.display = "None"
+
+
     import_string="["+import_array+"]"
     // We load it via a fetch in the API
     fetch(`/save_contract_partner/${contract_id}`, {
@@ -65,12 +72,14 @@ function save_contract_partner(contract_id){
         })
         .then(response => response.json())
         .then(result => {
+            spinner_beneficiary.style.display = "None"
             if (!!result.error) {alert(result.error);return}
             //message
-            saved_message=document.getElementById(id="saved_message")
-            saved_message.innerHTML="Saved"
+            saved_message_beneficiary.style.display = "Block"
             setTimeout(function() { 
-                saved_message.innerHTML=""},
+                saved_message_beneficiary.style.display = "None",
+                saved_button_beneficiary.style.display = "Block"
+            },
             1000)
         })
 }
@@ -189,9 +198,12 @@ function delete_rule(elm){
     elm.parentElement.parentElement.remove()
 }
 function save_rule(contract_id){
-    //Select the spinner
-    spinner_top=document.getElementById('central_spinner')
-    spinner_top.style.display = "Block"
+    //Select the spinner, save button and message
+    spinner_rule=document.getElementById("spinner_rule")
+    saved_button_rule=document.getElementById(id="saved_button_rule")
+    saved_message_rule=document.getElementById(id="saved_message_rule")
+    spinner_rule.style.display = "Block"
+    saved_button_rule.style.display = "None"
 
     
     main_list=[]
@@ -273,21 +285,25 @@ function save_rule(contract_id){
         }  
     //create main list before Fetch
     main_list.push('['+ sub_list+ ']')
-    alert(main_list) 
+
     fetch(`/save_rule/${contract_id}`, {
         method: 'POST',
         body: main_list
         })
         .then(response => response.json())
         .then(result => {
+            spinner_rule.style.display = "None"
             if (!!result.error) {alert(result.error);return}
+
             //message
-            saved_message=document.getElementById(id="saved_message_rule")
-            saved_message.innerHTML="Saved"
+            saved_message_rule.style.display = "Block"
             setTimeout(function() { 
-                saved_message.innerHTML=""},
+                saved_message_rule.style.display = "None",
+                saved_button_rule.style.display = "Block"
+            },
+                
             1000)
-            spinner_top.style.display = "None"
+
         })
 }
 
@@ -409,16 +425,19 @@ function save_invoice_breakdown(contract_id){
 
 
 function new_contract_file(contract_id){
-    //Select the spinner
-    spinner_top=document.getElementById('central_spinner')
-    spinner_top.style.display = "Block"
 
     //definition od the elements
 
     file_=document.getElementById("fileSelect")
 
+    if (file_.files.length==0){return}
     name_file=file_.files[0].name
     file_value=file_.value
+    //Select the spinner
+    spinner_top=document.getElementById('central_spinner')
+    spinner_top.style.display = "Block"
+
+
   
     let formData = new FormData();
     formData.append('name', name_file);

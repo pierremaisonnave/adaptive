@@ -20,10 +20,10 @@
         <thead>
           <tr >
             <th >
-              <input  type="file" name="loaded_file" id="fileSelect" accept=".pdf"  style="width: 100%">
+              <input  type="file" name="loaded_file" id="fileSelect" accept=".pdf"  style="width: 100%" onchange="new_contract_file({{contract.id}})">
             </th>
             <th >
-              <button type="button" class="btn btn-sm btn-outline-success" type="button" onclick="new_contract_file({{contract.id}})" style="border:0px;"><span class="bi bi-save2-fill"></span></button>
+
              </th>
           </tr>
         </thead>
@@ -53,15 +53,22 @@
 
     <table  hidden class="table table-striped table-sm" id="beneficiary_table" style="max-width: 500px">
       <thead>
-        <tr style="border-top: hidden">
-          <th style="color:transparent">:</th>
-          <th colspan="2" style="text-align: end; color:green" id="saved_message"></th>
-        </tr>
         <tr >
           <th > Name</th>
           <th style="width: 80px">%</th>
-          <th style="width: 30px">
-            <button   class="btn btn-sm btn-outline-success" title="save" onclick="save_contract_partner({{contract.id}})" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+          <th style="width: 50px; height: 45px;">
+            <button   id="saved_button_beneficiary" class="btn btn-sm btn-outline-success" title="save" onclick="save_contract_partner({{contract.id}})" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+            <div id="spinner_beneficiary" style="display: None;text-align: end">
+              <div class="sk-chase" >
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+              </div>
+            </div>
+            <div style="text-align: end; color:green ;display: None;" id="saved_message_beneficiary" >Saved</div>
           </th>
         </tr>
       </thead>
@@ -141,10 +148,7 @@
    <!--Rule table-->  
     <table hidden class="table table-striped table-sm" id="rule_table" >
       <thead>
-        <tr style="border-top: hidden">
-          <th style="color:transparent">:</th>
-          <th colspan="7" style="text-align: end; color:green" id="saved_message_rule"></th>
-        </tr>
+
         <tr >
           <th>Formulation</th>
           <th>country</th>
@@ -153,8 +157,19 @@
           <th>Period to</th>
           <th>Tranche</th>
           <th>Amount</th>
-          <th style="width: 30px">
-            <button   class="btn btn-sm btn-outline-success" title="save" onclick="save_rule({{contract.id}})" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+          <th style="width: 50px; height: 45px;">
+            <button  id="saved_button_rule" class="btn btn-sm btn-outline-success" title="save" onclick="save_rule({{contract.id}})" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+            <div id="spinner_rule" style="display: None;text-align: end">
+              <div class="sk-chase" >
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+              </div>
+            </div>
+            <div style="text-align: end; color:green ;display: None;" id="saved_message_rule" >Saved</div>
           </th>
         </tr>
       </thead>

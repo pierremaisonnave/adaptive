@@ -553,6 +553,7 @@ function add_new_record(){
                             message_save.hidden=false
                             setTimeout(function() { message_save.hidden=true;tr_newlycreated.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that thje load has been done
                             hide_column()
+                            cancel_new_record()
                             document.getElementById("form_new").reset() // once the form is submitted , we reset the form                
             }) 
         }
