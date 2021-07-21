@@ -422,10 +422,10 @@ def chart_accruals(year,contract_id_list):
   #-----------------------------------
 @login_required(login_url='/login')
 def partners(request):
-  partner_list=Partner.objects.all()
+  partner_list=Partner.objects.all().select_related('partner_country','partner_payment_type')
   payment_type_list=Payment_type.objects.all()
   region_list=Region.objects.all()
-  country_list=Country.objects.all().order_by("country")
+  country_list=Country.objects.all().order_by("country").select_related('country_region')
   
   return render(request, 'royalty_app/partners.html',  { "payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list})
 
@@ -482,12 +482,12 @@ def analytics(request):
 
 @login_required(login_url='/login')
 def invoices(request):
-  contract_list=Contract.objects.all().order_by("contract_name")
-  payment_structure_list=Payment_structure.objects.all()
-  contract_partner_list=Contract_partner.objects.all()
-  periodicity_cat_list=Periodicity_cat.objects.all()
+  contract_list=Contract.objects.all().order_by("contract_name").select_related('contract_currency','payment_periodicity')
+
+  contract_partner_list=Contract_partner.objects.all().select_related('partner','contract')
+  periodicity_cat_list=Periodicity_cat.objects.all().select_related('periodicity')
   invoice_list=Invoice.objects.all()
-  return render(request, 'royalty_app/invoices.html', {"invoice_list":invoice_list,"periodicity_cat_list":periodicity_cat_list,"contract_partner_list":contract_partner_list,"payment_structure_list":payment_structure_list,"contract_list":contract_list})
+  return render(request, 'royalty_app/invoices.html', {"invoice_list":invoice_list,"periodicity_cat_list":periodicity_cat_list,"contract_partner_list":contract_partner_list,"contract_list":contract_list})
 
 @login_required(login_url='/login')
 def static_data(request):
@@ -2189,7 +2189,7 @@ def modif_static(request,table_name):
     return render(request, 'royalty_app/division.html',  { "country_list":country_list ,"division_list":division_list})
 
   if table_name=="country":
-    country_list=Country.objects.all().order_by("country_region","country_id")
+    country_list=Country.objects.all().order_by("country_region","country_id").select_related('country_region')
     region_list=Region.objects.all()
     return render(request, 'royalty_app/country.html',  { "country_list":country_list ,"region_list":region_list})
 
@@ -2219,7 +2219,7 @@ def modif_static(request,table_name):
     return render(request, 'royalty_app/accounting.html',  { "accounting_list":accounting_list})
 
   if table_name=="tax":
-    tax_list=Tax.objects.all()
+    tax_list=Tax.objects.all().select_related('country_from','country_to')
     country_list=Country.objects.all()
     return render(request, 'royalty_app/tax.html',  { "country_list":country_list,"tax_list":tax_list})
 
