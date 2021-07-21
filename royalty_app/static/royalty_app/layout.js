@@ -33,13 +33,22 @@ function change_profile_picture(){
                 spinner_top.style.display = "None"  
             }else{
                 //change the profile pict of the current page
-                img_list=document.querySelectorAll('.user_img') 
-                for ( var img = 0; img < img_list.length; img++){
-                    img_list[img].src=result.new_picture_url
-                }
+                img_list=document.getElementById('picture') 
+               
+                img_list.src=result.new_picture_url
+
                 spinner_top.style.display = "None"  
             }
              
         })
     
+}
+
+function hide_dropdown_user(){
+    dropdown_user=document.getElementById("dropdown_user")
+
+    if (dropdown_user.style.display == "None"  ){
+        dropdown_user.style.display = "Block"
+
+    }
 }

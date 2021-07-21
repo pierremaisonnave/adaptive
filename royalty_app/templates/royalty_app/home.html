@@ -9,7 +9,7 @@
       <div style="display:grid; grid-template-columns: 300px 150px; ">
         <div  class="comboTreeWrapper" onchange="accruals_change()" >
             <div  class="comboTreeInputWrapper" dd_id="contract">
-              <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="contract"  value="Contract_list">
+              <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="contract"  value="Contract_list" id="item_list_display_contract">
               <input   type="text" hidden  id="item_list_contract" selection_mode="" value={{contract_id_list|join:"," }}> 
             </div>
             <div  class="comboTreeDropDownContainer" id="dropdown_contract" style="display: none;">

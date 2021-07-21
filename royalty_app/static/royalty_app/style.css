@@ -22,6 +22,8 @@
 #user_photo_on_layout{
     cursor: pointer;
 }
+
+
 .comboTreeWrapper{
 	position: relative;
 	text-align: left !important;
@@ -215,7 +217,10 @@ span.comboTreeItemTitle{
     background-color:white;
     
 }
-#user_menu:hover  #displayed_item_name_user{
+#user_menu:hover >div>div {
 
     color:red
+}
+#user_menu{
+    cursor: pointer;
 }
