@@ -28,7 +28,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG =True#os.getenv('DEBUG')
+DEBUG =True #os.getenv('DEBUG')
 
 ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST'), '127.0.0.1','localhost']
 
@@ -45,17 +45,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-
-
-    'whitenoise.runserver_nostatic',
+    'whitenoise.runserver_nostatic', 
     'royalty_app',  
 
     'django_email_verification',
     'storages', #AWS 
     'django_filters',
+
+    "debug_toolbar", #use to generate the toolbar to view bugs
+
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -93,6 +95,7 @@ WSGI_APPLICATION = 'royalty.wsgi.application'
 #postgres://atzrmjyxcymhtd:c73ec4bb9461274ff04a5fad3951cb0da2b0fcd13c60936d86b5d1cb69905b71@ec2-54-83-82-187.compute-1.amazonaws.com:5432/db309563b7l4j5
 
 #see https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
+
 '''
 DATABASES = {
     'default': {
@@ -220,4 +223,9 @@ DEFAULT_FROM_EMAIL= os.getenv('EMAIL_ID')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PW')
 
 
-
+#Used to debug
+INTERNAL_IPS=[
+    os.getenv('ALLOWED_HOST'),
+    '127.0.0.1',
+    'localhost'
+]

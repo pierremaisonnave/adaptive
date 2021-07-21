@@ -196,13 +196,13 @@
                         <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="country_new" region_id={{region.id}} ></span>
                         <span class="region" dd_id="country_new">{{region.region}}</span>
                         <ul style="display: block;" id="country_new_{{region.id}}">
-                            {% for country in country_list %}
-                              {% if region == country.country_region%}
+                          {% for country in country_list %}
+                            {% if region == country.country_region%}
                               <li style="display: block;" class="item_single_select" dd_id="country_new">
                                 <span>{{ country.country_id }}</span><span> : </span><span>{{ country.country }}</span>
                               </li>
                               {% endif %}
-                            {% endfor %}
+                          {% endfor %}
                         </ul>
                       </li>
                     {% endfor %}
@@ -528,9 +528,9 @@
         {% for region in region_list %}  
           <optgroup label={{region.region}}>
             {% for country in country_list %}
-              {% if region == country.country_region%}
+                {% if country.country_region == region %}
                   <option value="{{ country.country_id }}"> {{ country.country_id }}:{{country.country}} </option>
-              {% endif %}
+                {% endif %}
             {% endfor %}
           </optgroup>
         {% endfor %}

@@ -429,17 +429,21 @@ def partners(request):
   
   return render(request, 'royalty_app/partners.html',  { "payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list})
 
+import time
 @login_required(login_url='/login')
 def contracts(request):
-  contract_list=Contract.objects.all()
+
+
+  contract_list=Contract.objects.all().select_related('m3_brand','division','division_via','payment_periodicity','minimum_guar_remaining_allocation_country','contract_currency')
   region_list=Region.objects.all()
-  country_list=Country.objects.all().order_by("country")
+  country_list=Country.objects.all().select_related('country_region')
   m3_brand_list=Brand.objects.all().order_by("brand_name")
   division_list=Division.objects.all()
   currency_list=Currency.objects.all()
   periodicity_list=Periodicity.objects.all()
 
-  return render(request, 'royalty_app/contracts.html',  {"periodicity_list":periodicity_list,"currency_list":currency_list,"division_list":division_list,"m3_brand_list":m3_brand_list, "contract_list":contract_list, "country_list":country_list ,"region_list":region_list})
+
+  return render(request, 'royalty_app/contracts.html',  {"periodicity_list":periodicity_list,"currency_list":currency_list,"division_list":division_list,"m3_brand_list":m3_brand_list, "contract_list":contract_list,"region_list":region_list, "country_list":country_list})
 
 @login_required(login_url='/login')
 def rules(request,contract_id):
