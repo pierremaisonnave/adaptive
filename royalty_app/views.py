@@ -448,16 +448,17 @@ def contracts(request):
 @login_required(login_url='/login')
 def rules(request,contract_id):
 
-  contract=Contract.objects.get(id=contract_id)
+  contract=Contract.objects.get(id=contract_id)#.select_related('contract_currency')
   contract_file_list=Contract_file.objects.filter(contract=contract)
   contract_partner_list=Contract_partner.objects.filter(contract=contract)
   partner_list=Partner.objects.all().order_by("partner_name")
-  country_list=Country.objects.all().order_by("country_id")
+  country_list=Country.objects.all().order_by("country_id").select_related('country_region')
   region_list=Region.objects.all().order_by("region")
   formulation_list=Formulation.objects.all()
   currency_list=Currency.objects.all()
   rule_list=Rule.objects.filter(contract=contract)
-  tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id")
+  #formulations=Formulation.objects.filter(rule_formulation__contract=contract)
+  tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
 
   sbd=Sales_breakdown_item.objects.all()
   sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)

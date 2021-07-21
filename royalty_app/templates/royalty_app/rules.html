@@ -189,7 +189,7 @@
           <td> <!--Country-->
             <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
               <div  class="comboTreeInputWrapper" dd_id="ctry_{{forloop.counter0}}">
-                <input value='{% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country.all|join:"," != "" %} except : {% endif %}{% endif %}{{ rule.country.all|join:"," }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_{{forloop.counter0}}" id="item_list_display_ctry_{{forloop.counter0}}">
+                <input value='{% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "" %} except : {% endif %}{% endif %}{{ rule.country_list }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_{{forloop.counter0}}" id="item_list_display_ctry_{{forloop.counter0}}">
                 <input  value='{{ rule.country.all|join:"," }}' type="text" hidden  id="item_list_ctry_{{forloop.counter0}}" selection_mode=""> 
               </div>
             </div>
@@ -356,7 +356,7 @@
 
           <td hidden  style="display:grid; grid-template-columns: auto auto"><!-- Qty amount-->
             <input class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="price per unit"  type="text">
-            <select style="; background-color:transparent; border:None ;width:60px">
+            <select style=" background-color:transparent; border:None ;width:60px">
               {% for curr in currency_list %}
                 {% if contract.contract_currency == curr %}
                   <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
@@ -493,7 +493,7 @@
           </td>
           <td  hidden style="display:grid; grid-template-columns: auto auto"><!--Qty-->
             <input class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="price per unit"  type="text">
-            <select style="; background-color:transparent; border:None ;width:60px">
+            <select style=" background-color:transparent; border:None ;width:60px">
               {% for curr in currency_list %}
                 {% if contract.contract_currency == curr %}
                   <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
@@ -584,7 +584,7 @@
       </div>
     <!--import currency list-->
     <div id="import_currency_list" style="display: None"> 
-      <select style="; background-color:transparent; border:None ;width:60px">
+      <select style=" background-color:transparent; border:None ;width:60px">
         {% for curr in currency_list %}
             <option value={{curr.currency}}>{{curr.currency}}</option>          
         {% endfor %}
