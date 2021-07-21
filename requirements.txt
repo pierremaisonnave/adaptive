@@ -28,3 +28,5 @@ django_resized #resize the profile picture
 django-filter==2.4.0
 django-email-verification
 django-storages== 1.11.1 #access to AWS
+
+django-debug-toolbar==3.2.1 
