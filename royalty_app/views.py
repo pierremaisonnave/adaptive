@@ -457,7 +457,7 @@ def rules(request,contract_id):
   formulation_list=Formulation.objects.all()
   currency_list=Currency.objects.all()
   rule_list=Rule.objects.filter(contract=contract)
-  #formulations=Formulation.objects.filter(rule_formulation__contract=contract)
+  
   tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
 
   sbd=Sales_breakdown_item.objects.all()

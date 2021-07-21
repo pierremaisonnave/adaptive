@@ -149,7 +149,7 @@ span.comboTreeItemTitle{
         padding-left: 60px!important;
 
     }
-    .user_gear{
+    #displayed_item_name_user{
         display: None;
         }   
     #your_logo{
@@ -176,7 +176,7 @@ span.comboTreeItemTitle{
 }
 
 @media (min-width: 500px){
-    .user_gear{
+    #displayed_item_name_user{
         display: Block;
         }   
 }
