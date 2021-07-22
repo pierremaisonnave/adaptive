@@ -30,8 +30,8 @@ from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from django_email_verification import send_email
 
-
-
+#CAPTCHA
+from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY
 
 def login_view(request):
     if request.method == "POST":
@@ -104,7 +104,7 @@ def register_page(request):
   return render(request, "royalty_app/register.html")
 
 
-from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY
+
 
 
 import requests

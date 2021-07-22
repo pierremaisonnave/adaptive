@@ -205,7 +205,7 @@ def verified_callback(user):
     user.is_active = True
 
 EMAIL_VERIFIED_CALLBACK = verified_callback
-EMAIL_FROM_ADDRESS =os.getenv('EMAIL_ID')
+EMAIL_FROM_ADDRESS = os.getenv('EMAIL_FROM')
 EMAIL_MAIL_SUBJECT = 'SwissRoy- Confirm your email'
 EMAIL_MAIL_HTML = 'password_confirmation/mail_body.html'
 EMAIL_MAIL_PLAIN = 'password_confirmation/mail_body.txt'
@@ -219,7 +219,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_ID') 
-DEFAULT_FROM_EMAIL= os.getenv('EMAIL_ID') 
+DEFAULT_FROM_EMAIL= os.getenv('EMAIL_FROM') 
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PW')
 
 

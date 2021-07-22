@@ -9,6 +9,8 @@ from django.conf.urls.static import static# so as to save pdf to Media forder
 from django_email_verification import urls as email_urls
 
 from django.contrib.auth import views as auth_views#for pass reset
+from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY
+
 
 urlpatterns = [
     path('', include('royalty_app.urls')),
@@ -35,8 +37,10 @@ urlpatterns = [
             template_name='password_reset/password_reset_form.html',
             subject_template_name='password_reset/password_reset_subject.txt',
             email_template_name='password_reset/password_reset_email.html',
+            extra_context ={'recaptcha_site_key': GOOGLE_RECAPTCHA_SITE_KEY},
         ),
-        name='password_reset'),
+        name='password_reset'
+        ),
     
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(template_name='password_reset/password_reset_complete.html'),
         name='password_reset_complete'),
