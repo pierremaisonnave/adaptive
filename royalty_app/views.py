@@ -104,7 +104,9 @@ def register_page(request):
   return render(request, "royalty_app/register.html")
 
 
-from royalty.settings.base import  GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY
+from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY
+
+
 import requests
 def register(request):
 
