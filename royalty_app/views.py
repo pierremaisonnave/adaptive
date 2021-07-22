@@ -31,6 +31,8 @@ from django.contrib.auth import get_user_model
 from django_email_verification import send_email
 
 
+
+
 def login_view(request):
     if request.method == "POST":
         #check if user is active:
@@ -98,50 +100,67 @@ def new_profile_pict(request):
 
 
 def register_page(request):
+
   return render(request, "royalty_app/register.html")
 
 
+from royalty.settings.base import  GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY
+import requests
 def register(request):
-  if request.method == "POST":
-    username = request.POST["email"]
-    email = request.POST["email"]
-    first_name = request.POST["first_name"]
-    last_name = request.POST["last_name"]
 
-    # Ensure password matches confirmation
-    password = request.POST["password"]
-    confirmation = request.POST["confirmation"]
-    if password != confirmation:
+  if request.method == "POST":
+        #---- captcha -----#
+    recaptcha_response = request.POST.get('g-recaptcha-response')    
+    data = {
+        'secret': GOOGLE_RECAPTCHA_SECRET_KEY,
+        'response': recaptcha_response
+    }
+    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
+    result = r.json()
+    #---- process data  -----#
+    if result['success']: # if captcha is successful 
+
+      username = request.POST["email"]
+      email = request.POST["email"]
+      first_name = request.POST["first_name"]
+      last_name = request.POST["last_name"]
+
+      # Ensure password matches confirmation
+      password = request.POST["password"]
+      confirmation = request.POST["confirmation"]
+      if password != confirmation:
+          return render(request, "royalty_app/register.html", {
+              "error_message": ["Passwords must match."],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
+          })
+      if User.objects.filter(email=email):
+          return render(request, "royalty_app/register.html", {
+              "error_message": ["Email already exists"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
+          })
+      try: 
+        password_validation.validate_password(password, request)
+      except Exception as e:
+        return render(request, "royalty_app/register.html",{
+          "error_message":e ,'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY}
+          )
+      # Attempt to create new user
+      try:
+        user = User.objects.create_user(username, email, password)
+        #user = get_user_model().objects.create(username=username, password=password, email=email)
+        user.first_name=first_name
+        user.last_name=last_name
+        user.is_active = False
+        user.save()
+        send_email(user)
+        pass#return HttpResponseRedirect(reverse("login"))     
+      except IntegrityError:
         return render(request, "royalty_app/register.html", {
-            "error_message": ["Passwords must match."]
+            "error_message": ["Username already taken"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
         })
-    if User.objects.filter(email=email):
-        return render(request, "royalty_app/register.html", {
-            "error_message": ["Email already exists"]
-        })
-    try: 
-      password_validation.validate_password(password, request)
-    except Exception as e:
-      return render(request, "royalty_app/register.html",{
-        "error_message":e }
-        )
-    # Attempt to create new user
-    try:
-      user = User.objects.create_user(username, email, password)
-      #user = get_user_model().objects.create(username=username, password=password, email=email)
-      user.first_name=first_name
-      user.last_name=last_name
-      user.is_active = False
-      user.save()
-      send_email(user)
-      pass#return HttpResponseRedirect(reverse("login"))     
-    except IntegrityError:
-      return render(request, "royalty_app/register.html", {
-          "error_message": ["Username already taken"]
-      })
-    return render(request, "royalty_app/login.html", {"message_confirmation": "email for confimation has been sent"})
+      return render(request, "royalty_app/login.html", {"message_confirmation": "email for confimation has been sent"})
+    else:
+      return render(request, "royalty_app/register.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY,"error_message": ["CAPTCHA must be validated"]})
   else:
-    return render(request, "royalty_app/register.html")
+    return render(request, "royalty_app/register.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
 
 
 

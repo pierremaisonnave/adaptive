@@ -10,7 +10,8 @@
         <span>you are already logged in, click <a  href="{% url 'logout' %}"  > here</a> to log out</span>
     {% else %}
 
-        <form action="{% url 'register' %}" method="post" style="max-width:500px" class="form_log">
+
+        <form action="{% url 'register' %}" method="post" style="max-width:500px" class="form_log" onsubmit="return validateRecaptcha();">
             {% csrf_token %}
             <h1 class="h3 mb-3 font-weight-normal">Register</h1>
             <div>
@@ -23,25 +24,39 @@
                 {% endif %}
             </div>
             <div class="form-group">
-                <input class="form-control" type="first_name" name="first_name" placeholder="First Name">
+                <input class="form-control" type="first_name" name="first_name" placeholder="First Name" required>
             </div>
             <div class="form-group">
-                <input class="form-control" type="last_name" name="last_name" placeholder="Last Name">
+                <input class="form-control" type="last_name" name="last_name" placeholder="Last Name" required>
             </div>
             <div class="form-group">
-                <input class="form-control" type="email" name="email" placeholder="Email Address">
+                <input class="form-control" type="email" name="email" placeholder="Email Address" required>
             </div>
             <div class="form-group">
-                <input class="form-control" type="password" name="password" placeholder="Password">
+                <input class="form-control" type="password" name="password" placeholder="Password" required>
             </div>
             <div class="form-group">
-                <input class="form-control" type="password" name="confirmation" placeholder="Confirm Password">
+                <input class="form-control" type="password" name="confirmation" placeholder="Confirm Password" required>
             </div>
+ 
             <input class="btn btn-primary form-control" type="submit" value="Register">
             <input type="hidden" name="next" value="{{ request.GET.next }}"/>
+            
+            
             <div>
                 Already have an account? <a href="{% url 'login' %}">Log In here.</a>
             </div>
+            <script src='https://www.google.com/recaptcha/api.js'></script>
+
+            <div class="form-group" style="margin-top: 80px; display: None;" id="captcha" >
+                <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                <p>This site is protected by reCAPTCHA and the Google
+                    <a href="https://policies.google.com/privacy">Privacy Policy</a> and
+                    <a href="https://policies.google.com/terms">Terms and Conditions</a> apply.
+                </p>
+            </div>
+
+
         </form>
 
 
@@ -53,6 +68,7 @@
 
     <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
     <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
+    <script src="{% static 'royalty_app/register.js'%}"></script>
     <link rel="stylesheet" href="{% static 'css/loged_out_form.css'%}">
 {% endblock %}
 

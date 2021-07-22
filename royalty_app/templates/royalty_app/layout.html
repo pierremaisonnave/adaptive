@@ -184,7 +184,7 @@
     {% if user.is_authenticated %}
       <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 main_authentificated" style="visibility: hidden" >
     {% else %}  
-      <main>
+      <main  style="visibility: hidden" >
     {% endif %}  
     {% block content %}{% endblock %}  
     </main>
