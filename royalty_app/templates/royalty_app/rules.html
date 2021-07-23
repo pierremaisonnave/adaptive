@@ -591,6 +591,112 @@
       </select>
     </div>
       
+
+  <!----------------------------------------------------------------------------->
+  <!----------------------------------Mini_guar---------------------------------->
+  <!----------------------------------------------------------------------------->
+
+  <div style="display:grid; grid-template-columns: 20px auto">
+    <span  class="bi-arrow-right-circle " id="unhide_mini_guar" onclick='unhide_table("mini_guar")'></span>
+    <span hidden class="bi-arrow-down-circle " id="hide_mini_guar" onclick='hide_table("mini_guar")'></span>
+    <h5 >Minimum Guarantee</h5>
+  </div>
+
+  <div id="mini_guar" hidden >
+    <div style=" display:grid;grid-template-columns: 320px 50px auto;margin-bottom:10px; width: 578px;">
+      <span>A minimum amount has to be paid/rec every year:</span>
+
+      <select   id="mini_gar_status" onchange="hide_unhide_mini(this)">
+        {% if "YES" == contract.mini_gar_status  %}
+          <option value="YES" selected="selected">YES</option>
+        {% else%}
+          <option value="YES" >YES</option>
+        {% endif %}
+
+        {% if "NO" == contract.mini_gar_status  %}
+        <option value="NO" selected="selected">NO</option>
+        {% else%}
+        <option value="NO" >NO</option>
+        {% endif %}
+      </select>
+      <div style="margin-left: 180px;">
+        <button  id="saved_button_mini" class="btn btn-sm btn-outline-success" title="save" onclick="save_mini({{contract.id}})" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+        <div id="spinner_mini" style="display: None;text-align: end">
+          <div class="sk-chase" >
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+          </div>
+        </div>
+        <div style="text-align: end; color:green ;display: None;" id="saved_message_mini" >Saved</div>
+      </div>
+    </div>  
+
+    <table  class="table table-striped table-sm"  style="max-width: 500px  " id="mini_table" {% if 'NO' == contract.mini_gar_status  %} hidden {% endif %} id="head_table" >
+      <thead>
+ 
+        <tr  >
+          <th >
+            <span>Amount</span>
+          </th>
+          <th>
+            <span>Country to allocate</span>
+          </th>
+          <th >
+            <span>From</span>
+          </th>
+          <th >
+            <span>To</span>
+          </th>
+
+        </tr>
+      </thead>
+      <tbody >
+        <tr >
+          <td ><!--Amount-->
+            <input type="text" class="fname number-separator"  id="minimum_guar_amount"  value='{{contract.minimum_guar_amount|default_if_none:""|floatformat:"-3g"}}' style="width: 100px;">
+          </td>
+          <td ><!--Country-->
+            <span hidden=true  id="span_minimum_guar_remaining_allocation_country">searched_value:{{contract.minimum_guar_remaining_allocation_country.country_id}} </span>
+            <select   class="fname" id="minimum_guar_remaining_allocation_country"  style="width:140px">
+              <!--Contrary to other fields, division via is not a mandatory field, hence, if this field is empty, we should select the value ""-->
+              {% if contract.minimum_guar_remaining_allocation_country is None  %}
+                <option value="" selected="selected"></option>
+                {% else%}
+                <option value="" ></option>
+              {% endif %}  
+              {% for region in region_list %}  
+                <optgroup label={{region.region}}>
+                  {% for country in country_list %}
+                    {% if region == country.country_region%}
+                      {% if country == contract.minimum_guar_remaining_allocation_country  %}
+                        <option value="{{ country.country_id }}" selected="selected">{{ country.country_id }}   </option> 
+                      {% else %}
+                        <option value="{{ country.country_id }}"> {{ country.country_id }} </option>
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                </optgroup>
+              {% endfor %}
+            </select>
+          </td>
+          <td><!--Date From-->
+            <input style="background-color:transparent; border-style: None "  type="date" id="mini_gar_from" value="1900-01-01">
+          </td>
+
+          <td><!--Date To-->
+            <input style="background-color:transparent; border-style: None "  type="date" id="mini_gar_to" value="2100-01-01">
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>  
+
+    
   <!----------------------------------------------------------------------------->
   <!----------------------------------Sales_breakdown_per_contract--------------->
   <!----------------------------------------------------------------------------->

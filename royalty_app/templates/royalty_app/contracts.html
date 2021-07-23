@@ -18,34 +18,11 @@
           </td>
         </tr>
         <tr>
-          <td ><span style="width: 100%; margin-left:5px;">accounting:</span></td>
+
           <td > <!--Name-->
             <input type="text" id="contract_name_new" placeholder="Contract Name"  maxlength="50" style="width: 100%; margin-left:5px;">
           </td>
-          <td>
-            <!--M3 Brand list-->
-            <div style="width: 100%; margin-left:5px;">
-              {% if m3_brand_list %}
-                <div  class="comboTreeInputWrapper" dd_id="m3_brand_new">
-                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Brand Code" readonly dd_id="m3_brand_new" id="displayed_item_name_m3_brand_new" >
-                  <input type="text"   hidden id="hidden_item_code_m3_brand_new">
-                </div>
-                <div  class="comboTreeDropDownContainer" id="dropdown_m3_brand_new" style="display: none;">
-                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="m3_brand_new" >
-                    <ul  >
-                      {% for brand in m3_brand_list %}
-                        <li style="display: block;" class="item_single_select" dd_id="m3_brand_new">
-                          <span hidden>{{ brand.id }}</span><span hidden> : </span><span>{{ brand.brand_name }}</span>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                </div>
-              {% else %}
-                <input type="text" readonly placeholder="Brand: Empty"  style="width:100%" title="please insert brands in static data tab" id="displayed_item_name_m3_brand_new" >
-                <input type="text"   hidden id="hidden_item_code_m3_brand_new">
-              {% endif %}
-            </div>
-          </td>
+
           <td>
             <!--Gald Div list-->
             <div style="width: 100%; margin-left:5px;">
@@ -71,9 +48,9 @@
             </div>
 
           </td>
-          <td>
+          <td style="display: None;"> 
             <!-- Div via-->
-            <div style="width: 100%; margin-left:5px; display: None;">
+            <div style="width: 100%; margin-left:5px; ">
               {% if division_list %}
                 <div  class="comboTreeInputWrapper" dd_id="division_via_new">
                   <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="pass-through division" readonly dd_id="division_via_new" id="displayed_item_name_division_via_new" >
@@ -97,12 +74,8 @@
                   <input type="text" readonly placeholder="pass-through division: Empty"  style="width:100%" title="please insert pass-through division in static data tab" id="displayed_item_name_division_via_new">
                 {% endif %}
             </div>
-
           </td>
-        </tr>
-        <tr>
-          <td ><span style="width: 100%; margin-left:5px;">payment:</span></td>
-          <td >
+          <td ><!--pay/REC-->
             <div style="width: 100%; margin-left:5px;">
               <select  style="width: 100% ; padding:2px" id="transaction_direction_new" >
                 <option value="PAY"> PAY</option>
@@ -135,6 +108,10 @@
             </div>
 
           </td>
+        </tr>
+        <tr>
+
+          
           <td>
             <!--periodicity-->
             <div style="width: 100%; margin-left:5px;">
@@ -163,9 +140,33 @@
           <td ><!--payment terms-->
             <input id="payment_terms_new" placeholder="nb days-payment terms"  type="number" min="0"  style="width: 100%; margin-left:5px;">
           </td>
+          <td>
+            <!--M3 Brand list-->
+            <div style="width: 100%; margin-left:5px;">
+              {% if m3_brand_list %}
+                <div  class="comboTreeInputWrapper" dd_id="m3_brand_new">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Brand Code" readonly dd_id="m3_brand_new" id="displayed_item_name_m3_brand_new" >
+                  <input type="text"   hidden id="hidden_item_code_m3_brand_new">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_m3_brand_new" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="m3_brand_new" >
+                    <ul  >
+                      {% for brand in m3_brand_list %}
+                        <li style="display: block;" class="item_single_select" dd_id="m3_brand_new">
+                          <span hidden>{{ brand.id }}</span><span hidden> : </span><span>{{ brand.brand_name }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+              {% else %}
+                <input type="text" readonly placeholder="Brand: Empty"  style="width:100%" title="please insert brands in static data tab" id="displayed_item_name_m3_brand_new" >
+                <input type="text"   hidden id="hidden_item_code_m3_brand_new">
+              {% endif %}
+            </div>
+          </td>
         </tr>
         <tr>
-          <td ><span style="width: 100%; margin-left:5px;">Minimum Guarantee (/year):</span></td>
+
           <td ><!--mini gar status-->
             <div   style="width: 100%; margin-left:5px;">
               <select  style="width: 100%; padding:2px"  id="mini_gar_status_new" onchange="hide_option()" >
@@ -221,17 +222,27 @@
 
       
         <tr > <!--last row-->
-          <td colspan="2">
+          <td colspan="3">
             <div style="width: 100%; margin-left:5px;">
               <div id="message_save" style="color: green;" hidden > Item saved</div>
               <div id="message_error" style="color: red;" hidden > error: some fields are missing</div>
           </div>
           </td>
-          <td></td>
-          <td></td>
-          <td >
-            <div style="width: 100%; text-align: end; margin-left:5px;">
-              <button class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()" title="save"><span class="bi bi-save2-fill"></span></button>
+          <td style="  float: right;display:grid;grid-template-columns: 35px  35px">
+               <div style="margin-right: 3px">
+                  <button class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()" title="save" id="saved_button_contract" style="display: Block;"><span class="bi bi-save2-fill"></span></button>
+                  <div id="spinner_contract" style="display: None; padding-top: 6px;padding-left: 4px">
+                    <div class="sk-chase" >
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                      <div class="sk-chase-dot"></div>
+                    </div>
+                  </div>
+                  <div style="text-align: end; color:green ;display: None;    position: relative; right: 10px ;top:5px" id="saved_message_contract" >Saved</div>
+                </div>
               <button class="btn btn-sm btn-outline-warning"  onclick="cancel_new_record()" type="reset" title="cancel"> <span class="bi bi-x-circle"></span></button>
             </div>
           </td>
@@ -269,26 +280,30 @@
         <tr >
           <td ><input type="checkbox" checked value=1 onclick="column_visibility(this,1)"></td>
           <td >Name</td>
-          <td ><input type="checkbox" checked value=2 onclick="column_visibility(this,2)"></td>
-          <td >Brand</td>
 
-          <td ><input type="checkbox" checked value=3 onclick="column_visibility(this,3)"></td>
+          <td ><input type="checkbox" checked value=2 onclick="column_visibility(this,2)"></td>
           <td >Division</td>
 
-          <td ><input style="display: None;" type="checkbox"  value=4 onclick="column_visibility(this,4)"></td>
-          <td ><span style="display: None;">Division via</span></td>
-        </tr>
-        <tr >
-          <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5)"></td>
+          <td ><input type="checkbox" checked value=3 onclick="column_visibility(this,3)"></td>
           <td >Pay/Rec</td>
-          <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6)"></td>
+
+          <td ><input type="checkbox" checked value=4 onclick="column_visibility(this,4)"></td>
           <td >Curr</td>
 
-          <td ><input type="checkbox" checked value=7 onclick="column_visibility(this,7)"></td>
+        </tr>
+        <tr >
+          
+          <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5)"></td>
           <td >periodicity</td>
 
-          <td ><input type="checkbox" checked value=8 onclick="column_visibility(this,8)"></td>
+          <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6)"></td>
           <td >payment terms:nb days</td>
+
+          <td ><input type="checkbox" checked value=7 onclick="column_visibility(this,7)"></td>
+          <td >Brand</td>
+
+          <td ><input style="display: None;" type="checkbox"  value=8 onclick="column_visibility(this,8)"></td>
+          <td ><span style="display: None;">Division via</span></td>
         </tr>
         <tr >
           <td ><input type="checkbox"   value=9 onclick="column_visibility(this,9)"></td>
@@ -332,13 +347,13 @@
         <tr style="height:65px">
           <th style="border-top:none; padding-left: 8px; width:20px">ID</th>
           <th style="border-top:none; padding-left: 8px">Name</th>
-          <th style="border-top:none; padding-left: 8px;">Brand</th>
           <th style="border-top:none; padding-left: 8px;width:50px;">Division</th>
-          <th style="border-top:none; padding-left: 8px;width:50px;">via</th>
           <th style="border-top:none; padding-left: 8px;width:50px;">Pay/Rec</th>
           <th style="border-top:none; padding-left: 8px;width:50px;">Curr</th>
           <th style="border-top:none; padding-left: 8px;">periodicity</th>
           <th style="border-top:none; padding-left: 8px;width:70px;">nb days</th>
+          <th style="border-top:none; padding-left: 8px;">Brand</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">via</th>
           <th style="border-top:none; padding-left: 8px;width:50px;">Yes/No</th>
           <th style="border-top:none; padding-left: 8px;">Amount</th>
           <th style="border-top:none; padding-left: 8px;width:50px;" >Country</th>
@@ -356,18 +371,6 @@
               <span hidden class="fname"  id="span_contract_name_{{contract.id}}" >{{contract.contract_name}}</span>
               <input type="text" class="fname"contract_id={{contract.id}} id="contract_name_{{contract.id}}"  value='{{contract.contract_name}}'>
             </td>
-            <td><!--Brand-->
-              <span hidden class="fname"  id="span_m3_brand_{{contract.id}}" >searched_value:{{contract.m3_brand.brand_name}}</span>
-              <select class="fname" contract_id={{contract.id}} id="m3_brand_{{contract.id}}">
-                {% for brand in m3_brand_list %}
-                  {% if brand == contract.m3_brand  %}
-                    <option value="{{ brand.id }}" selected="selected">{{ brand.brand_name }}</option>
-                  {% else%}
-                    <option value="{{ brand.id }}">{{ brand.brand_name }}</option>
-                  {% endif %}
-                {% endfor %}
-            </select>
-            </td>
             <td><!--Division-->
               <span hidden class="fname"  id="span_division_{{contract.id}}" >searched_value:{{contract.division.division_id}}</span>
               <select class="fname" contract_id={{contract.id}} id="division_{{contract.id}}">
@@ -380,26 +383,6 @@
                 {% endfor %}
               </select>
             </td>
-
-            <td><!--Division via-->
-              <span hidden class="fname"  id="span_division_via_{{contract.id}}" >searched_value:{{contract.division_via.division_id}}</span>
-              <select class="fname" contract_id={{contract.id}} id="division_via_{{contract.id}}">
-                <!--Contrary to other fields, division via is not a mandatory field, hence, if this field is empty, we should select the value ""-->
-                {% if contract.division_via is None  %}
-                  <option value="" selected="selected"></option>
-                  {% else%}
-                  <option value="" ></option>
-                {% endif %}  
-                {% for division in division_list %}
-                  {% if division == contract.division_via  %}
-                    <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}</option>
-                  {% else%}
-                    <option value="{{ division.division_id }}" >{{ division.division_id }}</option>
-                  {% endif %}
-                {% endfor %}
-              </select>
-            </td>
-
             <td><!--pay/rec-->
               <span hidden class="fname"  id="span_transaction_direction_{{contract.id}}" >searched_value:{{contract.transaction_direction}}</span>
               <select class="fname" contract_id={{contract.id}} id="transaction_direction_{{contract.id}}">
@@ -439,6 +422,39 @@
               <span hidden class="fname"  id="span_payment_terms_{{contract.id}}" >{{contract.payment_terms}}</span>
               <input type="number" class="fname"contract_id={{contract.id}} id="payment_terms_{{contract.id}}" value='{{contract.payment_terms}}'>
             </td>
+            <td><!--Brand-->
+              <span hidden class="fname"  id="span_m3_brand_{{contract.id}}" >searched_value:{{contract.m3_brand.brand_name}}</span>
+              <select class="fname" contract_id={{contract.id}} id="m3_brand_{{contract.id}}">
+                {% for brand in m3_brand_list %}
+                  {% if brand == contract.m3_brand  %}
+                    <option value="{{ brand.id }}" selected="selected">{{ brand.brand_name }}</option>
+                  {% else%}
+                    <option value="{{ brand.id }}">{{ brand.brand_name }}</option>
+                  {% endif %}
+                {% endfor %}
+            </select>
+            </td>
+
+
+            <td><!--Division via-->
+              <span hidden class="fname"  id="span_division_via_{{contract.id}}" >searched_value:{{contract.division_via.division_id}}</span>
+              <select class="fname" contract_id={{contract.id}} id="division_via_{{contract.id}}">
+                <!--Contrary to other fields, division via is not a mandatory field, hence, if this field is empty, we should select the value ""-->
+                {% if contract.division_via is None  %}
+                  <option value="" selected="selected"></option>
+                  {% else%}
+                  <option value="" ></option>
+                {% endif %}  
+                {% for division in division_list %}
+                  {% if division == contract.division_via  %}
+                    <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}</option>
+                  {% else%}
+                    <option value="{{ division.division_id }}" >{{ division.division_id }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </td>
+
 
             <td><!--yes/no mini gar-->
               <span hidden class="fname"  id="span_mini_gar_status_{{contract.id}}" >searched_value:{{contract.mini_gar_status}}</span>

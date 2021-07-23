@@ -958,6 +958,41 @@ def new_contract(request):
       return JsonResponse({"contract_id": contract.id}, status=201)
     except: return JsonResponse({"error": "data not loaded"}, status=404)
 
+
+#API to save new mini gar
+@csrf_exempt
+@login_required 
+def save_mini(request,contract_id):
+ 
+  try:
+    contract = Contract.objects.get( id=contract_id)
+  except contract.DoesNotExist:
+    return JsonResponse({"error": "post not found."}, status=404)
+
+  if request.method == "PUT":
+    data = json.loads(request.body)
+
+    if data["country_id"] == "" : 
+      minimum_guar_remaining_allocation_country= None
+    else :
+      minimum_guar_remaining_allocation_country=Country.objects.get(country_id=data["country_id"])
+    
+    if data["amount"] == "" : 
+      minimum_guar_amount= None
+    else :
+      minimum_guar_amount=data["amount"] 
+    print(data)
+    contract.mini_gar_status = data["mini_gar_status"]
+    contract.mini_gar_from = data["mini_gar_from"]
+    contract.mini_gar_to = data["mini_gar_to"]
+    contract.minimum_guar_amount = minimum_guar_amount
+    contract.minimum_guar_remaining_allocation_country=minimum_guar_remaining_allocation_country
+    contract.save()
+    return JsonResponse({"result": "all done"}, status=201)
+
+  else:
+    return JsonResponse({"error": "GET or PUT request required."}, status=400)
+
 @csrf_exempt 
 @login_required
 def delete_row_contract(request,contract_id):

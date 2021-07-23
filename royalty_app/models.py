@@ -116,6 +116,8 @@ class Contract(models.Model):
     payment_terms= models.IntegerField()
     m3_brand=  models.ForeignKey(Brand, related_name="m3_brand",on_delete=models.PROTECT)
     mini_gar_status=models.CharField(max_length=3,choices=(('YES','YES'),('NO','NO')), default='NO')
+    mini_gar_from=models.DateField(default="1900-01-01")
+    mini_gar_to=models.DateField(default="2100-01-01")
     minimum_guar_amount=models.IntegerField(null=True,blank=True)
     minimum_guar_remaining_allocation_country= models.ForeignKey(Country, related_name="minimum_guar_remaining_allocation_country",on_delete=models.SET_NULL,null=True,blank=True)
     def __str__(self):

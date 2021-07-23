@@ -500,3 +500,62 @@ function unhide_table(table){
     document.getElementById(`hide_${table}`).hidden=false
     document.getElementById(`unhide_${table}`).hidden=true
 }
+
+function hide_unhide_mini(elm){
+    mini_table= document.getElementById('mini_table')
+
+    if (elm.value == "YES"){
+        mini_table.hidden=false
+
+    }else{
+        mini_table.hidden=true
+
+    }
+}
+
+function save_mini(contract_id){
+    //definition of the elements
+    
+    saved_button_mini=document.getElementById('saved_button_mini')
+    spinner_mini=document.getElementById('spinner_mini')
+    saved_message_mini=document.getElementById('saved_message_mini')
+
+    mini_gar_status=document.getElementById('mini_gar_status')
+    mini_gar_from=document.getElementById('mini_gar_from')
+    mini_gar_to=document.getElementById('mini_gar_to')
+    minimum_guar_remaining_allocation_country=document.getElementById('minimum_guar_remaining_allocation_country')
+    minimum_guar_amount=document.getElementById('minimum_guar_amount')
+
+    
+
+    if (mini_gar_status.value=="NO"){
+        minimum_guar_remaining_allocation_country.value=""
+        minimum_guar_amount.value=""
+        mini_gar_from.value="1900-01-01"
+        mini_gar_to.value="2100-01-01"
+    }else{
+        if (mini_gar_from.value>mini_gar_to.value){
+            alert(" Date 'From' must be before date 'to'")
+            return
+        }
+    }
+    //hide save button and show spinner
+    saved_button_mini.style.display='none'
+    spinner_mini.style.display='block'
+
+    fetch(`/save_mini/${contract_id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            country_id : minimum_guar_remaining_allocation_country.value,
+            amount: Number(minimum_guar_amount.value.split(',').join("")),
+            mini_gar_status: mini_gar_status.value,   
+            mini_gar_from:mini_gar_from.value,
+            mini_gar_to:mini_gar_to.value  , 
+        })
+      }).then(response => response.json())
+        .then(result => { 
+            spinner_mini.style.display='none'
+            saved_message_mini.style.display='block'  
+            setTimeout(function() {saved_message_mini.style.display='none';saved_button_mini.style.display='block' }, 1000)
+            })    
+}

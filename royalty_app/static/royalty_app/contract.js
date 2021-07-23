@@ -377,6 +377,12 @@ function add_new_record(){
                 }} , 
                 2000)}
         else {
+            spinner_contract=document.getElementById("spinner_contract")
+            saved_button_contract=document.getElementById(id="saved_button_contract")
+            saved_message_contract=document.getElementById(id="saved_message_contract")
+            spinner_contract.style.display = "Block"
+            saved_button_contract.style.display = "None"
+        
             // we prepare the file to be imported in database
             var import_array = []
             for (var i = 0; i < length_dictionnary; i++) {
@@ -405,28 +411,30 @@ function add_new_record(){
                         `<a href='/contracts/${contract_id}'><span class="fname" contract_id=${contract_id} id="id_${contract_id}" >${contract_id}</span></a>`,
                     //tr 1 Name
                         `<span hidden=true id="span_contract_name_${contract_id}">${contract_name}</span><input type="text" class="fname" contract_id=${contract_id} id=contract_name_${contract_id} placeholder="m3 code" value="${contract_name}">`,
-                    //tr 2 Brand
-                        `<span hidden=true id="span_m3_brand_${contract_id}">searched_value:${m3_brand_name}</span>`,
-                    //tr 3 division
+                    //tr 2 division
                         `<span hidden=true id="span_division_${contract_id}">searched_value:${division_id}</span>`,
-                    //tr 4 division via
-                        `<span hidden=true id="span_division_via_${contract_id}">searched_value:${division_via_id}</span>`,
-                    //tr 5 transaction_direction
+                    //tr 3 transaction_direction
                         `<span hidden=true id="span_transaction_direction_${contract_id}">searched_value:${transaction_direction}</span>
                         <select class="fname" contract_id=${contract_id} id="transaction_direction_${contract_id}">
                             <option value="PAY" ${ pay_value}>PAY</option>
                             <option value="REC" ${ rec_value}>REC</option>
                         </select>
                         `,
-                    //tr 6 payment_currency
+                    //tr 4 payment_currency
                         `<span id="span_contract_currency_${contract_id}">${contract_currency_name}</span>`,
-                    //tr 7 periodicity
+                    //tr 5 periodicity
                         `<span hidden=true id="span_payment_periodicity_${contract_id}">searched_value:${periodicity_name}</span>`,
-                    //tr 8 payment_terms
+                    //tr 6 payment_terms
                     `
                         <span hidden=true id="span_payment_terms_${contract_id}">${payment_terms}</span>
                         <input type="number" class="fname" contract_id=${contract_id} id=payment_terms_${contract_id} placeholder="m3 code" value="${payment_terms}">
-                    `,
+                    `,                    
+                    //tr 7 Brand
+                        `<span hidden=true id="span_m3_brand_${contract_id}">searched_value:${m3_brand_name}</span>`,
+
+                    //tr 8 division via
+                        `<span hidden=true id="span_division_via_${contract_id}">searched_value:${division_via_id}</span>`,
+
                     //tr 9 mini_gar_status
                         `<span hidden=true id="span_mini_gar_status_${contract_id}">searched_value:${mini_gar_status}</span>
                          <select class="fname" contract_id=${contract_id} id="mini_gar_status_${contract_id}">
@@ -463,7 +471,7 @@ function add_new_record(){
                                 var itm = document.getElementById("m3_brand_newlist"); 
                                 var cln = itm.cloneNode(true);
                             // we select xth element from this row, which correspond to the column
-                                selected_td=t.getElementsByTagName("td")[2]; 
+                                selected_td=t.getElementsByTagName("td")[7]; 
                             //// we append the drop down list
                                 selected_td.appendChild(cln)
                             // we select the last node in the td (the first node being the span) and change the ID and contract code
@@ -479,7 +487,7 @@ function add_new_record(){
                                 var itm = document.getElementById("division_newlist"); 
                                 var cln = itm.cloneNode(true);
                             // we select xth element from this row, which correspond to the column
-                                selected_td=t.getElementsByTagName("td")[3]; 
+                                selected_td=t.getElementsByTagName("td")[2]; 
                             //// we append the drop down list
                                 selected_td.appendChild(cln)
                             // we select the last node in the td (the first node being the span) and change the ID and contract code
@@ -495,7 +503,7 @@ function add_new_record(){
                                 var itm = document.getElementById("division_via_newlist"); 
                                 var cln = itm.cloneNode(true);
                             // we select xth element from this row, which correspond to the column
-                                selected_td=t.getElementsByTagName("td")[4]; 
+                                selected_td=t.getElementsByTagName("td")[8]; 
                             //// we append the drop down list
                                 selected_td.appendChild(cln)
                             // we select the last node in the td (the first node being the span) and change the ID and contract code
@@ -512,7 +520,7 @@ function add_new_record(){
                                 var itm = document.getElementById("payment_periodicity_newlist"); 
                                 var cln = itm.cloneNode(true);
                             // we select xth element from this row, which correspond to the column
-                                selected_td=t.getElementsByTagName("td")[7]; 
+                                selected_td=t.getElementsByTagName("td")[5]; 
                             //// we append the drop down list
                                 selected_td.appendChild(cln)
                             // we select the last node in the td (the first node being the span) and change the ID and contract code
@@ -550,8 +558,10 @@ function add_new_record(){
                             tr_newlycreated=document.getElementById(`contract_${contract_id}`)
                             color_tr_newlycreated=tr_newlycreated.style.backgroundColor
                             tr_newlycreated.style.backgroundColor="#b3e3be"
-                            message_save.hidden=false
-                            setTimeout(function() { message_save.hidden=true;tr_newlycreated.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that thje load has been done
+                            saved_message_contract.style.display = "Block"
+                            spinner_contract.style.display = "None"
+                            
+                            setTimeout(function() {saved_message_contract.style.display = "None";saved_button_contract.style.display = "Block";tr_newlycreated.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that the load has been done
                             hide_column()
                             cancel_new_record()
                             document.getElementById("form_new").reset() // once the form is submitted , we reset the form                
@@ -633,3 +643,4 @@ function hide_column(){
         table.column( column_nb ).visible( false );
     }
 }
+

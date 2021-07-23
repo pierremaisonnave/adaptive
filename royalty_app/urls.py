@@ -52,6 +52,7 @@ urlpatterns = [
 
   #Rule :  contract_partner + formula/country/rate rules + contract breakdown
   path("save_contract_partner/<int:contract_id>", views.save_contract_partner, name="save_contract_partner"),
+  path("save_mini/<int:contract_id>", views.save_mini, name="save_mini"),
   path("save_rule/<int:contract_id>", views.save_rule, name="save_rule"),
   path("save_invoice_breakdown/<int:contract_id>", views.save_invoice_breakdown, name="save_invoice_breakdown"),
   path("new_contract_file", views.new_contract_file, name="new_contract_file"),
