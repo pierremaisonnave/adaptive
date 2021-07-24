@@ -106,6 +106,7 @@ DATABASES = {
         'HOST': os.getenv('POSTGRES_HOST'),#'ec2-54-83-82-187.compute-1.amazonaws.com',
         'PORT': '5432',
     }
+    
 }
 '''
 

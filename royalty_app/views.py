@@ -30,6 +30,10 @@ from django.shortcuts import render
 from django.contrib.auth import get_user_model
 from django_email_verification import send_email
 
+import time
+from .forms import  CustomerForm
+import requests
+
 #CAPTCHA
 from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY
 
@@ -107,7 +111,6 @@ def register_page(request):
 
 
 
-import requests
 def register(request):
 
   if request.method == "POST":
@@ -172,7 +175,6 @@ def logout_view(request):
   return HttpResponseRedirect(reverse("home"))    
 
 
-from .forms import  CustomerForm
 @login_required
 def accountSettings(request):
   print(request.user)
@@ -457,7 +459,7 @@ def partners(request):
   
   return render(request, 'royalty_app/partners.html',  { "payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list})
 
-import time
+
 @login_required(login_url='/login')
 def contracts(request):
 
@@ -2223,13 +2225,30 @@ def new_report(request):
    
 
         #---------------Save in database----------------
-
+        from sqlalchemy import create_engine
+        import os
         conn = sqlite3.connect('royalty/db.sqlite3')
-        
+        from royalty.settings.heroku import  DATABASES
+        print('DATABASES')
+
+        conn = DATABASES
+        '''
+        user=os.getenv("POSTGRES_USER")
+        password=os.getenv("POSTGRES_PWD")
+        database_name=os.getenv("POSTGRES_NAME")
+        host=os.getenv("POSTGRES_HOST")
+   
+
+        database_url = f'postgresql+psycopg2://{user}:{password}@{host}:5432/{database_name}'
+
+        conn = create_engine(database_url, echo=False)
+        '''
+
+        print(df_sales)
         df_sales['import_file_id']=file.id
         df_sales.to_sql('royalty_app_sale', con=conn,index=False,if_exists="append")
         print("df_sales loaded succesfully")
-
+        stopppp
         df_fx['import_file_id']=file.id
         df_fx.to_sql('royalty_app_fx', con=conn,index=False,if_exists="append")
         print("df_fx loaded succesfully")
