@@ -2225,14 +2225,15 @@ def new_report(request):
    
 
         #---------------Save in database----------------
-        from sqlalchemy import create_engine
-        import os
+
         conn = sqlite3.connect('royalty/db.sqlite3')
         from royalty.settings.heroku import  DATABASES
         print('DATABASES')
 
         conn = DATABASES
         '''
+        from sqlalchemy import create_engine
+        import os
         user=os.getenv("POSTGRES_USER")
         password=os.getenv("POSTGRES_PWD")
         database_name=os.getenv("POSTGRES_NAME")
