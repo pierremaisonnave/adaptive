@@ -71,11 +71,22 @@
               <div id="message_period"  hidden > make sure your import file contains FX and Sales for the period: <span id="period_message_date"> </span> </div>
           </div>
           </td>
-          <td ><!--Button-->
-            <div style="width: 100%; text-align: end; margin-left:5px;">
-              <button type="submit" class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()"><span class="bi bi-save2-fill"></span></button>
-              <button class="btn btn-sm btn-outline-warning"  type="reset" title="cancel"> <span class="bi bi-x-circle"></span></button>
+          <td  style="  float: right;display:grid;grid-template-columns: 35px  35px"><!--Button-->
+            <div style="margin-right: 3px">
+              <button type="submit" class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()" id="saved_button"><span class="bi bi-save2-fill"></span></button>
+              <div id="spinner" style="display: None; padding-top: 6px;padding-left: 4px">
+                <div class="sk-chase" >
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                  <div class="sk-chase-dot"></div>
+                </div>
+              </div>
+              <div style="text-align: end; color:green ;display: None;    position: relative; right: 10px ;top:5px" id="saved_message" >Saved</div>
             </div>
+            <button class="btn btn-sm btn-outline-warning"  type="reset" title="cancel"> <span class="bi bi-x-circle"></span></button>
           </td>
         </tr>
       </table> 

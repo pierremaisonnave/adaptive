@@ -198,6 +198,18 @@ function delete_rule(elm){
     elm.parentElement.parentElement.remove()
 }
 function save_rule(contract_id){
+    //verify that date from/to coherent
+    table=document.getElementById(id="rule_table").children[1]
+    length_table=table.rows.length-1
+    for (var i = 0; i < length_table; i++) {
+        row=table.rows[i]
+        period_from= row.cells[3].children[0].value
+        period_to= row.cells[4].children[0].value
+        if (period_from>period_to){
+            alert("make sure your date from/to are coherent")
+            return
+        }
+    }
     //Select the spinner, save button and message
     spinner_rule=document.getElementById("spinner_rule")
     saved_button_rule=document.getElementById(id="saved_button_rule")
@@ -208,8 +220,7 @@ function save_rule(contract_id){
     
     main_list=[]
     sub_list=[]
-    table=document.getElementById(id="rule_table").children[1]
-    length_table=table.rows.length-1
+
     //if (length_table ==0){return}
     for (var i = 0; i < length_table; i++) {
         row=table.rows[i]
@@ -531,11 +542,15 @@ function save_mini(contract_id){
     if (mini_gar_status.value=="NO"){
         minimum_guar_remaining_allocation_country.value=""
         minimum_guar_amount.value=""
-        mini_gar_from.value="1900-01-01"
-        mini_gar_to.value="2100-01-01"
+        mini_gar_from.value=1900
+        mini_gar_to.value=2100
     }else{
         if (mini_gar_from.value>mini_gar_to.value){
             alert(" Date 'From' must be before date 'to'")
+            return
+        }
+        if (mini_gar_from.value=="" || mini_gar_to.value==""){
+            alert(" year fields are empty")
             return
         }
     }

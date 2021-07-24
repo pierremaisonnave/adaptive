@@ -116,8 +116,8 @@ class Contract(models.Model):
     payment_terms= models.IntegerField()
     m3_brand=  models.ForeignKey(Brand, related_name="m3_brand",on_delete=models.PROTECT)
     mini_gar_status=models.CharField(max_length=3,choices=(('YES','YES'),('NO','NO')), default='NO')
-    mini_gar_from=models.DateField(default="1900-01-01")
-    mini_gar_to=models.DateField(default="2100-01-01")
+    mini_gar_from=models.IntegerField(default=1900)
+    mini_gar_to=models.IntegerField(default=2100)
     minimum_guar_amount=models.IntegerField(null=True,blank=True)
     minimum_guar_remaining_allocation_country= models.ForeignKey(Country, related_name="minimum_guar_remaining_allocation_country",on_delete=models.SET_NULL,null=True,blank=True)
     def __str__(self):
@@ -184,8 +184,8 @@ class File(models.Model):
 
 class Sale(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
-    year= models.CharField(max_length=10)
-    month=models.CharField(max_length=2,null=True,blank=True)
+    year= models.IntegerField()
+    month=models.IntegerField()
     country_id= models.CharField(max_length=10,null=True,blank=True)
     SKU= models.CharField(max_length=10,null=True,blank=True)
     SKU_name= models.CharField(max_length=100,null=True,blank=True)
@@ -196,14 +196,14 @@ class Sale(models.Model):
 
 class Fx(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
-    year= models.CharField(max_length=10)
+    year= models.IntegerField()
     currency= models.CharField(max_length=10,null=True,blank=True)
     exchange_rate=models.FloatField(null=True,blank=True)
 
 class Rule_calc(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
     contract_id= models.CharField(max_length=100,null=True,blank=True)
-    year= models.CharField(max_length=6,null=True,blank=True)
+    year= models.IntegerField()
     contract_name= models.CharField(max_length=100,null=True,blank=True)
     country_incl_excl= models.CharField(max_length=100,null=True,blank=True)
     country_list= models.CharField(max_length=2000,null=True,blank=True)
@@ -217,7 +217,7 @@ class Rule_calc(models.Model):
 
 class Conso(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
-    year_of_sales=models.CharField(max_length=10)
+    year_of_sales=models.IntegerField()
     division= models.CharField(max_length=10,null=True,blank=True)
     brand_name= models.CharField(max_length=100,null=True,blank=True)
     country= models.CharField(max_length=100,null=True,blank=True)
@@ -246,8 +246,8 @@ class Detail(models.Model):
     division_country_id= models.CharField(max_length=10,null=True,blank=True)
     division_via= models.CharField(max_length=10,null=True,blank=True)
     field_type= models.CharField(max_length=50,null=True,blank=True)
-    year_of_sales= models.CharField(max_length=10)
-    month_of_sales= models.CharField(max_length=2,null=True,blank=True)
+    year_of_sales= models.IntegerField()
+    month_of_sales= models.IntegerField()
     SKU= models.CharField(max_length=10,null=True,blank=True)
     SKU_name= models.CharField(max_length=100,null=True,blank=True)    
     market_id= models.CharField(max_length=10,null=True,blank=True)
@@ -309,8 +309,8 @@ class Sales_breakdown_per_contract(models.Model):
 class Sales_breakdown_for_contract_report(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
     contract_name= models.CharField(max_length=100,null=True,blank=True)
-    year= models.CharField(max_length=10)
-    month= models.CharField(max_length=2,null=True,blank=True)
+    year= models.IntegerField()
+    month= models.IntegerField()
     country_id= models.CharField(max_length=10,null=True,blank=True)
     formulation= models.CharField(max_length=10,null=True,blank=True)
     SKU= models.CharField(max_length=10,null=True,blank=True)

@@ -287,6 +287,12 @@ function add_new_record(){
             2000)
         }
         else {
+            //define spinner
+            spinner=document.getElementById("spinner")
+            saved_button=document.getElementById(id="saved_button")
+            saved_message=document.getElementById(id="saved_message")
+            spinner.style.display = "Block"
+            saved_button.style.display = "None"
             // We load it via a fetch in the API
             fetch('/new_partner', {
                 method: 'POST',
@@ -399,9 +405,15 @@ function add_new_record(){
                         tr_newlycreated=document.getElementById(`partner_${partner_id}`)
                         color_tr_newlycreated=tr_newlycreated.style.backgroundColor
                         tr_newlycreated.style.backgroundColor="#b3e3be"
-                        message_save.hidden=false
 
-                        setTimeout(function() { message_save.hidden=true;tr_newlycreated.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that thje load has been done
+                        spinner.style.display = "None"
+                        saved_message.style.display = "Block";
+                        setTimeout(function() { 
+
+                            saved_message.style.display = "None";
+                            saved_button.style.display = "Block";
+                            tr_newlycreated.style.backgroundColor=color_tr_newlycreated 
+                            }, 1000) // we show a text explaining that thje load has been done
                         hide_column()
                         document.getElementById("form_new").reset() // once the form is submitted , we reset the form
                 }) 

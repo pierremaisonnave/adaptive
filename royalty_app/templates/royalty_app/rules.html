@@ -189,7 +189,7 @@
           <td> <!--Country-->
             <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
               <div  class="comboTreeInputWrapper" dd_id="ctry_{{forloop.counter0}}">
-                <input value='{% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "" %} except : {% endif %}{% endif %}{{ rule.country_list }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_{{forloop.counter0}}" id="item_list_display_ctry_{{forloop.counter0}}">
+                <input value='{% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "---" %} except : {{ rule.country_list }}{% endif %}{% else %}{{ rule.country_list }}{% endif %}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_{{forloop.counter0}}" id="item_list_display_ctry_{{forloop.counter0}}">
                 <input  value='{{ rule.country.all|join:"," }}' type="text" hidden  id="item_list_ctry_{{forloop.counter0}}" selection_mode=""> 
               </div>
             </div>
@@ -252,7 +252,7 @@
                 <tr>
                   <td>0</td>
                   <td onchange="add_row_tranche_rate(this)">
-                    <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="sales"   type="text">
+                    <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="infinity"   type="text">
                   </td>
                   <td>
                     <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
@@ -684,11 +684,11 @@
             </select>
           </td>
           <td><!--Date From-->
-            <input style="background-color:transparent; border-style: None "  type="date" id="mini_gar_from" value="1900-01-01">
+            <input style="background-color:transparent; border-style: None "  type="number" id="mini_gar_from" value="{{ contract.mini_gar_from }}"  >
           </td>
 
           <td><!--Date To-->
-            <input style="background-color:transparent; border-style: None "  type="date" id="mini_gar_to" value="2100-01-01">
+            <input style="background-color:transparent; border-style: None "  type="number" id="mini_gar_to" value="{{ contract.mini_gar_to }}" >
           </td>
           <td></td>
         </tr>

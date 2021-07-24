@@ -68,7 +68,15 @@ function add_new_record(){
             }} , 
             1000)
     }else{
+        //definition of spinner
         message_wait.hidden=false
+        spinner=document.getElementById("spinner")
+        saved_button=document.getElementById(id="saved_button")
+        saved_message=document.getElementById(id="saved_message")
+        spinner.style.display = "Block"
+        saved_button.style.display = "None"
+
+
         let formData = new FormData();
         formData.append('file_type', 'accruals');
         formData.append('name', name_value);
@@ -86,7 +94,10 @@ function add_new_record(){
             .then(response => response.json())
             .then(result => {
                 var file_id=result.file_id
+                spinner.style.display = "None"
+                
                 if (result.error){
+                    saved_button.style.display = "Block"
                     alert(result.error)
                 }else{
                     
@@ -108,11 +119,17 @@ function add_new_record(){
                         initial_gb_color=t.style.backgroundColor
                         t.style.backgroundColor="#b3e3be"
                         message_save.hidden=false
-                        setTimeout(function() {message_save.hidden=true;t.style.backgroundColor=initial_gb_color},1000)
+                        saved_message.style.display = "Block"
+                        setTimeout(function() {
+                            message_save.hidden=true;
+                            saved_message.style.display = "None"
+                            saved_button.style.display = "Block";
+                            t.style.backgroundColor=initial_gb_color},1000)
                     //reset for:
                         message_period.hidden=true 
-                        document.getElementById("form_new").reset()
+                        
                 }
+                document.getElementById("form_new").reset()
                 message_wait.hidden=true    
             })
     } 

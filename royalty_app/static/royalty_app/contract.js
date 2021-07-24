@@ -377,6 +377,7 @@ function add_new_record(){
                 }} , 
                 2000)}
         else {
+            //define spinner
             spinner_contract=document.getElementById("spinner_contract")
             saved_button_contract=document.getElementById(id="saved_button_contract")
             saved_message_contract=document.getElementById(id="saved_message_contract")
@@ -561,7 +562,10 @@ function add_new_record(){
                             saved_message_contract.style.display = "Block"
                             spinner_contract.style.display = "None"
                             
-                            setTimeout(function() {saved_message_contract.style.display = "None";saved_button_contract.style.display = "Block";tr_newlycreated.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that the load has been done
+                            setTimeout(function() {
+                                saved_message_contract.style.display = "None";
+                                saved_button_contract.style.display = "Block";
+                                tr_newlycreated.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that the load has been done
                             hide_column()
                             cancel_new_record()
                             document.getElementById("form_new").reset() // once the form is submitted , we reset the form                
