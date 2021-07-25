@@ -290,11 +290,11 @@ class Cash_flow(models.Model):
 
 class Wht(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
-    from_payor= models.CharField(max_length=10,null=True,blank=True)   
-    to_payee= models.CharField(max_length=10,null=True,blank=True)   
-    contract_currency= models.CharField(max_length=10,null=True,blank=True)   
+    from_payor= models.CharField(max_length=100,null=True,blank=True)   
+    to_payee= models.CharField(max_length=100,null=True,blank=True)   
+    contract_currency= models.CharField(max_length=20,null=True,blank=True)   
     amount_contract_curr= models.FloatField(null=True,blank=True) 
-    wht_rate= models.FloatField(null=True,blank=True) 
+    wht_rate= models.CharField(max_length=100,null=True,blank=True)
 
 class Sales_breakdown_item(models.Model):
     sales_breakdown_definition= models.CharField(max_length=50)
