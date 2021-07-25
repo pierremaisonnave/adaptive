@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG =True #os.getenv('DEBUG')
 
-ALLOWED_HOSTS = [ '127.0.0.1','localhost']#os.getenv('ALLOWED_HOST'),
+ALLOWED_HOSTS = [ '127.0.0.1','localhost','www.swissroy.ch',f'{os.getenv("ALLOWED_HOST")}'],
 
 
 
