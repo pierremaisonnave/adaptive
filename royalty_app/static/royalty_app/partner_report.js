@@ -117,16 +117,12 @@ function delete_row(elm){
     if (r == true) {
         tr_to_delete=elm.parentElement.parentElement
         file_id=tr_to_delete.children[1].innerHTML
-
+        t.row( tr_to_delete ).remove().draw(false);
         fetch(`/delete_row_file/${file_id}`, {
             method: 'POST',})
         .then(response => response.json())
         .then(result => {
-            if (result.error){
-                alert(result.error)
-            }else{     
-                t.row( tr_to_delete ).remove().draw(false);
-            }
+
         })
     }
 }
