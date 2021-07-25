@@ -2242,21 +2242,18 @@ def new_report(request):
         '''
         DATABASE_URL='acucxettlkslgy:94a33c4d67c61724d9fb6590f17b4dae0d0c6640f820657601173e278bdf54e5@ec2-54-87-112-29.compute-1.amazonaws.com:5432/d7dq3h8tda4f4j'
         final_db_url = "postgresql+psycopg2://" +DATABASE_URL
-        engine = create_engine(final_db_url)
+        conn = create_engine(final_db_url)
 
 
         df_sales['import_file_id']=file.id
 
         df_sales.to_sql(
           'royalty_app_sale', 
-          con=engine,
+          con=conn,
           index=False,
           if_exists="append"
         )
 
-
-
-        stopppp
 
 
 

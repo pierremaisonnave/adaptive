@@ -262,7 +262,7 @@ class Detail(models.Model):
     transaction_direction= models.CharField(max_length=10,null=True,blank=True)
     contract_currency= models.CharField(max_length=10,null=True,blank=True)
     amount_consolidation_curr= models.FloatField(null=True,blank=True)
-    Consolidation_currency= models.CharField(max_length=10,null=True,blank=True)
+    consolidation_currency= models.CharField(max_length=10,null=True,blank=True)
     contract_id= models.PositiveSmallIntegerField()
     contract_name= models.CharField(max_length=100,null=True,blank=True)
     partner_id= models.PositiveSmallIntegerField()
