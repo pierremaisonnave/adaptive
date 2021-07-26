@@ -17,8 +17,8 @@ DEBUG = env('DEBUG')
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env('SECRET_KEY')
 
-#ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
-ALLOWED_HOSTS = [ '127.0.0.1','localhost','www.swissroy.ch','swissroy-public.herokuapp.com','swissroy.ch'],
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+#ALLOWED_HOSTS = ['www.swissroy.ch','swissroy-public.herokuapp.com','swissroy.ch'],
 #ALLOWED_HOSTS = ['hellotest666.herokuapp.com','localhost']
 
 # Parse database connection url strings like psql://user:pass@127.0.0.1:8458/db

@@ -2311,7 +2311,7 @@ def new_report(request):
           df_cash_flow["import_file_id"]=file.id
           df_cash_flow.to_sql('royalty_app_cash_flow', con=conn, index=False, if_exists="append")
           print("df_cash_flow loaded succesfully")
-
+        
           df_wht['import_file_id']=file.id
           df_wht.to_sql('royalty_app_wht', con=conn, index=False, if_exists="append")
           print("df_wht loaded succesfully")
