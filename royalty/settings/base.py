@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG =True #os.getenv('DEBUG')
 
-ALLOWED_HOSTS = [ '127.0.0.1','localhost']#,'www.swissroy.ch',f'{os.getenv("ALLOWED_HOST")}'],
+ALLOWED_HOSTS = [ '127.0.0.1','localhost','www.swissroy.ch','swissroy.ch','swissroy-public.herokuapp.com']#,f'{os.getenv("ALLOWED_HOST")}'],
 
 
 
@@ -96,7 +96,7 @@ WSGI_APPLICATION = 'royalty.wsgi.application'
 
 #see https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
 
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -109,16 +109,13 @@ DATABASES = {
     
 }
 '''
-
-
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
+'''
 AUTH_USER_MODEL = 'royalty_app.User'
 
 # Password validation
