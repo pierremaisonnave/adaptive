@@ -12,9 +12,18 @@ urlpatterns = [
   path("logout", views.logout_view, name="logout"),
   path("new_profile_pict", views.new_profile_pict, name="new_profile_pict"),
   #pages
-  path('account/', views.accountSettings, name="account"),
 
-  path('partners', views.partners, name='partners'),
+
+
+  path('partners', views.partners_writer, name='partners'),
+  path('partners/to_validate', views.partners_to_validate, name='partners_to_validate'),
+  path('partners/current', views.partners_current, name='partners_current'),
+  path('validate_new_partner/<int:partner_id>', views.validate_new_partner, name='validate_new_partner'),
+  path('validate_change_partner/<int:partner_id>', views.validate_change_partner, name='validate_change_partner'),
+  path('reject_change_partner/<int:partner_id>', views.reject_change_partner, name='reject_change_partner'),
+  path('delete_partner/<int:partner_id>', views.delete_partner, name='delete_partner'),
+
+
   path('contracts', views.contracts, name='contracts'),
   path('contracts/<int:contract_id>', views.rules, name='rules'),
   path('analytics', views.analytics, name='analytics'),

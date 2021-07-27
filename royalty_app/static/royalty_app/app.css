@@ -190,3 +190,27 @@ select.fname{
   background-color: rgba(0,0,0,.05)
 }
 
+.approve_button:hover{
+  background-color: #e6f1e6;
+}
+.approve_button {
+  width:150px;
+  background-color:transparent
+}
+.reject_button:hover{
+  background-color: #efdedf;
+}
+
+.reject_button{
+  width:150px;
+  background-color:transparent
+}
+
+.previous_value_button:hover{
+  background-color: #d6cdcd;
+}
+.previous_value_button {
+  width:150px;
+  background-color:transparent
+}
+

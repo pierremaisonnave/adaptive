@@ -91,24 +91,76 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
 function delete_row(partner_id) {
-    var t = $('#partners_table').DataTable()
-    var r = confirm("Are you sure!");
-    if (r == true) {
-        fetch(`/delete_row_partner/${partner_id}`, {
+    // Here we grab the values from the form
+    fetch(`/cancel_row_partner/${partner_id}`)
+    //First, get the info from database 
+    .then(response => response.json())
+    .then(result => {
+        unhide_column()
+        restate_color_button(partner_id,"DELETE")
+        //get the row
+            var t = $('#partners_table').DataTable()
+            var row_to_modify=document.getElementById(`partner_${partner_id}`) 
+            td_list=row_to_modify.querySelectorAll('td')
+        //change the dom
+            //tr 1 M3 Code
+            td_list[1].innerHTML=`
+                <span hidden=true id="span_m3_code_${partner_id}">${result.partner_m3_code}</span>
+                <span style="cursor:default; padding-left:2px" >${result.partner_m3_code}</span>
+            `,
+            //tr 2 Name
+            td_list[2].innerHTML=`
+                <span hidden=true id="span_name_${partner_id}">${result.partner_name}</span>
+                <span style="cursor:default; padding-left:2px" >${result.partner_name}</span>
+            `,
+            //tr 3 ico_3rd
+            td_list[3].innerHTML=`
+                <span hidden=true id="span_ico_3rd_${partner_id}">searched_value:${result.ico_3rd}</span>
+                <span style="cursor:default; padding-left:4px" >${result.ico_3rd}</span>
+            `,
+            //tr 4 Country
+            td_list[4].innerHTML=`   <span hidden=true id="span_country_${partner_id}">searched_value:${result.country_id}</span>
+                <span style="cursor:default; padding-left:4px" >${result.country_id}:${result.country_name}</span>
+            `,
+            //tr 5 Bank
+            td_list[5].innerHTML=`
+                <span hidden=true id="span_bank_${partner_id}">${result.partner_bank_account}</span>
+                <span style="cursor:default; padding-left:2px" >${result.partner_bank_account}</span>
+            `,
+            //tr 6 Payment Type
+            td_list[6].innerHTML=`<span hidden=true id="span_payment_type_${partner_id}">searched_value:${result.partner_payment_type}</span>
+            <span style="cursor:default; padding-left:0px" >${result.partner_payment_type}</span>
+            `,
+            //tr 7 Button
+            td_list[7].outerHTML=`<td><span style="color:orange"> NEW pending validation</span></td>`,
+
+        // save the value in the datatable
+            td_list_html=[
+                td_list[0].innerHTML,
+                td_list[1].innerHTML,
+                td_list[2].innerHTML,
+                td_list[3].innerHTML,
+                td_list[4].innerHTML,
+                td_list[5].innerHTML,
+                td_list[6].innerHTML,
+                td_list[7].innerHTML,
+            ]
+            t.row(row_to_modify).data(td_list_html).draw(false)
+
+        hide_column()
+    })
+    //Secondly, we send the request to the database 
+    fetch(`/delete_row_partner/${partner_id}`, {
             method: 'POST',})
         .then(response => response.json())
         .then(result => {
-            if (result.error){
-                alert(result.error)
-            }else{
-                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
-                t.row( tr_to_delete ).remove().draw(false);
-            }
+            if (result.error){alert(result.error)}
         })
-    } 
-}
+}               
+
+
+
 
 function cancel_row_partner(partner_id){
     //Everytime the user decide to cancel a modification, we must go thought a 3 steps approache
@@ -122,6 +174,7 @@ function cancel_row_partner(partner_id){
         //Second, populate the page based on the info extracted from the databse
         //we first need to unhide all columns
         unhide_column()
+        restate_color_button(partner_id,"CANCEL")         // we restate the color to blank   
         //M3 Code
             document.getElementById(`span_m3_code_${partner_id}`).innerHTML=result.partner_m3_code
             document.getElementById(`m3_code_${partner_id}`).setAttribute("value",`${result.partner_m3_code}`)
@@ -154,11 +207,11 @@ function cancel_row_partner(partner_id){
                 selected_option.setAttribute('selected','selected')
 
         // bank account
-            document.getElementById(`span_bank_${partner_id}`).innerHTML="searched_value:"+result.partner_bank_account
+            document.getElementById(`span_bank_${partner_id}`).innerHTML=result.partner_bank_account
             document.getElementById(`bank_${partner_id}`).setAttribute("value",`${result.partner_bank_account}`) 
         //payment type   
             //span   
-                document.getElementById(`span_payment_type_${partner_id}`).innerHTML=result.partner_payment_type
+                document.getElementById(`span_payment_type_${partner_id}`).innerHTML="searched_value:"+result.partner_payment_type
             //Select
                 var payment_list= document.getElementById(`payment_type_${partner_id}`)
                 //we first need to remove the selected from the previous option ( otherwise it remains)
@@ -189,7 +242,7 @@ function cancel_row_partner(partner_id){
 
         //------------------------------------------------------------------------
 
-        restate_color_button(partner_id)         // we restate the color to blank   
+
         hide_column()   
     }); 
 }
@@ -200,13 +253,70 @@ function change_row(partner_id){
     partner_m3_code = document.getElementById(`m3_code_${partner_id}`).value,
     partner_name = document.getElementById(`name_${partner_id}`).value,
     ico_3rd = document.getElementById(`ico_3rd_${partner_id}`).value,
-    country_id =document.getElementById(`country_${partner_id}`).value,
+    country_input=document.getElementById(`country_${partner_id}`)
+    country_id =country_input.value,
+    country_name=country_input.options[country_input.selectedIndex].text
     partner_bank_account =document.getElementById(`bank_${partner_id}`).value,   
-    partner_payment_type_id  =document.getElementById(`payment_type_${partner_id}`).value, 
-    hide_column()     
+    partner_payment_input=document.getElementById(`payment_type_${partner_id}`)
+    partner_payment_type_id  =partner_payment_input.value
+    partner_payment_type=partner_payment_input.options[partner_payment_input.selectedIndex].text
+    unhide_column()    
+    restate_color_button(partner_id,"CHANGE") 
+
+    //first, we change the DOM, and remove the select and so on
+        //get the row
+            var t = $('#partners_table').DataTable()
+            var row_to_modify=document.getElementById(`partner_${partner_id}`) 
+            td_list=row_to_modify.querySelectorAll('td')
+        //change the dom
+            //tr 1 M3 Code
+            td_list[1].innerHTML=`
+                <span hidden=true id="span_m3_code_${partner_id}">${partner_m3_code}</span>
+                <span style="cursor:default; padding-left:2px" >${partner_m3_code}</span>
+            `,
+            //tr 2 Name
+            td_list[2].innerHTML=`
+                <span hidden=true id="span_name_${partner_id}">${partner_name}</span>
+                <span style="cursor:default; padding-left:2px" >${partner_name}</span>
+            `,
+            //tr 3 ico_3rd
+            td_list[3].innerHTML=`
+                <span hidden=true id="span_ico_3rd_${partner_id}">searched_value:${ico_3rd}</span>
+                <span style="cursor:default; padding-left:4px" >${ico_3rd}</span>
+            `,
+            //tr 4 Country
+            td_list[4].innerHTML=`   <span hidden=true id="span_country_${partner_id}">searched_value:${country_id}</span>
+                <span style="cursor:default; padding-left:4px" >${country_id}:${country_name}</span>
+            `,
+            //tr 5 Bank
+            td_list[5].innerHTML=`
+                <span hidden=true id="span_bank_${partner_id}">${partner_bank_account}</span>
+                <span style="cursor:default; padding-left:2px" >${partner_bank_account}</span>
+            `,
+            //tr 6 Payment Type
+            td_list[6].innerHTML=`<span hidden=true id="span_payment_type_${partner_id}">searched_value:${partner_payment_type}</span>
+            <span style="cursor:default; padding-left:0px" >${partner_payment_type}</span>
+            `,
+            //tr 7 Button
+            td_list[7].outerHTML=`<td><span style="color:orange"> NEW pending validation</span></td>`,
+
+        // save the value in the datatable
+            td_list_html=[
+                td_list[0].innerHTML,
+                td_list[1].innerHTML,
+                td_list[2].innerHTML,
+                td_list[3].innerHTML,
+                td_list[4].innerHTML,
+                td_list[5].innerHTML,
+                td_list[6].innerHTML,
+                td_list[7].innerHTML,
+            ]
+            t.row(row_to_modify).data(td_list_html).draw(false)
+    //Secondly, load the modification in the database
+
     fetch(`/change_row/${partner_id}`, {
         
-        method: 'PUT',
+        method: 'POST',
         body: JSON.stringify({
             partner_m3_code : partner_m3_code,
             partner_name : partner_name,
@@ -217,14 +327,15 @@ function change_row(partner_id){
         })
       }).then(response => response.json())
         .then(result => {
+            if (!!result.error) {alert(result.error);return}
             tr_newlycreated=document.getElementById(`partner_${partner_id}`)
             color_tr_newlycreated=tr_newlycreated.style.backgroundColor
             tr_newlycreated.style.backgroundColor="#b3e3be"
             message_save.hidden=false
 
             setTimeout(function() { message_save.hidden=true;tr_newlycreated.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that thje load has been done
-            unhide_column()
-            restate_color_button(partner_id)
+
+
             hide_column()
             })
        
@@ -232,16 +343,26 @@ function change_row(partner_id){
 
 
 
-function restate_color_button(partner_id){
-    if (document.getElementById(`change_${partner_id}`)){
-    document.getElementById(`change_${partner_id}`).hidden=true
-    document.getElementById(`cancel_${partner_id}`).hidden=true
+function restate_color_button(partner_id,status){
+    if (status=="CHANGE" || status=="DELETE"){
+        //document.getElementById(`change_${partner_id}`).hidden=true
+        //document.getElementById(`cancel_${partner_id}`).hidden=true
+        //document.getElementById(`delete_${partner_id}`).hidden=true
+        //pending_validation_message=document.getElementById(`pending_validation_${partner_id}`)
+        //pending_validation_message.innerHTML=`${status} pending validation`
+        //pending_validation_message.hidden=false
+    }
+    if (status=="CANCEL" ){
+        document.getElementById(`change_${partner_id}`).hidden=true
+        document.getElementById(`cancel_${partner_id}`).hidden=true
+        document.getElementById(`delete_${partner_id}`).hidden=false
+    }       
     var entire_row = document.getElementById(`partner_${partner_id}`)
     for (var j = 0, col; col = entire_row.cells[j]; j++) {
         col.style.backgroundColor  = "transparent"
       }  
     }  
-}
+
 
 
 function add_new_record(){
@@ -321,79 +442,40 @@ function add_new_record(){
                         //tr 1 M3 Code
                         `
                             <span hidden=true id="span_m3_code_${partner_id}">${partner_m3_code}</span>
-                            <input type="text" class="fname" partner_id=${partner_id} id=m3_code_${partner_id} placeholder="m3 code" value="${partner_m3_code}">
+                            <span style="cursor:default; padding-left:2px" >${partner_m3_code}</span>
                         `,
                         //tr 2 Name
                         `
                             <span hidden=true id="span_name_${partner_id}">${partner_name}</span>
-                            <input type="text" class="fname" partner_id=${partner_id} id="name_${partner_id}" placeholder="name" value='${partner_name}'>
+                            <span style="cursor:default; padding-left:2px" >${partner_name}</span>
                         `,
                         //tr 3 ico_3rd
                         `
                             <span hidden=true id="span_ico_3rd_${partner_id}">searched_value:${ico_3rd}</span>
-                            <select style="width:100%;background-color: transparent;border-style: hidden;" partner_id=${partner_id} id="ico_3rd_${partner_id}">
-                                <option value="3rd" ${third_select}>3rd</option>
-                                <option value="ICO" ${ico_select}>ICO</option>
-                            </select>
+                            <span style="cursor:default; padding-left:4px" >${ico_3rd}</span>
                         `,
                         //tr 4 Country
-                        `<span hidden=true id="span_country_${partner_id}">searched_value:${country_id}</span>`,
+                        `   <span hidden=true id="span_country_${partner_id}">searched_value:${country_id}</span>
+                            <span style="cursor:default; padding-left:4px" >${country_id}:${country_name}</span>
+                        `,
                         //tr 5 Bank
                         `
                             <span hidden=true id="span_bank_${partner_id}">${partner_bank_account}</span>
-                            <input type="text" class="fname" partner_id=${partner_id} id="bank_${partner_id}" placeholder="bank account here" value='${partner_bank_account}'>
+                            <span style="cursor:default; padding-left:2px" >${partner_bank_account}</span>
                         `,
                         //tr 6 Payment Type
-                        `<span hidden=true id="span_payment_type_${partner_id}">${payment_name}</span>`,
-                        //tr 7 Button
-                        `
-                            <button class="btn btn-sm btn-outline-danger" title="delete" name="delete" partner_id=${partner_id} id="delete_${partner_id}" onclick="delete_row('${partner_id}')"><span class="bi bi-trash"></span></button>
-                            <button class="btn btn-sm btn-outline-success" title="save modification" partner_id=${partner_id} name="change" id="change_${partner_id}" hidden=true onclick="change_row('${partner_id}')"><span class="bi bi-save2-fill"></span></button>
-                            <button class="btn btn-sm btn-outline-warning" title="cancel modification" partner_id=${partner_id} name="cancel" id="cancel_${partner_id}" onclick="cancel_row_partner('${partner_id}')" hidden=true><span class="bi bi-x-circle"></span></button>
+                        `<span hidden=true id="span_payment_type_${partner_id}">searched_value:${payment_name}</span>
+                        <span style="cursor:default; padding-left:0px" >${payment_name}</span>
                         `,
+                        //tr 7 Button
+                        `<span style="color:orange"> NEW pending validation</span>`,
                     ] ).draw( false ).node();
 
                     // a new tr has been created, here add some attribute ( id and partner_id)
                     $(t).attr('partner_id',`${partner_id}`);
                     $(t).attr("id", `partner_${partner_id}`);
                     // the last tr, which corresponds to the buttons, must have a class attribute called "button_td"- this is used as a reference for the CSS
-                    td_button=t.getElementsByTagName("td")[7];
-                    $(td_button).attr('class','button_td');
-                    
-                    //for Country and payment, we need to add a drop down- as the dorpdown is pretty long, instead of adding it in the previous section (.draw.node) 
-                    //we prefer to copy the lists from a div- those divs are hidden to the user, and contain the country and payment list
-                        //........................................Add a country drop down list to the newly created row------------------
-                            // there is a div, in this page, that contains the country list- here we copy this div
-                                var itm = document.getElementById("country_newlist"); 
-                                var cln = itm.cloneNode(true);
-                            // we select the 4rth ( which is [4] as 0 is counted) element from this row, which correspond to the the country td
-                                td_country_list=t.getElementsByTagName("td")[4]; 
-                            //// we append the drop down list
-                                td_country_list.appendChild(cln)
-                            // we select the last node in the td (the first node being the span) and change the ID and partner code
-                                $(td_country_list.lastChild).attr('partner_id',`${partner_id}`); 
-                                $(td_country_list.lastChild).attr('id',`country_${partner_id}`);
-                            // we select from the list, the option node with the same country ID as the one entered by the user + we select it
-                                td_to_select=td_country_list.querySelectorAll(`option[value="${country_id}"]`)[0]
-                                $(td_to_select).attr('selected',`selected`)
-                        //........................................------------------------------------------------------------------
-
-                        //........................................Add a payment type drop down list to the newly created row------------------
-                            // there is a div, in this page, that contains the payment list- here we copy this div
-                                var itm = document.getElementById("payment_type_newlist"); 
-                                var cln = itm.cloneNode(true);
-                            // we select the 6th ( which is [7] as 0 is counted) element from this row, which correspond to the the payment td
-                                td_payment_list=t.getElementsByTagName("td")[6]; 
-                            //// we append the drop down list
-                                td_payment_list.appendChild(cln)
-                            // we select the last node in the td (the first node being the span) and change the ID and partner code
-                                $(td_payment_list.lastChild).attr('partner_id',`${partner_id}`); 
-                                $(td_payment_list.lastChild).attr('id',`payment_type_${partner_id}`);
-                            // we select from the list, the option node with the same country ID as the one entered by the user + we select it
-                                td_to_select=td_payment_list.querySelectorAll(`option[value="${payment_id}"]`)[0]
-                                $(td_to_select).attr('selected',`selected`)
-                        //........................................------------------------------------------------------------------
-                        
+ 
                         //we clear the search items
                              $('#partners_table').DataTable().search("").columns().search('').draw()
                             table=document.getElementById("partners_table")
@@ -462,5 +544,105 @@ function hide_column(){
     for (c = 0; c < uncheck_list.length; c++){
         column_nb=uncheck_list[c].value
         table.column( column_nb ).visible( false );
+    }
+}
+
+//Approve/Reject from VALIDATOR:
+
+function approve(partner_id,status){
+    var t = $('#partners_table').DataTable()
+    if ( status=="DELETE"){
+        
+        fetch(`/delete_partner/${partner_id}`, {
+            method: 'POST',})
+        .then(response => response.json())
+        .then(result => {
+            if (!!result.error) {alert(result.error);return}
+            if (result.error){
+                alert(result.error)
+            }else{
+                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
+                t.row( tr_to_delete ).remove().draw(false);
+            }
+        })
+    }
+    if ( status=="NEW"){
+        
+        fetch(`/validate_new_partner/${partner_id}`, {
+            method: 'POST'})
+        .then(response => response.json())
+        .then(result => {
+            if (!!result.error) {alert(result.error);return}
+            if (result.error){
+                alert(result.error)
+            }else{
+                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
+                t.row( tr_to_delete ).remove().draw(false);
+            }
+        })
+    }
+    if ( status=="CHANGE"){
+        
+        fetch(`/validate_change_partner/${partner_id}`, {
+            method: 'POST'})
+        .then(response => response.json())
+        .then(result => {
+            if (!!result.error) {alert(result.error);return}
+            if (result.error){
+                alert(result.error)
+            }else{
+                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
+                t.row( tr_to_delete ).remove().draw(false);
+            }
+        })
+    }
+}
+
+function reject(partner_id,status){
+    var t = $('#partners_table').DataTable()
+    if ( status=="NEW"){
+        
+        fetch(`/delete_partner/${partner_id}`, {
+            method: 'POST',})
+        .then(response => response.json())
+        .then(result => {
+            if (!!result.error) {alert(result.error);return}
+            if (result.error){
+                alert(result.error)
+            }else{
+                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
+                t.row( tr_to_delete ).remove().draw(false);
+            }
+        })
+    }
+    if ( status=="DELETE"){
+        
+        fetch(`/validate_new_partner/${partner_id}`, {
+            method: 'POST'})
+        .then(response => response.json())
+        .then(result => {
+            if (!!result.error) {alert(result.error);return}
+            if (result.error){
+                alert(result.error)
+            }else{
+                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
+                t.row( tr_to_delete ).remove().draw(false);
+            }
+        })
+    }
+    if ( status=="CHANGE"){
+   
+        fetch(`/reject_change_partner/${partner_id}`, {
+            method: 'POST'})
+        .then(response => response.json())
+        .then(result => {
+            if (!!result.error) {alert(result.error);return}
+            if (result.error){
+                alert(result.error)
+            }else{
+                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
+                t.row( tr_to_delete ).remove().draw(false);
+            }
+        })
     }
 }

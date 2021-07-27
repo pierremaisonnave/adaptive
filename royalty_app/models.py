@@ -4,12 +4,10 @@ from django.db import models
 from django_resized import ResizedImageField
 
 class User(AbstractUser):
+    role=models.CharField(max_length=20,choices=(('WRITER','WRITER'),('READER','READER'),('VALIDATOR','VALIDATOR'),('ADMINISTRATOR','ADMINISTRATOR')), default='WRITER')
+    profile_picture = ResizedImageField(size=[150, 100],upload_to='profile_picture/',null=True,blank=True)#, default='royalty_app/static/default.png'
     pass
 
-class User_profile_picture(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
-    profile_picture = ResizedImageField(size=[150, 100],upload_to='profile_picture/', default='royalty_app/static/default.png')
-    #profile_picture = models.ImageField(default="royalty_app/static/default.png", null=True, blank=True)
 
 
 class Payment_type(models.Model):
@@ -35,6 +33,8 @@ class Partner(models.Model):
     partner_bank_account = models.CharField(max_length=100,null=True,blank=True)
     partner_payment_type=models.ForeignKey(Payment_type, related_name="partner_payment_type",on_delete=models.PROTECT)
     ico_3rd=models.CharField(max_length=3,choices=(('3rd','3rd'),('ICO','ICO')), default='3rd')
+    partner_proposal= models.ForeignKey('self',null=True,on_delete=models.CASCADE,blank=True)
+    status=models.CharField(max_length=20,choices=(('CHANGE','CHANGE'),('PROPOSAL','PROPOSAL'),('NEW','NEW'),('DELETE','DELETE'),('CURRENT','CURRENT')), default='NEW')
     def __str__(self):
         return f"{self.partner_name}"
 class Accounting(models.Model):

@@ -66,8 +66,8 @@
                 <H6 style="display: grid; grid-template-columns:45px auto" >
                   
                     <div id="imput_label_select" style="margin: 2px;">
-                        {% if  user.user_profile_picture %}
-                          <img class="" src="{{ user.user_profile_picture.profile_picture.url}}" style="border-radius: 50%; width:40px; height:40px" id="picture">
+                        {% if  user.profile_picture %}
+                          <img class="" src="{{ user.profile_picture.url}}" style="border-radius: 50%; width:40px; height:40px" id="picture">
                         {% else %}
                           <img class="" src="{% static 'photo/default.png'%}"  style="border-radius: 50%; width:40px; height:40px" id="picture">
                         {% endif %}
@@ -121,7 +121,7 @@
                 </li>
             
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar"  id="item_in_sidebar_2"  href="{% url 'partners' %}" title="Partners" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar"  id="item_in_sidebar_2"  {% if user.role == "WRITER"%}   href="{% url 'partners' %}"  {%else%} href="{% url 'partners_current' %}" {%endif%}   title="Partners" style="display: grid; grid-template-columns:20px  auto">
                     <span class="bi bi-people"></span>
                     <span class="item_name">Partners</span>
                   </a>

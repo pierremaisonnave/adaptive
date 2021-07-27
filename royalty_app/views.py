@@ -9,7 +9,7 @@ from .models import (Invoice,Country,Partner,Region,Payment_type,Brand,
   Payment_structure,Contract,Contract_partner,Rule,Tranche,
   Periodicity_cat,Fx,Sales_breakdown_item,Sales_breakdown_per_contract,Sales_breakdown_item,
   File,Sale, Rule_calc,Periodicity_cat,Consolidation_currency,Cash_flow,Detail,Gls,Conso,Wht,Sales_breakdown_for_contract_report,
-  Contract_file,Month_table,User,User_profile_picture)
+  Contract_file,Month_table,User)
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 import numpy as np
@@ -31,7 +31,7 @@ from django.contrib.auth import get_user_model
 from django_email_verification import send_email
 
 import time
-from .forms import  CustomerForm
+
 import requests
 
 #CAPTCHA
@@ -85,19 +85,10 @@ def login_page(request):
 def new_profile_pict(request):
   if request.method == "POST":
     try:
-      if User_profile_picture.objects.filter(user=request.user):
-        user_profile_picture=User_profile_picture.objects.get(user=request.user)
-        user_profile_picture.profile_picture=request.FILES.get("file")
-
-        user_profile_picture.save()
-      else:  
-        user_profile_picture=User_profile_picture(
-          user =request.user,
-          profile_picture=request.FILES.get("file"),
-        )
-
-        user_profile_picture.save()
-      return JsonResponse({"new_picture_url":user_profile_picture.profile_picture.url}, status=201)
+      user=request.user
+      user.profile_picture=request.FILES.get("file")
+      user.save()
+      return JsonResponse({"new_picture_url":user.profile_picture.url}, status=201)
     except Exception as e:
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 
@@ -175,20 +166,6 @@ def logout_view(request):
   return HttpResponseRedirect(reverse("home"))    
 
 
-@login_required
-def accountSettings(request):
-  print(request.user)
-  customer = request.user.user_profile_picture
-  form = CustomerForm(instance=customer)
-
-  if request.method == 'POST':
-    form = CustomerForm(request.POST, request.FILES,instance=customer)
-    if form.is_valid():
-      form.save()
-
-
-  context = {'form':form}
-  return render(request, 'royalty_app/account.html', context)
 
 
 
@@ -449,16 +426,282 @@ def chart_accruals(year,contract_id_list):
     data_accruals=[ d[2] for d in datas]
     data_roy_ytd=[ d[3] for d in datas]
   return [labels, data_accruals,data_roy_ytd]
-  #-----------------------------------
+
+
+
+  #-----------------------------------PARTNER START----------------------------
+  #----------------------------------------------------------------------------
 @login_required(login_url='/login')
-def partners(request):
-  partner_list=Partner.objects.all().select_related('partner_country','partner_payment_type')
+def partners_writer(request):
+  user=request.user
+  if user.role=="WRITER" :
+    payment_type_list=Payment_type.objects.all()
+    region_list=Region.objects.all()
+    country_list=Country.objects.all().order_by("country").select_related('country_region')
+  
+    partner_list=Partner.objects.all().filter(status__in=["CURRENT","NEW","CHANGE","DELETE"]).select_related('partner_country','partner_payment_type','partner_proposal')
+    for p in partner_list:
+      if p.status=="CHANGE" :
+        partner_proposal=p.partner_proposal
+        p.partner_name= partner_proposal.partner_name
+        p.partner_m3_code= partner_proposal.partner_m3_code
+        p.partner_country= partner_proposal.partner_country
+        p.partner_bank_account= partner_proposal.partner_bank_account
+        p.partner_payment_type= partner_proposal.partner_payment_type
+        p.ico_3rd= partner_proposal.ico_3rd
+
+
+    return render(request, 'royalty_app/partners/partners_writer.html',  { "payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list})
+  else :
+    return HttpResponseRedirect(reverse("partners_current"))
+
+
+@login_required(login_url='/login')
+def partners_to_validate(request):
+  user=request.user
+  if user.role=="VALIDATOR":
+    payment_type_list=Payment_type.objects.all()
+    region_list=Region.objects.all()
+    country_list=Country.objects.all().order_by("country").select_related('country_region')
+    partner_list=Partner.objects.all().filter(status__in=["CHANGE","DELETE","NEW"]).select_related('partner_country','partner_payment_type')
+    for p in partner_list:
+      if p.status=="CHANGE" :
+        partner_proposal=p.partner_proposal
+        p.partner_name= partner_proposal.partner_name
+        p.partner_m3_code= partner_proposal.partner_m3_code
+        p.partner_country= partner_proposal.partner_country
+        p.partner_bank_account= partner_proposal.partner_bank_account
+        p.partner_payment_type= partner_proposal.partner_payment_type
+        p.ico_3rd= partner_proposal.ico_3rd
+
+    return render(request, 'royalty_app/partners/partners_validation.html',  { "payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list})
+  else:
+     return HttpResponseRedirect(reverse("partners_current"))  
+
+
+@login_required(login_url='/login')
+def partners_current(request):
   payment_type_list=Payment_type.objects.all()
   region_list=Region.objects.all()
   country_list=Country.objects.all().order_by("country").select_related('country_region')
-  
-  return render(request, 'royalty_app/partners.html',  { "payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list})
 
+
+  partner_list=Partner.objects.all().filter(status__in=["CURRENT","CHANGE","DELETE"]).select_related('partner_country','partner_payment_type')
+  partner_list_to_validate=Partner.objects.all().filter(status__in=["PROPOSAL","NEW","DELETE"])
+  message_validator=f'you have {len(partner_list_to_validate)} request(s) to validate'
+
+  return render(request, 'royalty_app/partners/partners_current.html',  {"payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list,"message_validator":message_validator})
+  #  Tasks perform by VALIDATOR
+@csrf_exempt 
+@login_required(login_url='/login')
+def validate_new_partner(request,partner_id):
+
+  user=request.user
+  if user.role=="VALIDATOR": 
+    partner=Partner.objects.get(id=partner_id)
+    if request.method == "POST" and partner.status != "CURRENT":
+      try:
+        partner.status="CURRENT"
+        partner.save()
+        return JsonResponse({"result": "all done"}, status=201)
+      except ProtectedError as e:
+        message=f"{e}"
+        message=message.replace('(', '').replace(')', '')
+        return JsonResponse({"error": message}, status=400)
+    else:
+      return JsonResponse({"error": "GET or PUT request required."}, status=400)
+  else:
+    return JsonResponse({"error": "as a non VALIDATOR, you do not have the right to perform that task"}, status=400)
+@csrf_exempt 
+@login_required(login_url='/login')
+def validate_change_partner(request,partner_id):
+
+  user=request.user
+  if user.role=="VALIDATOR": 
+    partner=Partner.objects.get(id=partner_id)
+    partner_proposal=partner.partner_proposal
+    if request.method == "POST" and partner.status != "CURRENT":
+      try:
+        partner.partner_name=partner_proposal.partner_name
+        partner.partner_m3_code=partner_proposal.partner_m3_code
+        partner.partner_country=partner_proposal.partner_country
+        partner.partner_bank_account= partner_proposal.partner_bank_account
+        partner.partner_payment_type=partner_proposal.partner_payment_type
+        partner.ico_3rd= partner_proposal.ico_3rd
+        partner.partner_proposal=None
+        partner.status="CURRENT"
+        partner.save()
+
+        partner_proposal.delete()
+
+        return JsonResponse({"result": "all done"}, status=201)
+      except ProtectedError as e:
+        message=f"{e}"
+        message=message.replace('(', '').replace(')', '')
+        return JsonResponse({"error": message}, status=400)
+    else:
+      return JsonResponse({"error": "GET or PUT request required."}, status=400)
+  else:
+    return JsonResponse({"error": "as a non VALIDATOR, you do not have the right to perform that task"}, status=400)
+
+@csrf_exempt 
+@login_required(login_url='/login')
+def reject_change_partner(request,partner_id):
+
+  user=request.user
+  if user.role=="VALIDATOR": 
+    partner=Partner.objects.get(id=partner_id)
+    partner_proposal=partner.partner_proposal
+    if request.method == "POST"and partner.status != "CURRENT":
+      try:
+
+        partner.status="CURRENT"
+        partner.partner_proposal=None
+        partner.save()
+
+        partner_proposal.delete()
+
+        return JsonResponse({"result": "all done"}, status=201)
+      except ProtectedError as e:
+        message=f"{e}"
+        message=message.replace('(', '').replace(')', '')
+        return JsonResponse({"error": message}, status=400)
+    else:
+      return JsonResponse({"error": "GET or PUT request required."}, status=400)
+  else:
+    return JsonResponse({"error": "as a non VALIDATOR, you do not have the right to perform that task"}, status=400)
+
+@csrf_exempt 
+@login_required
+def delete_partner(request,partner_id):
+  user=request.user
+  if user.role=="VALIDATOR": 
+    if request.method == "POST":
+      try:
+        partner=Partner.objects.get(pk=partner_id)
+        if  partner.status!="CURRENT" :
+          partner.delete()
+          return JsonResponse({"result": "all done"}, status=201)
+        else:
+          return JsonResponse({"error": "item should not be in CURRENT status"}, status=400) 
+      except ProtectedError as e:
+        message=f"{e}"
+        message=message.replace('(', '').replace(')', '')
+        return JsonResponse({"error": message}, status=400)
+      except:
+        return JsonResponse({"error": "something went wrong"}, status=400) 
+    else:
+      return JsonResponse({"error": "GET or PUT request required."}, status=400)
+  else:
+    return JsonResponse({"error": "as a non VALIDATOR, you do not have the right to perform that task"}, status=400)
+
+  #  Tasks perform by writer
+@csrf_exempt 
+@login_required
+def change_row(request,partner_id):
+  user=request.user
+  if user.role=="WRITER": 
+    try:
+      partner = Partner.objects.get( id=partner_id)
+    except partner.DoesNotExist:
+      return JsonResponse({"error": "post not found."}, status=404)
+
+    if request.method == "POST" and partner.status=="CURRENT" :
+      data = json.loads(request.body)
+      
+      partner_proposal=Partner(
+        partner_m3_code = data["partner_m3_code"],
+        partner_name = data["partner_name"],
+        ico_3rd = data["ico_3rd"],
+        partner_country=Country.objects.get(country_id=data["country_id"]),
+        partner_bank_account = data["partner_bank_account"],
+        partner_payment_type=Payment_type.objects.get(id=data["partner_payment_type_id"]),
+        status='PROPOSAL'      
+      )
+      partner_proposal.save()
+      print("ttt")
+      print(partner_proposal)
+      partner.partner_proposal=partner_proposal
+      partner.status='CHANGE'
+      partner.save()
+      return JsonResponse({"result": "all done"}, status=201)
+    else:
+      return JsonResponse({"error": "GET or PUT request required."}, status=400)
+  else:
+    return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=400)
+
+@login_required
+def cancel_row_partner(request,partner_id):
+  try:
+    partner = Partner.objects.get( id=partner_id)
+  except partner.DoesNotExist:
+    return JsonResponse({"error": "post not found."}, status=404)
+
+  if request.method == "GET" and partner.status=="CURRENT":
+    return JsonResponse({
+      "partner_name": partner.partner_name,
+      "country_id": partner.partner_country.country_id,
+      "country_name": partner.partner_country.country,
+      "ico_3rd": partner.ico_3rd,
+      "partner_bank_account": partner.partner_bank_account,
+      "partner_payment_type_id": partner.partner_payment_type.id,
+      "partner_payment_type":partner.partner_payment_type.payment_type,
+      "partner_m3_code":partner.partner_m3_code,
+  
+      })
+
+  else:
+    return JsonResponse({"error": "GET or PUT request required."}, status=400) 
+
+@csrf_exempt 
+@login_required
+def delete_row_partner(request,partner_id):
+  user=request.user
+  if user.role=="WRITER":
+    if request.method == "POST" :
+      try:
+        partner=Partner.objects.get(pk=partner_id)
+        if  partner.status=="CURRENT" :
+          partner.status="DELETE"
+          partner.save()
+          return JsonResponse({"result": "all done"}, status=201)
+        else:
+          return JsonResponse({"error": "item not in CURRENT status"}, status=400)  
+      except ProtectedError as e:
+        message=f"{e}"
+        message=message.replace('(', '').replace(')', '')
+        return JsonResponse({"error": message}, status=400)
+    else:
+      return JsonResponse({"error": "GET or PUT request required."}, status=400)
+  else:
+    return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=400)
+
+
+@csrf_exempt 
+@login_required
+def new_partner(request):
+  user=request.user
+  if user.role=="WRITER":
+    if request.method == "POST" :
+      try:
+        data = json.loads(request.body)
+        partner=Partner(
+          partner_m3_code = data["partner_m3_code"],
+          partner_name = data["partner_name"],
+          ico_3rd = data["ico_3rd"],
+          partner_country=Country.objects.get(country_id=data["country_id"]),
+          partner_bank_account = data["partner_bank_account"],
+          partner_payment_type=Payment_type.objects.get(id=data["partner_payment_type_id"]),
+        )
+        partner.save()
+
+        return JsonResponse({"partner_id": partner.id}, status=201)
+      except: return JsonResponse({"error": "data not loaded"}, status=404)
+  else:
+    return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=400)
+
+  #-----------------------------------PARTNER END----------------------------
+  #----------------------------------------------------------------------------
 
 @login_required(login_url='/login')
 def contracts(request):
@@ -787,94 +1030,7 @@ def export(request,file):
     return response
 
   #API Partner:
-@csrf_exempt 
-@login_required
-def change_row(request,partner_id):
 
-  try:
-    partner = Partner.objects.get( id=partner_id)
-  except partner.DoesNotExist:
-    return JsonResponse({"error": "post not found."}, status=404)
-
-  if request.method == "PUT":
-    data = json.loads(request.body)
-    partner.partner_m3_code = data["partner_m3_code"]
-    partner.partner_name = data["partner_name"]
-    partner.ico_3rd = data["ico_3rd"]
-    partner.partner_country=Country.objects.get(country_id=data["country_id"])
-    partner.partner_bank_account = data["partner_bank_account"]
-    partner.partner_payment_type=Payment_type.objects.get(id=data["partner_payment_type_id"])
-    partner.save()
-    return JsonResponse({
-      "result": "all done"
-    
-    
-    }, status=201)
-
-  else:
-    return JsonResponse({"error": "GET or PUT request required."}, status=400)
-
-@login_required
-def cancel_row_partner(request,partner_id):
-  try:
-    partner = Partner.objects.get( id=partner_id)
-  except partner.DoesNotExist:
-    return JsonResponse({"error": "post not found."}, status=404)
-
-  if request.method == "GET":
-    return JsonResponse({
-      "partner_name": partner.partner_name,
-      "country_id": partner.partner_country.country_id,
-      "country_name": partner.partner_country.country,
-      "ico_3rd": partner.ico_3rd,
-      "partner_bank_account": partner.partner_bank_account,
-      "partner_payment_type_id": partner.partner_payment_type.id,
-      "partner_payment_type":partner.partner_payment_type.payment_type,
-      "partner_m3_code":partner.partner_m3_code,
-  
-      })
-
-  else:
-    return JsonResponse({"error": "GET or PUT request required."}, status=400) 
-
-@csrf_exempt 
-@login_required
-def delete_row_partner(request,partner_id):
-
-  if request.method == "POST":
-    try:
-      partner=Partner.objects.get(pk=partner_id)
-      partner.delete()
-      return JsonResponse({"result": "all done"}, status=201)
-    except ProtectedError as e:
-      message=f"{e}"
-      message=message.replace('(', '').replace(')', '')
-      return JsonResponse({"error": message}, status=400)
-    except:
-      return JsonResponse({"error": "something went wrong"}, status=400) 
-  else:
-    return JsonResponse({"error": "GET or PUT request required."}, status=400)
-
-
-#API to save new partner
-@csrf_exempt 
-@login_required
-def new_partner(request):
-  if request.method == "POST":
-    try:
-      data = json.loads(request.body)
-      partner=Partner(
-        partner_m3_code = data["partner_m3_code"],
-        partner_name = data["partner_name"],
-        ico_3rd = data["ico_3rd"],
-        partner_country=Country.objects.get(country_id=data["country_id"]),
-        partner_bank_account = data["partner_bank_account"],
-        partner_payment_type=Payment_type.objects.get(id=data["partner_payment_type_id"]),
-      )
-      partner.save()
-
-      return JsonResponse({"partner_id": partner.id}, status=201)
-    except: return JsonResponse({"error": "data not loaded"}, status=404)
 @csrf_exempt
 @login_required
 def save_paid_status(request):
