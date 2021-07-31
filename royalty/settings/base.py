@@ -96,7 +96,7 @@ WSGI_APPLICATION = 'royalty.wsgi.application'
 
 #see https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
 
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -106,7 +106,6 @@ DATABASES = {
         'HOST': os.getenv('POSTGRES_HOST'),#'ec2-54-83-82-187.compute-1.amazonaws.com',
         'PORT': '5432',
     }
-    
 }
 '''
 DATABASES = {
@@ -115,7 +114,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-'''
+
 AUTH_USER_MODEL = 'royalty_app.User'
 
 # Password validation

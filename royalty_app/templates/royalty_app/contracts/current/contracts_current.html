@@ -1,0 +1,194 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+
+      <div class=" pb-2 mb-3 border-bottom" style="display: flex" >
+
+        <h1 class="h2">Contracts</h1>
+        <span style="padding-top:16px">(currently used in the system)</span>
+      </div>
+
+  
+  
+
+  <!------------------------------------------------------------------------------------->   
+  <!---------------------------Contracts Table------------------------------------------->  
+  
+  <!----setting to unhide/hide column--->  
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" >
+    <div>{% if user.role == "VALIDATOR"%}<a   href="{% url 'contracts_to_validate' %}"  target="_blank">{{message_validator}}{%endif%}<a></div>
+    <div></div>
+    <div class="btn-toolbar mb-2 mb-md-0">
+      <div class="btn-group mr-2">
+        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="column_sel()" title="column selection" ><span class="bi bi-gear"></span> </button>
+      </div>
+      <div class="btn-group mr-2">
+        <a class="btn btn-sm btn-outline-secondary" href="/export/contract,contract_partner,rule"><span class="bi bi-download" ></span> download </a>
+      </div>
+
+    </div>
+  </div> 
+  <div id="column_selection" style=" display:none" >
+    <table class="table table-striped table-sm" id="beneficiary_table" >
+      <thead>
+        <tr >
+          <th  > </th>
+          <th ></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <tr >
+          <td ><input type="checkbox" checked value=1 onclick="column_visibility(this,1)"></td>
+          <td >Name</td>
+
+          <td ><input type="checkbox" checked value=2 onclick="column_visibility(this,2)"></td>
+          <td >Division</td>
+
+          <td ><input type="checkbox" checked value=3 onclick="column_visibility(this,3)"></td>
+          <td >Pay/Rec</td>
+
+          <td ><input type="checkbox" checked value=4 onclick="column_visibility(this,4)"></td>
+          <td >Curr</td>
+
+        </tr>
+        <tr >
+          
+          <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5)"></td>
+          <td >periodicity</td>
+
+          <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6)"></td>
+          <td >payment terms:nb days</td>
+
+          <td ><input type="checkbox" checked value=7 onclick="column_visibility(this,7)"></td>
+          <td >Brand</td>
+
+          <td ><input style="display: None;" type="checkbox"  value=8 onclick="column_visibility(this,8)"></td>
+          <td ><span style="display: None;">Division via</span></td>
+        </tr>
+        <tr >
+          <td ><input type="checkbox"   value=9 onclick="column_visibility(this,9)"></td>
+          <td >Minimum Guarantee:Yes/No</td>
+          <td ><input type="checkbox"   value=10 onclick="column_visibility(this,10)"></td>
+          <td >Minimum Guarantee:Amount</td>
+          <td ><input type="checkbox"   value=11 onclick="column_visibility(this,11)"></td>
+          <td >Minimum Guarantee:Country</td>
+          <td></td>
+          <td></td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>  
+
+
+  <div class="table-responsive">
+    <table class="table table-striped table-sm " id="contracts_table" style="width: 100%;">
+      <thead>
+        <tr class="search_box_class">
+          <th style="padding-left:8px"><input  id="column0_search"  class="fname2" placeholder="..." column=0> </th>
+          <th style="padding-left:8px"><input  id="column1_search"  class="fname2" placeholder="..." column=1> </th>
+          <th style="padding-left:8px"><input  id="column2_search"  class="fname2" placeholder="..." column=2>  </th>
+          <th style="padding-left:8px"><input  id="column3_search"  class="fname2" placeholder="..." column=3> </th>
+          <th style="padding-left:8px"><input  id="column4_search"  class="fname2" placeholder="..." column=4> </th>
+          <th style="padding-left:8px"><input  id="column5_search"  class="fname2" placeholder="..." column=5> </th>
+          <th style="padding-left:8px"><input  id="column6_search"  class="fname2" placeholder="..." column=6> </th>
+          <th style="padding-left:8px"><input  id="column7_search"  class="fname2" placeholder="..." column=7> </th>
+          <th style="padding-left:8px"><input  id="column8_search"  class="fname2" placeholder="..." column=8> </th>
+          <th style="padding-left:8px"><input  id="column9_search"  class="fname2" placeholder="..." column=9> </th>
+          <th style="padding-left:8px"><input  id="column10_search"  class="fname2" placeholder="..." column=10> </th>
+          <th style="padding-left:8px" ><input  id="column11_search"  class="fname2" placeholder="..." column=11 > </th>
+          <th style="padding-left:8px"><input  id="column12_search"  class="fname2" placeholder="..." column=12 > </th>
+        </tr>
+        <tr >
+          <th style="border-bottom:none" colspan=9></th>
+          <th colspan=3 style="text-align: center;border-bottom:none; padding:2px">Minimum Guarantee</th>
+          <th style="border-bottom:none"></th>
+        </tr>        
+        <tr style="height:65px">
+          <th style="border-top:none; padding-left: 8px; width:20px">ID</th>
+          <th style="border-top:none; padding-left: 8px">Name</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">Division</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">Pay/Rec</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">Curr</th>
+          <th style="border-top:none; padding-left: 8px;">periodicity</th>
+          <th style="border-top:none; padding-left: 8px;width:70px;">nb days</th>
+          <th style="border-top:none; padding-left: 8px;">Brand</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">via</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;">Yes/No</th>
+          <th style="border-top:none; padding-left: 8px;">Amount</th>
+          <th style="border-top:none; padding-left: 8px;width:50px;" >Country</th>
+          <th style="border-top:none"></th>
+        </tr>
+      </thead>
+
+      <tbody id="tbody_contracts">
+        {% for contract in contract_list %}
+          <tr id="contract_{{contract.id}}" contract_id={{contract.id}}>
+            <td><!--ID-->
+              <a   href="{% url 'rules_current' contract_id=contract.id %}"><span class="fname" contract_id={{contract.id}} id="id_{{contract.id}}" >{{contract.id}}</span></a>
+            </td>
+            <td><!--Name-->
+              <span >{{contract.contract_name}}</span>
+            </td>
+            <td><!--Division-->
+              <span >{{contract.division.division_id}}</span>
+            </td>
+            <td><!--pay/rec-->
+              <span >{{contract.transaction_direction}}</span>
+            </td>
+
+            <td><!--Currency-->
+              <span  >{{contract.contract_currency}}</span>
+            </td>
+
+            <td><!--Periodicity-->
+              <span  >{{contract.payment_periodicity.periodicity}}</span>
+            </td>
+
+            <td> <!--payment_terms-->
+              <span  >{{contract.payment_terms}}</span>
+            </td>
+            <td> <!--payment_terms-->
+              <span  >{{contract.m3_brand.brand_name}}</span>
+            </td>
+
+            <td><!--Division via-->
+              <span >{{contract.division_via.division_id}}</span>
+            </td>
+
+            <td><!--yes/no mini gar-->
+              <span >{{contract.mini_gar_status}}</span>
+            </td>
+            <td><!--Amount-->
+              <span >{{contract.minimum_guar_amount|default_if_none:""}}</span>
+            </td>
+            <td><!--Country-->
+              <span >{{contract.minimum_guar_remaining_allocation_country.country_id}} </span>
+            </td>
+            <td><!--Button-->
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>    
+      
+    </table>
+  </div>
+
+  
+
+
+{% load static %}
+  
+    <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+    <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
+    <script src="{% static 'royalty_app/contracts/contract.js'%}"></script>
+    <script src="{% static 'royalty_app/easy-number-separator.js'%}"></script>
+
+
+
+ 
+
+{% endblock %}
+

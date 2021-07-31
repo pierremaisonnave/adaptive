@@ -364,7 +364,7 @@
         {% for contract in contract_list %}
           <tr id="contract_{{contract.id}}" contract_id={{contract.id}}>
             <td><!--ID-->
-              <a href='/contracts/{{contract.id}}'><span class="fname" contract_id={{contract.id}} id="id_{{contract.id}}" >{{contract.id}}</span></a>
+              <a   href="{% url 'rules_writer' contract_id=contract.id %}"><span class="fname" contract_id={{contract.id}} id="id_{{contract.id}}" >{{contract.id}}</span></a>
             </td>
             <td><!--Name-->
               <span hidden class="fname"  id="span_contract_name_{{contract.id}}" >{{contract.contract_name}}</span>
@@ -557,7 +557,7 @@
   
     <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
     <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
-    <script src="{% static 'royalty_app/contract.js'%}"></script>
+    <script src="{% static 'royalty_app/contracts/contract.js'%}"></script>
     <script src="{% static 'royalty_app/easy-number-separator.js'%}"></script>
 
 

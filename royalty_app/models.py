@@ -120,6 +120,8 @@ class Contract(models.Model):
     mini_gar_to=models.IntegerField(default=2100)
     minimum_guar_amount=models.IntegerField(null=True,blank=True)
     minimum_guar_remaining_allocation_country= models.ForeignKey(Country, related_name="minimum_guar_remaining_allocation_country",on_delete=models.SET_NULL,null=True,blank=True)
+    contract_proposal= models.ForeignKey('self',null=True,on_delete=models.CASCADE,blank=True)
+    status=models.CharField(max_length=20,choices=(('IN_CREATION','IN_CREATION'),('CHANGE','CHANGE'),('PROPOSAL','PROPOSAL'),('NEW','NEW'),('DELETE','DELETE'),('CURRENT','CURRENT')), default='IN_CREATION')
     def __str__(self):
         return f"{self.contract_name}"
 

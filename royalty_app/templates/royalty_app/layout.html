@@ -57,7 +57,7 @@
 
 
         {% if user.is_authenticated %}
-          <div style="background-color: #f8f9fa! ;" id="user_menu" onclick="hide_dropdown_user()">
+          <div style="background-color: #f8f9fa! ;" id="user_menu"  >
               <div id="user_photo_on_layout" class="comboTreeInputWrapper" dd_id="user" style="display: grid; grid-template-columns:auto  auto; margin: 10px ">
                 <div class="comboTreeInputBox  bi bi-gear" dd_id="user" style="margin:7px; font-size: 1.2rem " > </div>
                 <div   class=" justAnInputBox comboTreeInputBox   " style="margin:10px " id="displayed_item_name_user" dd_id="user" >{{ user.first_name }}   </div>
@@ -94,6 +94,12 @@
                     <span class="bi bi-arrow-clockwise" style="margin-right: 4px;"></span>
                     reset password</a>
                 </li>
+                <li style="display: block;" class="item_single_select" dd_id="user" ">
+                  <a  href="{% url 'change_role' %}" class="bi bi-arrow-left-right"  style="color: inherit;text-decoration:none">
+                    {% if user.role == "WRITER"%}change to VALIDATOR role{% else %}change to WRITER role{% endif %}
+                  </a>
+
+                </li>
               </div>
             </div>
 
@@ -127,7 +133,7 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_3"  href="{% url 'contracts' %}" title="Contracts" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_3"  href="{% url 'contracts_writer' %}" title="Contracts" style="display: grid; grid-template-columns:20px  auto">
                     <span class="bi bi-book"></span>
                     <span class="item_name">Contracts</span>
                   </a>

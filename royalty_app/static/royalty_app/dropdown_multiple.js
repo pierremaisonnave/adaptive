@@ -41,10 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 actiononcheckbox(dd_id,element)
             }
             if (element.getAttribute("class") == "group"){
-            
                 item_group = element.parentElement.querySelectorAll('input[type=checkbox]')
                 checked_item = element.parentElement.querySelectorAll('input:checked')
-                
                 if(checked_item.length >0){
                     for (i = 0; i < checked_item.length; ++i) {
                         checked_item[i].checked=false
@@ -62,13 +60,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 unhidegroup(dd_id,group_id,element)}
         }
-
         if (classnameparent == "comboTreeInputWrapper"  ) {
-
             // is dropdown hidden?
             var dd_item=document.getElementById(`dropdown_${dd_id}`)
             if (dd_item.style.display === "block"){dd_item.style.display = "none"} else { dd_item.style.display = "block"} 
-        }     
+        }   
+        if ( element.id=="user_menu" || element.id=="user_photo_on_layout") {
+            // is dropdown hidden?
+            dropdown_user=document.getElementById(`dropdown_user`)
+            if (dropdown_user.style.display === "block"){dropdown_user.style.display = "none"} else { dropdown_user.style.display = "block"} 
+        }      
     })
 
     //search box when typing
@@ -125,7 +126,10 @@ function isindropdownlist(event){
         if (grandparentelement && grandparentelement.children[1].style.display=="block"){return true}
 
     }
-
+    if (e.id== "user_menu" || e.id=="user_photo_on_layout"){
+        dropdown_user=document.getElementById(`dropdown_user`)
+        if (dropdown_user.style.display=="block"){return true }
+    }
     node=e.parentNode
     while (node != null){
         if (node.className=="comboTreeDropDownContainer") {return true }else{}

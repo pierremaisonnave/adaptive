@@ -46,9 +46,9 @@ function change_profile_picture(){
 
 function hide_dropdown_user(){
     dropdown_user=document.getElementById("dropdown_user")
-
+    alert(dropdown_user.style.display)
     if (dropdown_user.style.display == "None"  ){
         dropdown_user.style.display = "Block"
-
     }
+
 }

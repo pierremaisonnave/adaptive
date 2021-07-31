@@ -6,9 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         //hide all dp 
         if (!isindropdownlist(event)){  //we verify if the user click inside a dd- if so, we do not hide all dd
+
             hidde_all_dropdows()
         }
-        
+         
         var classnameparent=element.parentElement.className;
         var classname=element.className;
         var dd_id = element.getAttribute("dd_id")
@@ -34,11 +35,16 @@ document.addEventListener('DOMContentLoaded', function() {
             if (element.parentElement==null ){return} // if we click on an object without parent, we stop
         }
 
-        if (classnameparent == "comboTreeInputWrapper"  ) {
-
+        if (classnameparent == "comboTreeInputWrapper"   ) {
             // is dropdown hidden?
             var dd_item=document.getElementById(`dropdown_${dd_id}`)
             if (dd_item.style.display === "block"){dd_item.style.display = "none"} else { dd_item.style.display = "block"} 
+        }  
+
+        if ( element.id=="user_menu" || element.id=="user_photo_on_layout") {
+            // is dropdown hidden?
+            dropdown_user=document.getElementById(`dropdown_user`)
+            if (dropdown_user.style.display === "block"){dropdown_user.style.display = "none"} else { dropdown_user.style.display = "block"} 
         }     
     })
 
@@ -94,7 +100,10 @@ function isindropdownlist(event){
     if (e.className.includes("comboTreeInputBox")){
         grandparentelement=e.parentElement.parentElement
         if (grandparentelement.childNodes[3].style.display=="block"){return true}
-
+    }
+    if (e.id== "user_menu" || e.id=="user_photo_on_layout"){
+        dropdown_user=document.getElementById(`dropdown_user`)
+        if (dropdown_user.style.display=="block"){return true }
     }
 
     node=e.parentNode
@@ -102,6 +111,7 @@ function isindropdownlist(event){
         if (node.className=="comboTreeDropDownContainer") {return true }else{}
         node = node.parentNode;
     }
+
     return false   
 }
 

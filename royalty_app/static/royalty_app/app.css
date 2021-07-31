@@ -194,7 +194,7 @@ select.fname{
   background-color: #e6f1e6;
 }
 .approve_button {
-  width:150px;
+  width:100%;
   background-color:transparent
 }
 .reject_button:hover{
@@ -202,7 +202,7 @@ select.fname{
 }
 
 .reject_button{
-  width:150px;
+  width:100%;
   background-color:transparent
 }
 
@@ -210,7 +210,7 @@ select.fname{
   background-color: #d6cdcd;
 }
 .previous_value_button {
-  width:150px;
+  width:100%;
   background-color:transparent
 }
 

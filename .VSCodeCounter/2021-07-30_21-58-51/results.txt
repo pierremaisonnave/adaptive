@@ -1,0 +1,140 @@
+Date : 2021-07-30 21:58:51
+Directory : c:\Users\pierre\Desktop\SwissRoy_public
+Total : 94 files,  12821 codes, 1051 comments, 2480 blanks, all 16352 lines
+
+Languages
++------------------+------------+------------+------------+------------+------------+
+| language         | files      | code       | comment    | blank      | total      |
++------------------+------------+------------+------------+------------+------------+
+| HTML             |         41 |      5,456 |        211 |      1,012 |      6,679 |
+| Python           |         18 |      3,519 |        340 |        769 |      4,628 |
+| JavaScript       |         28 |      3,319 |        477 |        611 |      4,407 |
+| CSS              |          5 |        501 |         23 |         80 |        604 |
+| pip requirements |          1 |         25 |          0 |          8 |         33 |
+| JSON             |          1 |          1 |          0 |          0 |          1 |
++------------------+------------+------------+------------+------------+------------+
+
+Directories
++------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                         | files      | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                            |         94 |     12,821 |      1,051 |      2,480 |     16,352 |
+| royalty                                                                                                                      |          6 |        201 |         70 |        102 |        373 |
+| royalty\settings                                                                                                             |          2 |        159 |         52 |         73 |        284 |
+| royalty_app                                                                                                                  |         85 |     12,579 |        978 |      2,365 |     15,922 |
+| royalty_app\migrations                                                                                                       |          3 |        488 |          2 |         14 |        504 |
+| royalty_app\static                                                                                                           |         33 |      3,820 |        500 |        691 |      5,011 |
+| royalty_app\static\css                                                                                                       |          2 |         76 |          0 |          8 |         84 |
+| royalty_app\static\royalty_app                                                                                               |         31 |      3,744 |        500 |        683 |      4,927 |
+| royalty_app\static\royalty_app\contracts                                                                                     |          2 |        671 |        149 |        103 |        923 |
+| royalty_app\templates                                                                                                        |         41 |      5,456 |        211 |      1,012 |      6,679 |
+| royalty_app\templates\password_confirmation                                                                                  |          2 |         72 |          4 |         33 |        109 |
+| royalty_app\templates\password_reset                                                                                         |          7 |        194 |          0 |         43 |        237 |
+| royalty_app\templates\royalty_app                                                                                            |         32 |      5,190 |        207 |        936 |      6,333 |
+| royalty_app\templates\royalty_app\contracts                                                                                  |          6 |      2,044 |         82 |        341 |      2,467 |
+| royalty_app\templates\royalty_app\contracts\current                                                                          |          2 |        431 |         22 |         99 |        552 |
+| royalty_app\templates\royalty_app\contracts\validator                                                                        |          1 |        150 |          3 |         41 |        194 |
+| royalty_app\templates\royalty_app\contracts\writer                                                                           |          3 |      1,463 |         57 |        201 |      1,721 |
+| royalty_app\templates\royalty_app\partners                                                                                   |          3 |        516 |         11 |         86 |        613 |
++------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++------------------------------------------------------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| filename                                                                                                                     | language         | code       | comment    | blank      | total      |
++------------------------------------------------------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+
+| c:\Users\pierre\Desktop\SwissRoy_public\load.json                                                                            | JSON             |          1 |          0 |          0 |          1 |
+| c:\Users\pierre\Desktop\SwissRoy_public\manage.py                                                                            | Python           |         15 |          3 |          5 |         23 |
+| c:\Users\pierre\Desktop\SwissRoy_public\requirements.txt                                                                     | pip requirements |         25 |          0 |          8 |         33 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty\__init__.py                                                                  | Python           |          0 |          0 |          1 |          1 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty\asgi.py                                                                      | Python           |          4 |          8 |          5 |         17 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty\settings\base.py                                                             | Python           |        138 |         38 |         56 |        232 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty\settings\heroku.py                                                           | Python           |         21 |         14 |         17 |         52 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty\urls.py                                                                      | Python           |         34 |          2 |         18 |         54 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty\wsgi.py                                                                      | Python           |          4 |          8 |          5 |         17 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\__init__.py                                                              | Python           |          0 |          0 |          1 |          1 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\admin.py                                                                 | Python           |         82 |          1 |         31 |        114 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\apps.py                                                                  | Python           |          3 |          0 |          3 |          6 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\migrations\0001_initial.py                                               | Python           |        470 |          1 |          7 |        478 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\migrations\0002_auto_20210728_1502.py                                    | Python           |         18 |          1 |          6 |         25 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\migrations\__init__.py                                                   | Python           |          0 |          0 |          1 |          1 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\models.py                                                                | Python           |        282 |          0 |         44 |        326 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\css\loader.css                                                    | CSS              |         49 |          0 |          7 |         56 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\css\loged_out_form.css                                            | CSS              |         27 |          0 |          1 |         28 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\accounting.js                                         | JavaScript       |         35 |          3 |          7 |         45 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\app.css                                               | CSS              |        170 |         10 |         37 |        217 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\brand.js                                              | JavaScript       |         75 |         11 |         18 |        104 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\cash_flow_forecast.js                                 | JavaScript       |        166 |         16 |         26 |        208 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\consolidation_currency.js                             | JavaScript       |         24 |          4 |          6 |         34 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\contracts\contract.js                                 | JavaScript       |        178 |         46 |         33 |        257 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\contracts\rules.js                                    | JavaScript       |        493 |        103 |         70 |        666 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\country.js                                            | JavaScript       |        110 |         12 |         17 |        139 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\currency.js                                           | JavaScript       |         90 |         10 |         16 |        116 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\division.js                                           | JavaScript       |        110 |         12 |         17 |        139 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\dropdown_multiple.js                                  | JavaScript       |        116 |          7 |         43 |        166 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\dropdown_single.js                                    | JavaScript       |         86 |          6 |         30 |        122 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\easy-number-separator.js                              | JavaScript       |         14 |          0 |          0 |         14 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\formulation.js                                        | JavaScript       |         95 |         11 |         18 |        124 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\home.js                                               | JavaScript       |        107 |          9 |         15 |        131 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\invoices.js                                           | JavaScript       |        177 |         22 |         28 |        227 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\jquery.dataTables.min.js                              | JavaScript       |        170 |         14 |          0 |        184 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\jquery.min.js                                         | JavaScript       |          1 |          1 |          0 |          2 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\layout.css                                            | CSS              |         71 |          6 |          1 |         78 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\layout.js                                             | JavaScript       |         34 |          5 |         16 |         55 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\monthly_accruals.js                                   | JavaScript       |        169 |         16 |         41 |        226 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\partner.js                                            | JavaScript       |        453 |        102 |         79 |        634 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\partner_report.js                                     | JavaScript       |        154 |         15 |         26 |        195 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\password_reset_form.js                                | JavaScript       |         21 |          0 |          3 |         24 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\payment_type.js                                       | JavaScript       |         90 |         10 |         16 |        116 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\region.js                                             | JavaScript       |         68 |         10 |         17 |         95 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\register.js                                           | JavaScript       |         20 |          0 |          4 |         24 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\sales_breakdown_item.js                               | JavaScript       |         68 |         10 |         17 |         95 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\static_data.js                                        | JavaScript       |         56 |          3 |         26 |         85 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\style.css                                             | CSS              |        184 |          7 |         34 |        225 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\static\royalty_app\tax.js                                                | JavaScript       |        139 |         19 |         22 |        180 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\storage_backends.py                                                      | Python           |          5 |          0 |          1 |          6 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\password_confirmation\confirm_template.html                    | HTML             |         39 |          4 |         21 |         64 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\password_confirmation\mail_body.html                           | HTML             |         33 |          0 |         12 |         45 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\password_reset\password_change.html                            | HTML             |         47 |          0 |          7 |         54 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\password_reset\password_change_done.html                       | HTML             |         11 |          0 |          1 |         12 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\password_reset\password_reset_complete.html                    | HTML             |         11 |          0 |          3 |         14 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\password_reset\password_reset_confirm.html                     | HTML             |         46 |          0 |         13 |         59 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\password_reset\password_reset_done.html                        | HTML             |         19 |          0 |          3 |         22 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\password_reset\password_reset_email.html                       | HTML             |          9 |          0 |          3 |         12 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\password_reset\password_reset_form.html                        | HTML             |         51 |          0 |         13 |         64 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\account.html                                       | HTML             |         25 |          0 |         12 |         37 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\accounting.html                                    | HTML             |         70 |          3 |         19 |         92 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\brand.html                                         | HTML             |         73 |          5 |         21 |         99 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\cash_flow_forecast.html                            | HTML             |        147 |          5 |         17 |        169 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\consolidation_currency.html                        | HTML             |         41 |          4 |         15 |         60 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\contracts\current\contracts_current.html           | HTML             |        150 |          3 |         41 |        194 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\contracts\current\rules_current.html               | HTML             |        281 |         19 |         58 |        358 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\contracts\validator\contracts_validator.html       | HTML             |        150 |          3 |         41 |        194 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\contracts\writer\contracts_writer.html             | HTML             |        377 |         11 |         55 |        443 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\contracts\writer\rules_writer.html                 | HTML             |        788 |         27 |         84 |        899 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\contracts\writer\rules_writer_wait_validation.html | HTML             |        298 |         19 |         62 |        379 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\contracts_ copy.html                               | HTML             |        497 |         15 |         57 |        569 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\contracts_copy.html                                | HTML             |        224 |         10 |         25 |        259 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\country.html                                       | HTML             |         91 |          5 |         21 |        117 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\currency.html                                      | HTML             |         53 |          5 |         18 |         76 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\division.html                                      | HTML             |         91 |          4 |         20 |        115 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\formulation.html                                   | HTML             |         63 |          5 |         20 |         88 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\home.html                                          | HTML             |        169 |          2 |         32 |        203 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\invoices.html                                      | HTML             |        183 |          6 |         22 |        211 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\layout.html                                        | HTML             |        154 |         10 |         49 |        213 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\login.html                                         | HTML             |         39 |          3 |         12 |         54 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\monthly_accruals.html                              | HTML             |        142 |          5 |         18 |        165 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\partner_report.html                                | HTML             |        130 |          4 |         16 |        150 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\partners\partners_current.html                     | HTML             |        108 |          3 |         27 |        138 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\partners\partners_validation.html                  | HTML             |        124 |          3 |         31 |        158 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\partners\partners_writer.html                      | HTML             |        284 |          5 |         28 |        317 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\payment_type.html                                  | HTML             |         53 |          5 |         17 |         75 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\region.html                                        | HTML             |         63 |          5 |         17 |         85 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\register.html                                      | HTML             |         53 |          3 |         20 |         76 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\sales_breakdown_item.html                          | HTML             |         63 |          5 |         18 |         86 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\static_data.html                                   | HTML             |         97 |          0 |         23 |        120 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\templates\royalty_app\tax.html                                           | HTML             |        109 |          5 |         20 |        134 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\test.py                                                                  | Python           |          0 |          0 |          1 |          1 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\urls.py                                                                  | Python           |         65 |         19 |         26 |        110 |
+| c:\Users\pierre\Desktop\SwissRoy_public\royalty_app\views.py                                                                 | Python           |      2,378 |        245 |        541 |      3,164 |
+| Total                                                                                                                        |                  |     12,821 |      1,051 |      2,480 |     16,352 |
++------------------------------------------------------------------------------------------------------------------------------+------------------+------------+------------+------------+------------+

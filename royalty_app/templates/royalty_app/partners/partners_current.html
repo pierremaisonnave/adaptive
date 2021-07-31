@@ -3,11 +3,11 @@
 
 
 
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-      <h1 class="h2">Current partners </h1>
-      <div class="btn-toolbar mb-2 mb-md-0">
-      </div>
-    </div>
+
+<div class=" pb-2 mb-3 border-bottom" style="display: flex" >
+  <h1 class="h2">Partners</h1>
+  <span style="padding-top:16px">(currently used in the system)</span>
+</div>
   
 
   <!------------------------------------------------------------------------------------->   
@@ -91,12 +91,10 @@
                 <span class="fname" partner_id={{partner.id}} id="id_{{partner.id}}" >{{partner.id}}</span>
               </td>
               <td><!--M3 Code-->
-                <span hidden=true id="span_m3_code_{{partner.id}}">{{partner.partner_m3_code}}</span>
                 <span >{{partner.partner_m3_code}}</span>
 
               </td>
               <td><!--Name-->
-                <span hidden=true id="span_name_{{partner.id}}">{{partner.partner_name}}</span>
                 <span >{{partner.partner_name}}</span>
               </td>
               <td ><!--Ico_3rd-->
@@ -109,9 +107,7 @@
                 <span >{{partner.partner_country.country_id}}</span>
               </td>
               <td><!--Bank-->
-                <span hidden=true id="span_bank_{{partner.id}}">{{partner.partner_bank_account}}</span>
                 <span >{{partner.partner_bank_account}}</span>
-
                 </td>
               <td><!--payment ype-->
                 <span hidden=true id="span_payment_type_{{partner.id}}">searched_value:{{partner.partner_payment_type}} </span>

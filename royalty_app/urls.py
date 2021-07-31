@@ -11,22 +11,52 @@ urlpatterns = [
 
   path("logout", views.logout_view, name="logout"),
   path("new_profile_pict", views.new_profile_pict, name="new_profile_pict"),
-  #pages
+
+ #change user role- API, onl valid in test mode:
+  path("change_role", views.change_role, name="change_role"),
+ 
 
 
-
-  path('partners', views.partners_writer, name='partners'),
+  #---------------------Partner-------------------------------
+  #------------------------------------------------------------
+  path('partners/writer', views.partners_writer, name='partners'),
   path('partners/to_validate', views.partners_to_validate, name='partners_to_validate'),
   path('partners/current', views.partners_current, name='partners_current'),
   path('validate_new_partner/<int:partner_id>', views.validate_new_partner, name='validate_new_partner'),
   path('validate_change_partner/<int:partner_id>', views.validate_change_partner, name='validate_change_partner'),
   path('reject_change_partner/<int:partner_id>', views.reject_change_partner, name='reject_change_partner'),
   path('delete_partner/<int:partner_id>', views.delete_partner, name='delete_partner'),
+  path("new_partner", views.new_partner, name="new_partner"),
+
+  #-------------------Contract (and rules)---------------------
+  #------------------------------------------------------------
+  # related to summary of contracts 
+  path('contracts/writer', views.contracts_writer, name='contracts_writer'),
+  path('contracts/to_validate', views.contracts_to_validate, name='contracts_to_validate'),
+  path('contracts/current', views.contracts_current, name='contracts_current'),
+  path('contracts/writer/<int:contract_id>', views.rules_writer, name='rules_writer'),
+  path('contracts/to_validate/<int:contract_id>', views.rules_validator, name='rules_validator'),
+  path('contracts/current/<int:contract_id>', views.rules_current, name='rules_current'),
+  path("change_row/<int:partner_id>", views.change_row, name="change_row"),
+  path("cancel_row_partner/<int:partner_id>", views.cancel_row_partner, name="cancel_row_partner"),
+  path("delete_row_partner/<int:partner_id>", views.delete_row_partner, name="delete_row_partner"),
+
+  path("cancel_row_contract/<int:contract_id>", views.cancel_row_contract, name="cancel_row_contract"),
+  path("change_row_contract/<int:contract_id>", views.change_row_contract, name="change_row_contract"),
+  path("new_contract", views.new_contract, name="new_contract"),
+  path("delete_row_contract/<int:contract_id>", views.delete_row_contract, name="delete_row_contract"),
+ # Modification/creation of a specific contract 
+  path("save_contract_partner/<int:contract_id>", views.save_contract_partner, name="save_contract_partner"),
+  path("save_mini/<int:contract_id>", views.save_mini, name="save_mini"),
+  path("save_rule/<int:contract_id>", views.save_rule, name="save_rule"),
+  path("save_invoice_breakdown/<int:contract_id>", views.save_invoice_breakdown, name="save_invoice_breakdown"),
+  path("new_contract_file", views.new_contract_file, name="new_contract_file"),
+  path("save_contract_basic_info/<int:contract_id>/<str:save_type>", views.save_contract_basic_info, name="save_contract_basic_info"),
+  path("pdf_file_to_keep/<int:contract_id>", views.pdf_file_to_keep, name="pdf_file_to_keep"),
+  #API response_validator
+  path("response_validator", views.response_validator, name="response_validator"),
 
 
-  path('contracts', views.contracts, name='contracts'),
-  path('contracts/<int:contract_id>', views.rules, name='rules'),
-  path('analytics', views.analytics, name='analytics'),
   path('invoices', views.invoices, name='invoices'),
 
   path('settings', views.settings, name='settings'),
@@ -46,26 +76,7 @@ urlpatterns = [
   path('export/<str:file>', views.export, name='export'), 
 
 
-  #Partner
-  path("change_row/<int:partner_id>", views.change_row, name="change_row"),
-  path("cancel_row_partner/<int:partner_id>", views.cancel_row_partner, name="cancel_row_partner"),
-  path("delete_row_partner/<int:partner_id>", views.delete_row_partner, name="delete_row_partner"),
-  path("new_partner", views.new_partner, name="new_partner"),
-  
-  #Contracts
-  path("cancel_row_contract/<int:contract_id>", views.cancel_row_contract, name="cancel_row_contract"),
-  path("change_row_contract/<int:contract_id>", views.change_row_contract, name="change_row_contract"),
-  path("new_contract", views.new_contract, name="new_contract"),
-  path("delete_row_contract/<int:contract_id>", views.delete_row_contract, name="delete_row_contract"),
-  
 
-  #Rule :  contract_partner + formula/country/rate rules + contract breakdown
-  path("save_contract_partner/<int:contract_id>", views.save_contract_partner, name="save_contract_partner"),
-  path("save_mini/<int:contract_id>", views.save_mini, name="save_mini"),
-  path("save_rule/<int:contract_id>", views.save_rule, name="save_rule"),
-  path("save_invoice_breakdown/<int:contract_id>", views.save_invoice_breakdown, name="save_invoice_breakdown"),
-  path("new_contract_file", views.new_contract_file, name="new_contract_file"),
-  path("delete_contract_file/<int:cf_id>", views.delete_contract_file, name="delete_contract_file"),
 
   # invoice
   path("new_invoice", views.new_invoice, name="new_invoice"),

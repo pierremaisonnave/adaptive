@@ -53,8 +53,8 @@ function onchange_contract(elm){
                 }else{cp.hidden=true}
         })
         if (n==0){
-            alert("please insert some partners for this contract")
-            window.location.replace(`/contracts/${contract_id}`)
+            alert(`please insert some partners for this contract /contracts/current/${contract_id}` )
+            window.location.replace(`/contracts/current/${contract_id}`)
             }
     // transaction_direction
         transaction_direction=elm.options[elm.selectedIndex].getAttribute("transaction_direction")

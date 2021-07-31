@@ -58,7 +58,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         # Check if authentication successful
         if user is not None:
-          print(user.last_login) # if None, then it's a first time user, I should redirect him to a welcome page
+          # if None, then it's a first time user, I should redirect him to a welcome page
           login(request, user)
           redirect=request.POST.get('next')
           if redirect=="":
@@ -389,7 +389,7 @@ def chart_accruals(year,contract_id_list):
     )
     #Creation of Ytd column
     print("chart_accruals 4")
-    print(df_data)
+
     df_data["Ytd_roy"]=np.where(
       df_data["year_of_sales"]==df_data["acc_year"],
       np.where(
@@ -399,7 +399,7 @@ def chart_accruals(year,contract_id_list):
       ),
       0
     )
-    print(df_data)
+
     print("chart_accruals 5")
     df_data["Ytd_roy"]=np.where(
       df_data["transaction_direction"]=="REC",
@@ -428,6 +428,16 @@ def chart_accruals(year,contract_id_list):
   return [labels, data_accruals,data_roy_ytd]
 
 
+  #API to change role- only in test environment:
+@login_required
+def change_role(request):
+  user=request.user
+  if user.role=="WRITER" :
+    user.role="VALIDATOR"
+  else:
+    user.role="WRITER"
+  user.save()
+  return HttpResponseRedirect(reverse("home"))
 
   #-----------------------------------PARTNER START----------------------------
   #----------------------------------------------------------------------------
@@ -619,8 +629,7 @@ def change_row(request,partner_id):
         status='PROPOSAL'      
       )
       partner_proposal.save()
-      print("ttt")
-      print(partner_proposal)
+
       partner.partner_proposal=partner_proposal
       partner.status='CHANGE'
       partner.save()
@@ -704,55 +713,181 @@ def new_partner(request):
   #----------------------------------------------------------------------------
 
 @login_required(login_url='/login')
-def contracts(request):
+def contracts_writer(request):
+  user=request.user
+  if user.role!="WRITER":
+    return HttpResponseRedirect(reverse("contracts_current")) 
+  else:
+    contract_list=Contract.objects.filter(status__in=['IN_CREATION','CHANGE','NEW','DELETE','CURRENT']).select_related('m3_brand','division','division_via','payment_periodicity','minimum_guar_remaining_allocation_country','contract_currency')
+    for c in contract_list:
+      if c.status=="CHANGE" :
+        contract_proposal=c.contract_proposal
+        c.contract_name= contract_proposal.contract_name
+        c.transaction_direction= contract_proposal.transaction_direction
+        c.division= contract_proposal.division
+        c.division_via= contract_proposal.division_via
+        c.contract_currency= contract_proposal.contract_currency
+        c.payment_periodicity= contract_proposal.payment_periodicity
+        c.payment_terms= contract_proposal.payment_terms
+        c.m3_brand= contract_proposal.m3_brand
+        c.mini_gar_status= contract_proposal.mini_gar_status
+        c.mini_gar_from= contract_proposal.mini_gar_from
+        c.mini_gar_to= contract_proposal.mini_gar_to
 
+    region_list=Region.objects.all()
+    country_list=Country.objects.all().select_related('country_region')
+    m3_brand_list=Brand.objects.all().order_by("brand_name")
+    division_list=Division.objects.all()
+    currency_list=Currency.objects.all()
+    periodicity_list=Periodicity.objects.all()
 
-  contract_list=Contract.objects.all().select_related('m3_brand','division','division_via','payment_periodicity','minimum_guar_remaining_allocation_country','contract_currency')
-  region_list=Region.objects.all()
-  country_list=Country.objects.all().select_related('country_region')
-  m3_brand_list=Brand.objects.all().order_by("brand_name")
-  division_list=Division.objects.all()
-  currency_list=Currency.objects.all()
-  periodicity_list=Periodicity.objects.all()
-
-
-  return render(request, 'royalty_app/contracts.html',  {"periodicity_list":periodicity_list,"currency_list":currency_list,"division_list":division_list,"m3_brand_list":m3_brand_list, "contract_list":contract_list,"region_list":region_list, "country_list":country_list})
+    return render(request, 'royalty_app/contracts/writer/contracts_writer.html',  {"periodicity_list":periodicity_list,"currency_list":currency_list,"division_list":division_list,"m3_brand_list":m3_brand_list, "contract_list":contract_list,"region_list":region_list, "country_list":country_list})
 
 @login_required(login_url='/login')
-def rules(request,contract_id):
+def contracts_current(request):
 
+
+  contract_list=Contract.objects.filter(status__in=['CHANGE','DELETE','CURRENT']).select_related('m3_brand','division','division_via','payment_periodicity','minimum_guar_remaining_allocation_country','contract_currency')
+  contract_list_to_validate=Contract.objects.all().filter(status__in=["PROPOSAL","NEW","DELETE"])
+  message_validator=f'you have {len(contract_list_to_validate)} request(s) to validate'
+  return render(request, 'royalty_app/contracts/current/contracts_current.html',  {"contract_list":contract_list,"message_validator":message_validator})
+
+@login_required(login_url='/login')
+def contracts_to_validate(request):
+
+  contract_list=Contract.objects.filter(status__in=['PROPOSAL','DELETE','NEW']).select_related('m3_brand','division','division_via','payment_periodicity','minimum_guar_remaining_allocation_country','contract_currency')
+  for c in contract_list :
+    if c.status=="PROPOSAL":
+      original_id=Contract.objects.get(contract_proposal=c).id
+      c.pk=original_id
+      c.status="CHANGE"
+
+  contract_list_to_validate=Contract.objects.all().filter(status__in=["PROPOSAL","NEW","DELETE"])
+  return render(request, 'royalty_app/contracts/validator/contracts_validator.html',  {"contract_list":contract_list})
+
+
+
+@login_required(login_url='/login')
+def rules_writer(request,contract_id):
+
+  user=request.user
+  if user.role=="WRITER" :
+
+    contract=Contract.objects.get(id=contract_id)#.select_related('contract_currency')
+    if contract.status in ['CHANGE'] : #if the writer want to access the value he submitted to his validator, he should be vuein the proposal
+      contract=contract.contract_proposal 
+
+    contract_file_list=Contract_file.objects.filter(contract=contract)
+    contract_partner_list=Contract_partner.objects.filter(contract=contract)
+    rule_list=Rule.objects.filter(contract=contract)
+    tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
+
+    #cas particulier du breakdown
+    sbd=Sales_breakdown_item.objects.all()
+    sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)
+    sales_breakdown_list=[]
+    for  item_sbd in sbd:
+      sales_breakdown_contract_definition=""
+      for item_sbd_contract in sbd_contract:
+        if item_sbd_contract.sales_breakdown_item==item_sbd:
+          sales_breakdown_contract_definition=item_sbd_contract.sales_breakdown_contract_definition
+          break
+      sub_dict={
+        "id":item_sbd.id,
+        "sales_breakdown_definition":item_sbd.sales_breakdown_definition,
+        "sales_breakdown_contract_definition":sales_breakdown_contract_definition}
+      sales_breakdown_list.append(sub_dict)
+
+
+
+    if contract.status in ['IN_CREATION','CURRENT'] :
+      partner_list=Partner.objects.all().filter(status__in=['CHANGE','DELETE','CURRENT']).order_by("partner_name")
+      country_list=Country.objects.all().order_by("country_id").select_related('country_region')
+      region_list=Region.objects.all().order_by("region")
+      formulation_list=Formulation.objects.all()
+      currency_list=Currency.objects.all()
+      brand_list=Brand.objects.all().order_by("brand_name")
+      division_list=Division.objects.all()
+      periodicity_list=Periodicity.objects.all()
+     
+      return render(request, 'royalty_app/contracts/writer/rules_writer.html', {"periodicity_list":periodicity_list,"division_list":division_list,"brand_list":brand_list,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"currency_list":currency_list,"tranche_list":tranche_list,"formulation_list":formulation_list,"region_list":region_list,"country_list":country_list,"contract":contract,"contract_partner_list":contract_partner_list,"partner_list":partner_list})
+    
+    if contract.status in ['NEW','DELETE','PROPOSAL'] :
+      if contract.status=="PROPOSAL":
+        inital_contract_id=Contract.objects.get(contract_proposal=contract).id
+      else:
+        inital_contract_id=None
+      return render(request, 'royalty_app/contracts/writer/rules_writer_wait_validation.html', {"inital_contract_id":inital_contract_id,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
+  return HttpResponseRedirect(reverse("contracts_current"))  
+
+@login_required(login_url='/login')
+def rules_current(request,contract_id):
+  user=request.user
   contract=Contract.objects.get(id=contract_id)#.select_related('contract_currency')
   contract_file_list=Contract_file.objects.filter(contract=contract)
   contract_partner_list=Contract_partner.objects.filter(contract=contract)
-  partner_list=Partner.objects.all().order_by("partner_name")
-  country_list=Country.objects.all().order_by("country_id").select_related('country_region')
-  region_list=Region.objects.all().order_by("region")
-  formulation_list=Formulation.objects.all()
-  currency_list=Currency.objects.all()
   rule_list=Rule.objects.filter(contract=contract)
-  
   tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
 
-  sbd=Sales_breakdown_item.objects.all()
-  sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)
-  sales_breakdown_list=[]
-  for  item_sbd in sbd:
-    sales_breakdown_contract_definition=""
-    for item_sbd_contract in sbd_contract:
-      if item_sbd_contract.sales_breakdown_item==item_sbd:
-        sales_breakdown_contract_definition=item_sbd_contract.sales_breakdown_contract_definition
-        break
-    sub_dict={
-      "id":item_sbd.id,
-      "sales_breakdown_definition":item_sbd.sales_breakdown_definition,
-      "sales_breakdown_contract_definition":sales_breakdown_contract_definition}
-    sales_breakdown_list.append(sub_dict)  
-      
-  return render(request, 'royalty_app/rules.html', {"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"currency_list":currency_list,"tranche_list":tranche_list,"formulation_list":formulation_list,"region_list":region_list,"country_list":country_list,"contract":contract,"contract_partner_list":contract_partner_list,"partner_list":partner_list})
+  if contract.status in ['CHANGE','DELETE','CURRENT'] :
+
+    sbd=Sales_breakdown_item.objects.all()
+    sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)
+    sales_breakdown_list=[]
+    for  item_sbd in sbd:
+      sales_breakdown_contract_definition=""
+      for item_sbd_contract in sbd_contract:
+        if item_sbd_contract.sales_breakdown_item==item_sbd:
+          sales_breakdown_contract_definition=item_sbd_contract.sales_breakdown_contract_definition
+          break
+      sub_dict={
+        "id":item_sbd.id,
+        "sales_breakdown_definition":item_sbd.sales_breakdown_definition,
+        "sales_breakdown_contract_definition":sales_breakdown_contract_definition}
+      sales_breakdown_list.append(sub_dict)   
+    return render(request, 'royalty_app/contracts/current/rules_current.html', {"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
+  else :
+    pass
+  return HttpResponseRedirect(reverse("contracts_current")) 
 
 @login_required(login_url='/login')
-def analytics(request):
-  return render(request, 'royalty_app/analytics.html', {})
+def rules_validator(request,contract_id):
+  user=request.user
+  if user.role=="VALIDATOR":
+    contract=Contract.objects.get(id=contract_id)#.select_related('contract_currency')
+    contract_file_list=Contract_file.objects.filter(contract=contract)
+    contract_partner_list=Contract_partner.objects.filter(contract=contract)
+    rule_list=Rule.objects.filter(contract=contract)
+    tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
+
+    if contract.status in ['CHANGE','DELETE','NEW'] :
+      if contract.status=="CHANGE":
+        inital_contract_id=contract.id
+        contract=contract.contract_proposal
+      else:
+        inital_contract_id=None
+
+      sbd=Sales_breakdown_item.objects.all()
+      sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)
+      sales_breakdown_list=[]
+      for  item_sbd in sbd:
+        sales_breakdown_contract_definition=""
+        for item_sbd_contract in sbd_contract:
+          if item_sbd_contract.sales_breakdown_item==item_sbd:
+            sales_breakdown_contract_definition=item_sbd_contract.sales_breakdown_contract_definition
+            break
+        sub_dict={
+          "id":item_sbd.id,
+          "sales_breakdown_definition":item_sbd.sales_breakdown_definition,
+          "sales_breakdown_contract_definition":sales_breakdown_contract_definition}
+        sales_breakdown_list.append(sub_dict)   
+      return render(request, 'royalty_app/contracts/validator/rules_validator.html', {"inital_contract_id":inital_contract_id,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
+    else :
+      pass
+  return HttpResponseRedirect(reverse("contracts_current")) 
+
+
+
 
 @login_required(login_url='/login')
 def invoices(request):
@@ -1124,39 +1259,7 @@ def new_contract(request):
     except: return JsonResponse({"error": "data not loaded"}, status=404)
 
 
-#API to save new mini gar
-@csrf_exempt
-@login_required 
-def save_mini(request,contract_id):
- 
-  try:
-    contract = Contract.objects.get( id=contract_id)
-  except contract.DoesNotExist:
-    return JsonResponse({"error": "post not found."}, status=404)
 
-  if request.method == "PUT":
-    data = json.loads(request.body)
-
-    if data["country_id"] == "" : 
-      minimum_guar_remaining_allocation_country= None
-    else :
-      minimum_guar_remaining_allocation_country=Country.objects.get(country_id=data["country_id"])
-    
-    if data["amount"] == "" : 
-      minimum_guar_amount= None
-    else :
-      minimum_guar_amount=data["amount"] 
-    print(data)
-    contract.mini_gar_status = data["mini_gar_status"]
-    contract.mini_gar_from = data["mini_gar_from"]
-    contract.mini_gar_to = data["mini_gar_to"]
-    contract.minimum_guar_amount = minimum_guar_amount
-    contract.minimum_guar_remaining_allocation_country=minimum_guar_remaining_allocation_country
-    contract.save()
-    return JsonResponse({"result": "all done"}, status=201)
-
-  else:
-    return JsonResponse({"error": "GET or PUT request required."}, status=400)
 
 @csrf_exempt 
 @login_required
@@ -1222,6 +1325,124 @@ def cancel_row_contract(request,contract_id):
   else:
     return JsonResponse({"error": "GET or PUT request required."}, status=400) 
 
+#------------------------------------------------------------------------------------------
+#----------------------Modification/creation of a specific contract------------------------
+#------------------------------------------------------------------------------------------
+
+# API to save in database:
+
+
+def response_validator(request):
+  if request.method == "POST":
+    contract_id=request.POST["contract_id"]
+    response_validator = request.POST["reponse_validator"]
+    contract = Contract.objects.get(id=contract_id)
+
+
+    if response_validator in ["approve_contract_deletion","reject_contract_creation"]:
+      contract.delete()
+      return HttpResponseRedirect(reverse("contracts_to_validate"))
+
+    if response_validator  in ["reject_contract_deletion","approve_contract_creation"]:
+      contract.status="CURRENT"
+      contract.save()
+      return HttpResponseRedirect(reverse("contracts_to_validate"))
+
+    if response_validator=="approve_contract_modification":
+      contract_proposal=contract.contract_proposal      
+      contract.delete()
+      contract_proposal.status="CURRENT"
+      contract.contract_proposal=None
+      contract_proposal.pk=contract_id
+      contract_proposal.save()
+      print(contract_proposal.id)
+      
+
+      return HttpResponseRedirect(reverse("contracts_to_validate"))
+
+    if response_validator=="reject_contract_modification":
+      print("response_validator")
+      contract_proposal=contract.contract_proposal
+      contract.status="CURRENT"
+      contract.contract_proposal=None
+      contract.save()
+      contract_proposal.delete()
+      return HttpResponseRedirect(reverse("contracts_to_validate"))
+    print("4")
+  else:
+    return HttpResponseRedirect(reverse("contracts_to_validate")) 
+
+@csrf_exempt 
+@login_required
+def pdf_file_to_keep(request,contract_id):
+  user=request.user
+  if user.role !="WRITER":
+    return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=201)
+  else:
+    data = json.loads(request.body)
+    contract=Contract.objects.get(id=contract_id)
+    if contract.status=="PROPOSAL": #then it means that we must copy the file from the corresponding CHANGE
+      initial_contract=Contract.objects.get(contract_proposal=contract_id)
+
+      contract_file_list=Contract_file.objects.filter(contract =initial_contract)
+
+      for c in contract_file_list:
+        contract_file_proposal= c
+        contract_file_proposal.pk=None
+        contract_file_proposal.contract=contract
+        contract_file_proposal.save()
+
+
+    if contract.status in ["IN_CREATION","NEW"]: #then it means that we must copy the file from the corresponding CHANGE
+      contract_file_list=Contract_file.objects.filter(contract =contract).exclude(id__in =data["list"])
+      contract_file_list.delete()
+    return JsonResponse({"response": "OK"}, status=201)
+
+
+@csrf_exempt 
+@login_required
+def save_contract_basic_info(request,contract_id,save_type):
+  user=request.user
+  if user.role !="WRITER":
+    return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=201)
+  else:
+    contract=Contract.objects.get(id=contract_id)
+    if contract.status not in ["IN_CREATION","CURRENT"] :
+      return JsonResponse({"error": "an error occured"}, status=201)
+    else:
+      data = json.loads(request.body)
+      if save_type=="SUBMIT_CHANGE" :
+        contract_proposal=Contract(
+          contract_name=data["contract_name"],
+          transaction_direction=data["transaction_direction"],
+          division=Division.objects.get(division_id=data["division_id"]),
+          division_via=Division.objects.get(division_id=data["division_via_id"]),
+          contract_currency=Currency.objects.get(currency=data["contract_currency"]),
+          payment_periodicity=Periodicity.objects.get(id=data["payment_periodicity"]),
+          payment_terms=data["payment_terms"],
+          m3_brand=Brand.objects.get(id=data["m3_brand"]),
+          status="PROPOSAL"
+        )
+        contract_proposal.save()
+        contract.contract_proposal=contract_proposal
+        contract.status="CHANGE"
+        contract.save()
+        return JsonResponse({"contract_proposal_id": contract_proposal.id}, status=201)
+      elif save_type=="SUBMIT_NEW":
+        contract.status="NEW"
+
+      contract.contract_name=data["contract_name"]
+      contract.transaction_direction=data["transaction_direction"]
+      contract.division=Division.objects.get(division_id=data["division_id"])
+      contract.division_via=Division.objects.get(division_id=data["division_via_id"])
+      contract.contract_currency=Currency.objects.get(currency=data["contract_currency"])
+      contract.payment_periodicity=Periodicity.objects.get(id=data["payment_periodicity"])
+      contract.payment_terms=data["payment_terms"]
+      contract.m3_brand=Brand.objects.get(id=data["m3_brand"])
+      contract.save()
+      return JsonResponse({"response": "OK"}, status=201)
+
+
 @csrf_exempt 
 @login_required
 def save_contract_partner(request,contract_id):
@@ -1256,7 +1477,6 @@ def save_rule(request,contract_id):
     rules_before_modification=Rule.objects.filter(contract=contract)
     Rule.objects.filter(contract=contract).delete()    #delete the existing record for this contract_partner ( we replace then, see code after:)
     data = json.loads(request.body)
-    print(data)
     for item in data :
       try:  
 
@@ -1309,7 +1529,38 @@ def save_rule(request,contract_id):
   else:
     return JsonResponse({"error": "GET or PUT request required."}, status=400)
 
+#API to save new mini gar
+@csrf_exempt
+@login_required 
+def save_mini(request,contract_id):
+ 
+  try:
+    contract = Contract.objects.get( id=contract_id)
+  except contract.DoesNotExist:
+    return JsonResponse({"error": "post not found."}, status=404)
 
+  if request.method == "PUT":
+    data = json.loads(request.body)
+
+    if data["country_id"] == "" : 
+      minimum_guar_remaining_allocation_country= None
+    else :
+      minimum_guar_remaining_allocation_country=Country.objects.get(country_id=data["country_id"])
+    
+    if data["amount"] == "" : 
+      minimum_guar_amount= None
+    else :
+      minimum_guar_amount=data["amount"] 
+    contract.mini_gar_status = data["mini_gar_status"]
+    contract.mini_gar_from = data["mini_gar_from"]
+    contract.mini_gar_to = data["mini_gar_to"]
+    contract.minimum_guar_amount = minimum_guar_amount
+    contract.minimum_guar_remaining_allocation_country=minimum_guar_remaining_allocation_country
+    contract.save()
+    return JsonResponse({"result": "all done"}, status=201)
+
+  else:
+    return JsonResponse({"error": "GET or PUT request required."}, status=400)
 
 @csrf_exempt 
 @login_required
@@ -1372,15 +1623,6 @@ def new_contract_file(request):
     except Exception as e:
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 
-@csrf_exempt
-@login_required
-def delete_contract_file(request,cf_id):
-  if request.method == "POST":
-    contract_file=Contract_file.objects.get(pk=cf_id)
-    contract_file.delete()
-    return JsonResponse({"result": "all done"}, status=201)
-  else:
-    return JsonResponse({"error": "GET or PUT request required."}, status=400)
 
 
 @csrf_exempt
@@ -1911,7 +2153,6 @@ def new_report(request):
         try:
           df_on_sales=pd.merge(df_rule_calc,df_sales, how="inner",left_on=['formulation','year'], right_on=['formulation','year'] )
           print('df_on_sales')
-          print(df_on_sales)
 
           #df_on_sales=df_on_sales.drop(['year'], axis = 1)  
           df_on_sales['country_validation']=(
@@ -2043,7 +2284,6 @@ def new_report(request):
         df_mini_gar = df_mini_gar.rename(columns={'payment_periodicity_id_x':'payment_periodicity_id'})
         df_mini_gar=df_mini_gar[['contract_id','year','month','SKU','SKU_name','amount_contract_curr','payment_periodicity_id','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency']]
 
-        print(df_mini_gar[['contract_id','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency']])
 
         df_mini_gar=df_mini_gar.groupby(['contract_id','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','report_currency','qty_value_currency'], as_index=False).agg({"amount_contract_curr": "sum","sales_in_market_curr": "sum","sales_in_contract_curr":"sum","volume":"sum"})
 
@@ -2112,7 +2352,7 @@ def new_report(request):
         invoice_empty=df_invoice.empty
 
         #--------------------------------------------
-        print(df_invoice)
+
         print("df_invoice: Done")
 
       #         iv.: Detail : 
@@ -2459,7 +2699,7 @@ def new_report(request):
         '''
 
         df_detail['import_file_id']=file.id
-        print(df_detail)
+
         df_detail.to_sql('royalty_app_detail', con=conn, index=False, if_exists="append")
         print("df_detail loaded succesfully")
     

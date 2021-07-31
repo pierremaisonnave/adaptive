@@ -133,7 +133,7 @@ function delete_row(partner_id) {
             <span style="cursor:default; padding-left:0px" >${result.partner_payment_type}</span>
             `,
             //tr 7 Button
-            td_list[7].outerHTML=`<td><span style="color:orange"> NEW pending validation</span></td>`,
+            td_list[7].outerHTML=`<td><span style="color:orange"> DELETE pending validation</span></td>`,
 
         // save the value in the datatable
             td_list_html=[
@@ -298,7 +298,7 @@ function change_row(partner_id){
             <span style="cursor:default; padding-left:0px" >${partner_payment_type}</span>
             `,
             //tr 7 Button
-            td_list[7].outerHTML=`<td><span style="color:orange"> NEW pending validation</span></td>`,
+            td_list[7].outerHTML=`<td><span style="color:orange"> CHANGE pending validation</span></td>`,
 
         // save the value in the datatable
             td_list_html=[
@@ -557,13 +557,8 @@ function approve(partner_id,status){
             method: 'POST',})
         .then(response => response.json())
         .then(result => {
-            if (!!result.error) {alert(result.error);return}
-            if (result.error){
-                alert(result.error)
-            }else{
-                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
-                t.row( tr_to_delete ).remove().draw(false);
-            }
+            if (!!result.error) {alert(result.error);return
+            }else{smooth_remove_row(partner_id)}
         })
     }
     if ( status=="NEW"){
@@ -572,13 +567,8 @@ function approve(partner_id,status){
             method: 'POST'})
         .then(response => response.json())
         .then(result => {
-            if (!!result.error) {alert(result.error);return}
-            if (result.error){
-                alert(result.error)
-            }else{
-                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
-                t.row( tr_to_delete ).remove().draw(false);
-            }
+            if (!!result.error) {alert(result.error);return
+            }else{smooth_remove_row(partner_id)}
         })
     }
     if ( status=="CHANGE"){
@@ -587,32 +577,21 @@ function approve(partner_id,status){
             method: 'POST'})
         .then(response => response.json())
         .then(result => {
-            if (!!result.error) {alert(result.error);return}
-            if (result.error){
-                alert(result.error)
-            }else{
-                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
-                t.row( tr_to_delete ).remove().draw(false);
-            }
+            if (!!result.error) {alert(result.error);return
+            }else{smooth_remove_row(partner_id)}
         })
     }
 }
 
 function reject(partner_id,status){
-    var t = $('#partners_table').DataTable()
+    
     if ( status=="NEW"){
-        
         fetch(`/delete_partner/${partner_id}`, {
             method: 'POST',})
         .then(response => response.json())
         .then(result => {
-            if (!!result.error) {alert(result.error);return}
-            if (result.error){
-                alert(result.error)
-            }else{
-                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
-                t.row( tr_to_delete ).remove().draw(false);
-            }
+            if (!!result.error) {alert(result.error);return
+            }else{smooth_remove_row(partner_id)}
         })
     }
     if ( status=="DELETE"){
@@ -622,12 +601,7 @@ function reject(partner_id,status){
         .then(response => response.json())
         .then(result => {
             if (!!result.error) {alert(result.error);return}
-            if (result.error){
-                alert(result.error)
-            }else{
-                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
-                t.row( tr_to_delete ).remove().draw(false);
-            }
+            else{smooth_remove_row(partner_id)}
         })
     }
     if ( status=="CHANGE"){
@@ -636,13 +610,25 @@ function reject(partner_id,status){
             method: 'POST'})
         .then(response => response.json())
         .then(result => {
-            if (!!result.error) {alert(result.error);return}
-            if (result.error){
-                alert(result.error)
-            }else{
-                tr_to_delete=document.getElementById(`partner_${partner_id}`) 
-                t.row( tr_to_delete ).remove().draw(false);
-            }
+            if (!!result.error) {alert(result.error);return
+            }else{smooth_remove_row(partner_id)}
         })
     }
+}
+
+function smooth_remove_row(partner_id){
+    var t = $('#partners_table').DataTable()
+    tr_to_delete=document.getElementById(`partner_${partner_id}`) 
+
+    $(`#partner_${partner_id}`)
+        .children('td, th')
+        .animate({
+        padding: 0
+    })
+        .wrapInner('<div />')
+        .children()
+        .slideUp(function () {
+            t.row( tr_to_delete ).remove().draw(false);
+        
+    });
 }
