@@ -1932,7 +1932,7 @@ def new_report(request):
 
       
         #Contract
-        contract_list=Contract.objects.all()
+        contract_list=Contract.objects.filter(status__in=["CURRENT","DELETE","CHANGE"])
         df_contract = pd.DataFrame(list(contract_list.values()))
         df_contract=df_contract.rename(columns={'id':'contract_id','contract_currency_id':'contract_currency','division_id':'division'})
 
@@ -2695,7 +2695,7 @@ def new_report(request):
         conn = sqlite3.connect('royalty/db.sqlite3')
 
         '''
-        DATABASE_URL='acucxettlkslgy:94a33c4d67c61724d9fb6590f17b4dae0d0c6640f820657601173e278bdf54e5@ec2-54-87-112-29.compute-1.amazonaws.com:5432/d7dq3h8tda4f4j'
+        #DATABASE_URL='acucxettlkslgy:94a33c4d67c61724d9fb6590f17b4dae0d0c6640f820657601173e278bdf54e5@ec2-54-87-112-29.compute-1.amazonaws.com:5432/d7dq3h8tda4f4j'
           
         final_db_url = f"postgresql+psycopg2://{DATABASE_URL}"
         conn = create_engine(final_db_url)
