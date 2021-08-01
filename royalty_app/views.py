@@ -1734,7 +1734,7 @@ def save_dashboard(request):
 @csrf_exempt
 @login_required
 def new_report(request):
-  return JsonResponse({"error": "postgresql+psycopg2://" }, status=400)
+  #return JsonResponse({"error": "postgresql+psycopg2://" }, status=400)
   return JsonResponse({"error": f"postgresql+psycopg2://{DATABASE_URL}" }, status=400)
 # Index:
   #   I: book file name in database
