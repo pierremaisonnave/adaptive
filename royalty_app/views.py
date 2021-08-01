@@ -8,7 +8,7 @@ from .models import (Invoice,Country,Partner,Region,Payment_type,Brand,
   Accounting,Formulation,Currency,Division,Tax,Periodicity,
   Payment_structure,Contract,Contract_partner,Rule,Tranche,
   Periodicity_cat,Fx,Sales_breakdown_item,Sales_breakdown_per_contract,Sales_breakdown_item,
-  File,Sale, Rule_calc,Periodicity_cat,Consolidation_currency,Cash_flow,Detail,Gls,Conso,Wht,Sales_breakdown_for_contract_report,
+  File,Sale, Rule_calc,Periodicity_cat,Consolidation_currency,Cash_flow,Detail,Accounting_entry,Conso,Wht,Sales_breakdown_for_contract_report,
   Contract_file,Month_table,User)
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
@@ -35,7 +35,10 @@ import time
 import requests
 
 #CAPTCHA
-from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY
+from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY,DATABASE_URL
+
+# to create connection with database 
+from sqlalchemy.engine.create import create_engine
 
 def login_view(request):
     if request.method == "POST":
@@ -743,6 +746,19 @@ def contracts_writer(request):
 
     return render(request, 'royalty_app/contracts/writer/contracts_writer.html',  {"periodicity_list":periodicity_list,"currency_list":currency_list,"division_list":division_list,"m3_brand_list":m3_brand_list, "contract_list":contract_list,"region_list":region_list, "country_list":country_list})
 
+
+@login_required
+def delete_contract(request,contract_id):
+  Contract.objects.get(id=contract_id).delete()
+  return HttpResponseRedirect(reverse("contracts_writer")) 
+
+@login_required
+def submit_delete_contract_request(request,contract_id):
+  contract=Contract.objects.get(id=contract_id)
+  contract.status="DELETE"
+  contract.save()
+  return HttpResponseRedirect(reverse("contracts_writer"))  
+
 @login_required(login_url='/login')
 def contracts_current(request):
 
@@ -779,7 +795,7 @@ def rules_writer(request,contract_id):
 
     contract_file_list=Contract_file.objects.filter(contract=contract)
     contract_partner_list=Contract_partner.objects.filter(contract=contract)
-    rule_list=Rule.objects.filter(contract=contract)
+    rule_list=Rule.objects.filter(contract=contract).select_related('qty_value_currency')
     tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
 
     #cas particulier du breakdown
@@ -823,10 +839,10 @@ def rules_writer(request,contract_id):
 @login_required(login_url='/login')
 def rules_current(request,contract_id):
   user=request.user
-  contract=Contract.objects.get(id=contract_id)#.select_related('contract_currency')
+  contract=Contract.objects.get(id=contract_id)
   contract_file_list=Contract_file.objects.filter(contract=contract)
   contract_partner_list=Contract_partner.objects.filter(contract=contract)
-  rule_list=Rule.objects.filter(contract=contract)
+  rule_list=Rule.objects.filter(contract=contract).select_related('qty_value_currency')
   tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
 
   if contract.status in ['CHANGE','DELETE','CURRENT'] :
@@ -855,17 +871,17 @@ def rules_validator(request,contract_id):
   user=request.user
   if user.role=="VALIDATOR":
     contract=Contract.objects.get(id=contract_id)#.select_related('contract_currency')
-    contract_file_list=Contract_file.objects.filter(contract=contract)
-    contract_partner_list=Contract_partner.objects.filter(contract=contract)
-    rule_list=Rule.objects.filter(contract=contract)
-    tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
-
     if contract.status in ['CHANGE','DELETE','NEW'] :
       if contract.status=="CHANGE":
         inital_contract_id=contract.id
         contract=contract.contract_proposal
       else:
         inital_contract_id=None
+
+      contract_file_list=Contract_file.objects.filter(contract=contract)
+      contract_partner_list=Contract_partner.objects.filter(contract=contract)
+      rule_list=Rule.objects.filter(contract=contract)
+      tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
 
       sbd=Sales_breakdown_item.objects.all()
       sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)
@@ -882,17 +898,13 @@ def rules_validator(request,contract_id):
           "sales_breakdown_contract_definition":sales_breakdown_contract_definition}
         sales_breakdown_list.append(sub_dict)   
       return render(request, 'royalty_app/contracts/validator/rules_validator.html', {"inital_contract_id":inital_contract_id,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
-    else :
-      pass
   return HttpResponseRedirect(reverse("contracts_current")) 
-
 
 
 
 @login_required(login_url='/login')
 def invoices(request):
-  contract_list=Contract.objects.all().order_by("contract_name").select_related('contract_currency','payment_periodicity')
-
+  contract_list=Contract.objects.filter(status__in=["CURRENT","CHANGE","DELETE",""]).order_by("contract_name").select_related('contract_currency','payment_periodicity')
   contract_partner_list=Contract_partner.objects.all().select_related('partner','contract')
   periodicity_cat_list=Periodicity_cat.objects.all().select_related('periodicity')
   invoice_list=Invoice.objects.all()
@@ -1108,7 +1120,7 @@ def export(request,file):
         df_partner.to_excel(writer, sheet_name='Partners',index=False)
 
       if table_name=="division":
-        df_division.to_excel(writer, sheet_name='Galderma Division',index=False)
+        df_division.to_excel(writer, sheet_name='Division',index=False)
 
       if table_name=="contract":
         df_contract.to_excel(writer, sheet_name='Contracts',index=False)
@@ -1349,14 +1361,54 @@ def response_validator(request):
       return HttpResponseRedirect(reverse("contracts_to_validate"))
 
     if response_validator=="approve_contract_modification":
-      contract_proposal=contract.contract_proposal      
-      contract.delete()
-      contract_proposal.status="CURRENT"
-      contract.contract_proposal=None
-      contract_proposal.pk=contract_id
-      contract_proposal.save()
-      print(contract_proposal.id)
+      #when modification is approved, we deleve the old contract, we copy the new contract and save it with the contract_id
+
+      contract_proposal_id=contract.contract_proposal.id
+      #contract.delete()
+     
+      #  loop though the Contract_file//Contract_partner//Rule//Tranche//Sales_breakdown_per_contract and delete
+      Contract_file.objects.filter(contract=contract).delete()
+      Contract_partner.objects.filter(contract=contract).delete()
+      rule_list_old_contract=Rule.objects.filter(contract=contract)
+      Tranche.objects.filter(rule__in=rule_list_old_contract).delete()
+      Rule.objects.filter(contract=contract).delete()
+      Sales_breakdown_per_contract.objects.filter(contract=contract).delete()
       
+
+      contract_changed=contract.contract_proposal
+      contract_changed.status="CURRENT"
+      contract_changed.pk=contract_id
+      contract_changed.save()
+      #contract_changed=Contract.objects.get(id=contract_proposal_id)   
+      #contract_changed.pk=contract_id
+      #contract_changed.status="CURRENT"
+      #contract_changed.save()
+      contract_proposal=Contract.objects.get(id=contract_proposal_id)
+
+      # now loop though the Contract_file//Contract_partner//Tranche//Sales_breakdown_per_contract- with contract id =contract_proposal_id, and change it to contract_id
+      contract_file_list=Contract_file.objects.filter(contract=contract_proposal)
+      for cf in contract_file_list:
+        cf.contract=contract_changed
+        cf.save()
+
+      contract_partner_list=Contract_partner.objects.filter(contract=contract_proposal)
+      for cp in contract_partner_list:
+        cp.contract=contract_changed 
+        cp.save()
+
+      rule_list=Rule.objects.filter(contract=contract_proposal)
+      for r in rule_list:
+        r.contract=contract_changed 
+        r.save()
+
+      sales_breakdown_per_contract_list=Sales_breakdown_per_contract.objects.filter(contract=contract_proposal)
+      for sb in sales_breakdown_per_contract_list:
+        sb.contract=contract_changed 
+        sb.save()
+
+
+      contract_proposal.delete()
+
 
       return HttpResponseRedirect(reverse("contracts_to_validate"))
 
@@ -1368,7 +1420,7 @@ def response_validator(request):
       contract.save()
       contract_proposal.delete()
       return HttpResponseRedirect(reverse("contracts_to_validate"))
-    print("4")
+
   else:
     return HttpResponseRedirect(reverse("contracts_to_validate")) 
 
@@ -1384,7 +1436,7 @@ def pdf_file_to_keep(request,contract_id):
     if contract.status=="PROPOSAL": #then it means that we must copy the file from the corresponding CHANGE
       initial_contract=Contract.objects.get(contract_proposal=contract_id)
 
-      contract_file_list=Contract_file.objects.filter(contract =initial_contract)
+      contract_file_list=Contract_file.objects.filter(contract =initial_contract).filter (id__in =data["list"])
 
       for c in contract_file_list:
         contract_file_proposal= c
@@ -1393,7 +1445,7 @@ def pdf_file_to_keep(request,contract_id):
         contract_file_proposal.save()
 
 
-    if contract.status in ["IN_CREATION","NEW"]: #then it means that we must copy the file from the corresponding CHANGE
+    if contract.status in ["IN_CREATION","NEW"]: 
       contract_file_list=Contract_file.objects.filter(contract =contract).exclude(id__in =data["list"])
       contract_file_list.delete()
     return JsonResponse({"response": "OK"}, status=201)
@@ -1417,8 +1469,8 @@ def save_contract_basic_info(request,contract_id,save_type):
           transaction_direction=data["transaction_direction"],
           division=Division.objects.get(division_id=data["division_id"]),
           division_via=Division.objects.get(division_id=data["division_via_id"]),
-          contract_currency=Currency.objects.get(currency=data["contract_currency"]),
-          payment_periodicity=Periodicity.objects.get(id=data["payment_periodicity"]),
+          contract_currency=contract.contract_currency,
+          payment_periodicity=contract.payment_periodicity,
           payment_terms=data["payment_terms"],
           m3_brand=Brand.objects.get(id=data["m3_brand"]),
           status="PROPOSAL"
@@ -1435,8 +1487,6 @@ def save_contract_basic_info(request,contract_id,save_type):
       contract.transaction_direction=data["transaction_direction"]
       contract.division=Division.objects.get(division_id=data["division_id"])
       contract.division_via=Division.objects.get(division_id=data["division_via_id"])
-      contract.contract_currency=Currency.objects.get(currency=data["contract_currency"])
-      contract.payment_periodicity=Periodicity.objects.get(id=data["payment_periodicity"])
       contract.payment_terms=data["payment_terms"]
       contract.m3_brand=Brand.objects.get(id=data["m3_brand"])
       contract.save()
@@ -1447,6 +1497,10 @@ def save_contract_basic_info(request,contract_id,save_type):
 @login_required
 def save_contract_partner(request,contract_id):
   if request.method == "POST":
+    user=request.user
+    if user.role!="WRITER":
+      return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=201)
+ 
     contract=Contract.objects.get(id=contract_id)
     Contract_partner_before_modification=Contract_partner.objects.filter(contract=contract)
     Contract_partner.objects.filter(contract=contract).delete()    #delete the existing record for this contract_partner ( we replace then, see code after:)
@@ -1473,6 +1527,10 @@ def save_contract_partner(request,contract_id):
 def save_rule(request,contract_id):
 
   if request.method == "POST":
+    user=request.user
+    if user.role!="WRITER":
+      return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=201)
+ 
     contract=Contract.objects.get(id=contract_id)
     rules_before_modification=Rule.objects.filter(contract=contract)
     Rule.objects.filter(contract=contract).delete()    #delete the existing record for this contract_partner ( we replace then, see code after:)
@@ -1538,7 +1596,10 @@ def save_mini(request,contract_id):
     contract = Contract.objects.get( id=contract_id)
   except contract.DoesNotExist:
     return JsonResponse({"error": "post not found."}, status=404)
-
+  user=request.user
+  if user.role!="WRITER":
+    return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=201)
+ 
   if request.method == "PUT":
     data = json.loads(request.body)
 
@@ -1612,6 +1673,9 @@ def new_invoice(request):
 @login_required
 def new_contract_file(request): 
   if request.method == "POST":
+    user=request.user
+    if user.role!="WRITER":
+      return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=201)
     try:  
       contract_file=Contract_file(
         name = request.POST.get("name"),
@@ -1683,7 +1747,7 @@ def new_report(request):
   #         iv. : append of i/ii/iii
   #       d-Calculation conso file
   #       e-Calculation Entry Detail
-  #       f-Calculation GLS
+  #       f-Calculation Accounting_entry
   #   III: Save calculation in database
 
   #   I: book file name in database
@@ -1691,7 +1755,9 @@ def new_report(request):
 
     #Save File
     try:
+
       file_type=request.POST.get("file_type")
+
       if file_type =="accruals":
         acc_year=int(request.POST.get("acc_year"))
         acc_month=int(request.POST.get("acc_month")) 
@@ -1699,8 +1765,8 @@ def new_report(request):
       else:
         acc_year=datetime.now().year
         acc_month=datetime.now().month
-       
-    
+
+      
       file=File(
         name =  request.POST.get("name"),
         acc_year =acc_year,
@@ -1714,7 +1780,6 @@ def new_report(request):
   #   II: Start Calculation Roy 
     #a- definition and import table
         consolidation_currency=Consolidation_currency.objects.all()[:1].get().currency.currency
-
         #nb month in import file: the goal is to specify the period under analysis
         rows = []
         if file_type =="accruals":
@@ -2064,7 +2129,7 @@ def new_report(request):
     
         #---------------------------------------
         
-    #b- calculation of rate per country and formulation
+      #b- calculation of rate per country and formulation
       #         i.  : average rate for contract with tranche  
 
         if not df_tranche.empty : 
@@ -2144,7 +2209,7 @@ def new_report(request):
           df_rule_calc=df_rule_calc.rename(columns={'rate_value': 'sales_rate'}) 
         print("definition of rule done")
 
-    #       c-Calculation royalty
+      #       c-Calculation royalty
       #         i   : Roy on sales
         #Here we calculate the roy based on the sales reported in the Excel file. i.e. : if roy is 150 USD, and %rate is 10 , then roy=15
         #If there are no sales on the period, of there are no match between the contract and the sales report, the dataframe ( result) would be empty
@@ -2572,9 +2637,9 @@ def new_report(request):
             df_conso=df_conso.groupby(['year_of_sales','division','brand_name','country','consolidation_currency'], as_index=False).sum()     
 
           print("df_conso")  
-          #          v.:  GLS for accruals---------------------
+          #          v.:  Accounting_entry for accruals---------------------
           if mini_gar_empty and roy_on_sales_empty and invoice_empty :
-            df_gls=pd.DataFrame({
+            df_accounting_entry=pd.DataFrame({
               'sheet_name': [''],
               'division': [''],
               'contract_currency': [''],
@@ -2589,46 +2654,47 @@ def new_report(request):
               'text_voucherline': [''],
             })
           else:
-            df_gls= df_detail.copy()
-            df_gls["accruals_contract_curr"]=np.where(df_gls["entry_type"]=="Invoice",-df_gls["amount_contract_curr"],df_gls["amount_contract_curr"])
-            df_gls=df_gls[['division','m3_brand_code','brand_name','transaction_direction','contract_currency','accruals_contract_curr']]
-            df_gls=df_gls.fillna("")
-            df_gls=df_gls.groupby(['division','m3_brand_code','brand_name','transaction_direction','contract_currency'], as_index=False).agg({"accruals_contract_curr": "sum"})
-            df_gls=pd.merge(df_gls,df_accounting, how="inner",left_on=['transaction_direction'], right_on=['transaction_direction'] )
-            df_gls["dim3"]=np.where(df_gls["pl_bs"]=="PL",df_gls["m3_brand_code"],"")
-            df_gls["d_c_if_amount_negativ"]=np.where(df_gls["d_c_if_amount_positiv"]=="C","D","C")
-            df_gls["d_c"]=np.where(df_gls["accruals_contract_curr"]>0,df_gls["d_c_if_amount_positiv"],df_gls["d_c_if_amount_negativ"])
-            df_gls["accruals_contract_curr"]=abs(df_gls["accruals_contract_curr"])
+            df_accounting_entry= df_detail.copy()
+            df_accounting_entry["accruals_contract_curr"]=np.where(df_accounting_entry["entry_type"]=="Invoice",-df_accounting_entry["amount_contract_curr"],df_accounting_entry["amount_contract_curr"])
+            df_accounting_entry=df_accounting_entry[['division','m3_brand_code','brand_name','transaction_direction','contract_currency','accruals_contract_curr']]
+            df_accounting_entry=df_accounting_entry.fillna("")
+            df_accounting_entry=df_accounting_entry.groupby(['division','m3_brand_code','brand_name','transaction_direction','contract_currency'], as_index=False).agg({"accruals_contract_curr": "sum"})
+            df_accounting_entry=pd.merge(df_accounting_entry,df_accounting, how="inner",left_on=['transaction_direction'], right_on=['transaction_direction'] )
+            df_accounting_entry["dim3"]=np.where(df_accounting_entry["pl_bs"]=="PL",df_accounting_entry["m3_brand_code"],"")
+            df_accounting_entry["d_c_if_amount_negativ"]=np.where(df_accounting_entry["d_c_if_amount_positiv"]=="C","D","C")
+            df_accounting_entry["d_c"]=np.where(df_accounting_entry["accruals_contract_curr"]>0,df_accounting_entry["d_c_if_amount_positiv"],df_accounting_entry["d_c_if_amount_negativ"])
+            df_accounting_entry["accruals_contract_curr"]=abs(df_accounting_entry["accruals_contract_curr"])
 
-            df_gls=df_gls.round({'accruals_contract_curr': 0})
-            df_gls["text_voucherline"]= 'ACCR. '+ df_gls["brand_name"]
+            df_accounting_entry=df_accounting_entry.round({'accruals_contract_curr': 0})
+            df_accounting_entry["text_voucherline"]= 'ACCR. '+ df_accounting_entry["brand_name"]
             #Get Date
-            df_gls["year"]=file.acc_year
-            df_gls["month"]=file.acc_month.month_nb
-            df_gls["day"]="1" 
-            df_gls["date"]= pd.to_datetime(df_gls[['year', 'month','day']], errors = 'coerce')
-            df_gls["accountingdate"]= pd.to_datetime(df_gls['date'], format="%Y%m") + MonthEnd(1)
-            df_gls["reverseDate"]= df_gls["accountingdate"]+ timedelta(days=1)
-            df_gls["accountingdate"]= df_gls["accountingdate"].dt.strftime('%d.%m.%Y')
-            df_gls["reverseDate"]= df_gls["reverseDate"].dt.strftime('%d.%m.%Y')
+            df_accounting_entry["year"]=file.acc_year
+            df_accounting_entry["month"]=file.acc_month.month_nb
+            df_accounting_entry["day"]="1" 
+            df_accounting_entry["date"]= pd.to_datetime(df_accounting_entry[['year', 'month','day']], errors = 'coerce')
+            df_accounting_entry["accountingdate"]= pd.to_datetime(df_accounting_entry['date'], format="%Y%m") + MonthEnd(1)
+            df_accounting_entry["reverseDate"]= df_accounting_entry["accountingdate"]+ timedelta(days=1)
+            df_accounting_entry["accountingdate"]= df_accounting_entry["accountingdate"].dt.strftime('%d.%m.%Y')
+            df_accounting_entry["reverseDate"]= df_accounting_entry["reverseDate"].dt.strftime('%d.%m.%Y')
             
-            df_gls["sheet_name"]= "Accounting_" +df_gls["division"]+"_"+df_gls["contract_currency"]
-            df_gls=df_gls.sort_values(['sheet_name','pl_bs','brand_name'], ascending=[1,0,1])
-            df_gls=df_gls[['sheet_name','division','contract_currency','accountingdate','reverseDate','dim1','dim2','dim3','dim4','accruals_contract_curr','d_c','text_voucherline']]
-          print("df_gls")
- 
+            df_accounting_entry["sheet_name"]= "Accounting_" +df_accounting_entry["division"]+"_"+df_accounting_entry["contract_currency"]
+            df_accounting_entry=df_accounting_entry.sort_values(['sheet_name','pl_bs','brand_name'], ascending=[1,0,1])
+            df_accounting_entry=df_accounting_entry[['sheet_name','division','contract_currency','accountingdate','reverseDate','dim1','dim2','dim3','dim4','accruals_contract_curr','d_c','text_voucherline']]
+          print("df_accounting_entry")
+
    
 
         #---------------Save in database----------------
 
 
 
-        from sqlalchemy.engine.create import create_engine
-        '''
+
+        '''        
         conn = sqlite3.connect('royalty/db.sqlite3')
 
         '''
-        DATABASE_URL='acucxettlkslgy:94a33c4d67c61724d9fb6590f17b4dae0d0c6640f820657601173e278bdf54e5@ec2-54-87-112-29.compute-1.amazonaws.com:5432/d7dq3h8tda4f4j'
+        #DATABASE_URL='acucxettlkslgy:94a33c4d67c61724d9fb6590f17b4dae0d0c6640f820657601173e278bdf54e5@ec2-54-87-112-29.compute-1.amazonaws.com:5432/d7dq3h8tda4f4j'
+    
         final_db_url = "postgresql+psycopg2://" +DATABASE_URL
         conn = create_engine(final_db_url)
 
@@ -2657,46 +2723,7 @@ def new_report(request):
         df_rule_calc.to_sql('royalty_app_rule_calc', con=conn, index=False, if_exists="append")
         print("df_rule_calc loaded succesfully")
 
-        '''
-        df_detail=df_detail[[
-          'division',
-          'division_country_id',
-          'division_via',
-          'field_type',
-          'year_of_sales',
-          'month_of_sales',
-          'SKU_name',
-          'SKU',
-          'market_id',
-          'sales_in_market_curr',
-          'sales_in_contract_curr',
-          'volume',
-          'market_curr',
-          'sales_rate',
-          'qty_value',
-          'beneficiary_percentage',
-          'amount_contract_curr',
-          'transaction_direction',
-          'contract_currency',
-          'consolidation_currency',
-          'amount_consolidation_curr',
-          'contract_id',
-          'contract_name',
-          'partner_id',
-          'ico_3rd',
-          'partner_name',
-          'partner_country_id',
-          'brand_name',
-  
-          'm3_brand_code',
-          'period',
-          'entry_type',
-           #
-          'invoice_paid',
-          'invoice_detail',
-          'payment_date',
-        ]]
-        '''
+
 
         df_detail['import_file_id']=file.id
 
@@ -2716,9 +2743,9 @@ def new_report(request):
           df_conso.to_sql('royalty_app_conso', con=conn, index=False, if_exists="append")
           print("df_conso loaded succesfully")
 
-          df_gls['import_file_id']=file.id
-          df_gls.to_sql('royalty_app_gls', con=conn, index=False, if_exists="append")
-          print("df_gls loaded succesfully")
+          df_accounting_entry['import_file_id']=file.id
+          df_accounting_entry.to_sql('royalty_app_accounting_entry', con=conn, index=False, if_exists="append")
+          print("df_accounting_entry loaded succesfully")
         elif file.file_type=="partner_report":
           df_sales_breakdown['import_file_id']=file.id
           df_sales_breakdown.to_sql('royalty_app_sales_breakdown_for_contract_report', con=conn, index=False, if_exists="append") 
@@ -2727,7 +2754,9 @@ def new_report(request):
         file.delete()
         return JsonResponse({"error": f"something went wrong with the import file- please check that the format is respected-   server message: {e}"}, status=201)
       return JsonResponse({"file_id": file.id,"date":file.date}, status=201)
-    except: return JsonResponse({"error": "data not loaded"}, status=404)
+    except Exception as e:
+      file.delete()
+      return JsonResponse({"error": f"something went wrong with the import file- please check that the format is respected-   server message: {e}"}, status=201)
 
 @login_required
 def export_report(request,file_array,table_array):
@@ -2777,11 +2806,11 @@ def export_report(request,file_array,table_array):
         df_conso=df_conso.drop(['id'], axis = 1)
         df_conso.to_excel(writer, sheet_name='Conso',index=False)
 
-      if table_name=="gls":
-        gls_list=Gls.objects.filter(import_file__in=file_object_list)
-        df_gls = pd.DataFrame(list(gls_list.values()))
-        df_gls=df_gls.drop(['id'], axis = 1)
-        df_gls.to_excel(writer, sheet_name='Accounting',index=False)
+      if table_name=="accounting_entry":
+        accounting_entry_list=Accounting_entry.objects.filter(import_file__in=file_object_list)
+        df_accounting_entry = pd.DataFrame(list(accounting_entry_list.values()))
+        df_accounting_entry=df_accounting_entry.drop(['id'], axis = 1)
+        df_accounting_entry.to_excel(writer, sheet_name='Accounting',index=False)
 
       if table_name =="wht":
         wht_list=Wht.objects.filter(import_file__in=file_object_list)

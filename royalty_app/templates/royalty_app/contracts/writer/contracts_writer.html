@@ -5,7 +5,7 @@
 
       <div class=" pb-2 mb-3 border-bottom" style="display: flex" >
          <h1 class="h2">Contracts </h1>
-         <a  style="padding-top:16px" href="{% url 'contracts_current' %}"  target="_blank">(click here to see the contracts currently used in the system)<a>
+         <a  style="padding-top:16px" href="{% url 'contracts_current' %}"  >(click here to see the contracts currently used in the system)<a>
    
       </div>
 
@@ -16,7 +16,7 @@
     <form   id="form_new" > 
       <table>
         <tr>
-          <td style="width: 140px">
+          <td style="width: 210px">
             <span style="width: 100%; margin-left:5px;">New Contract:</span>
           </td>
         </tr>
@@ -169,19 +169,18 @@
           </td>
         </tr>
         <tr>
-
           <td ><!--mini gar status-->
             <div   style="width: 100%; margin-left:5px;">
               <select  style="width: 100%; padding:2px"  id="mini_gar_status_new" onchange="hide_option()" >
-                <option value="YES"> YES</option>
-                <option value="NO" selected> NO</option>
+                <option value="YES"> minimum amount/year : YES</option>
+                <option value="NO" selected>  minimum amount/year : NO</option>
               </select>
             </div>
           </td>
           <td class="mini_gar_option" hidden><!--amount-->
             <input class="number-separator" id="minimum_guar_amount_new" placeholder="amount"  type="text"  style="width: 100%; margin-left:5px;">
           </td>
-        <!--Country List-->
+          <!--Country List-->
           <td  class="comboTreeWrapper mini_gar_option" hidden>
             <div style="width: 100%; margin-left:5px;" >
               {% if country_list %}
@@ -220,8 +219,7 @@
             </div>
           </td>
         </tr>
-        <tr > 
-          <td>
+
 
       
         <tr > <!--last row-->

@@ -2,7 +2,7 @@
 {% block content %}
 
 
-
+      <input  id="count" type="number" value=0 hidden>
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
         <div>
           <h1 class="h2">Contract Details</h1>
@@ -25,14 +25,14 @@
                 <button class="approve_button" onclick='save_contract({{contract.id}},"SUBMIT_NEW")'>Submit change to validator</button>
               </li>
               <li style="display: block; padding-left:0px; margin:2px"  >
-                <button class="reject_button" onclick='delete_contract({{contract.id}},"{{contract.status}}")'>Delete contract</button>
+                <a href="{% url 'delete_contract' contract_id=contract.id %}" ><button class="reject_button" >Delete contract</button></a>
               </li>
             {% else %}
             <li style="display: block; padding-left:0px; margin:2px"  >
               <button class="approve_button" onclick='save_contract({{contract.id}},"SUBMIT_CHANGE")'>Submit change to validator</button>
             </li>
             <li style="display: block; padding-left:0px; margin:2px"  >
-              <button class="reject_button" onclick='request_deletion({{contract.id}},"{{contract.status}}")'> Submit delete to validator</button>
+              <a href="{% url 'submit_delete_contract_request' contract_id=contract.id %}" ><button class="reject_button" > Submit delete to validator</button></a>
             </li>
             {% endif %}
 
@@ -97,36 +97,14 @@
           <span>Pay/REC:</span>
         </td>
         <td >
-
-            <select id="transaction_direction" style="width: 100%; margin-left:5px; padding:2px">
-                <option value="" selected disabled hidden></option>
-              {% if "REC" == contract.transaction_direction  %}
-                <option value="REC" selected="selected">REC</option>
-              {% else%}
-                <option value="REC" >REC</option>
-              {% endif %}
-
-              {% if "PAY" == contract.transaction_direction  %}
-                <option value="PAY" selected="selected">PAY</option>
-              {% else%}
-                <option value="PAY" >PAY</option>
-              {% endif %}
-            </select>
+          <input  id="transaction_direction" style="width: 100%; margin-left:5px;"  value='{{contract.transaction_direction}}' disabled>
 
         </td>
         <td > <!--Currency-->
           <span style=" margin-left:10px">Currency:</span>
         </td>
         <td>
-          <select  id="currency" style="width: 100%; margin-left:5px; padding:2px">
-            {% for curr in currency_list %}
-              {% if curr == contract.contract_currency  %}
-                <option value="{{ curr.currency }}" selected="selected">{{curr.currency }}</option>
-              {% else%}
-                <option value="{{ curr.currency}}" >{{ curr.currency }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
+          <input  id="currency" style="width: 100%; margin-left:5px;"  value='{{contract.contract_currency}}' disabled>
         </td>
       </tr>
       <tr>
@@ -190,18 +168,7 @@
             <th >
               <input  type="file" name="loaded_file"  accept=".pdf"  style="width: 100%" onchange="new_contract_file(this)">
             </th>
-            <th style="width:80px" >
-              <div id="spinner_rule_pdf" style="display: None;text-align: end">
-                <div class="sk-chase" >
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                </div>
-              </div>
-              <div style=" color:green ;display: None;" id="saved_message_pdf" >Saved</div>
+            <th  >
              </th>
           </tr>
         </thead>
@@ -214,7 +181,7 @@
             <td hidden><!--File -->
             </td>
             <td ><!--File Name-->
-              <a href='{{cf.upload.url}}' target="_blank"><span class="fname"  >{{cf.name}}</span></a>
+              <a href='{{cf.upload.url}}'><span class="fname"  >{{cf.name}}</span></a>
             </td>
             <td ><!--Button-->
               <button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_file(this,{{cf.id}})" style="border:0px" ><span class="bi bi-trash"></span></button>
@@ -240,7 +207,7 @@
           <th > Name</th>
           <th style="width: 80px">%</th>
           <th style="width: 50px; height: 45px;">
-            <div style="text-align: end; color:green ;display: None;" id="saved_message_beneficiary" >Saved</div>
+
           </th>
         </tr>
       </thead>
@@ -863,7 +830,7 @@
           <th>In import file</th>
           <th>In contract report</th>
           <th style="width: 30px">
-            <button   class="btn btn-sm btn-outline-success" title="save" onclick="save_invoice_breakdown({{contract.id}})" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+
           </th>
         </tr>
       </thead>

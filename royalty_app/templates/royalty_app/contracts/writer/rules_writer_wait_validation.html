@@ -10,9 +10,6 @@
           <span style="color:orange">  
               {% if contract.status == 'DELETE'  %} 
                 type of request: DELETE 
-                <a href="{% url 'rules_current' contract_id=contract.id %}" >
-                  <i>(click here to see the data currently used )</i>
-              </a>
               {% elif contract.status == 'NEW'%} 
                 type of request: CREATION 
               {% elif contract.status == 'PROPOSAL'%} 
@@ -20,7 +17,7 @@
                 <a href="{% url 'rules_current' contract_id=inital_contract_id %}" >
                   <i>(click here to see the data currently used )</i>
               </a>
-            {% endif %}-   
+            {% endif %}   
             
             </span>
 
@@ -107,7 +104,7 @@
           {% for cf in contract_file_list %}
           <tr >
             <td ><!--File Name-->
-              <a href='{{cf.upload.url}}' target="_blank"><span class="fname"  >{{cf.name}}</span></a>
+              <a href='{{cf.upload.url}}' ><span class="fname"  >{{cf.name}}</span></a>
             </td>
             <td ><!--Button-->
             </td>

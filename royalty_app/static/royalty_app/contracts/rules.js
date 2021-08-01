@@ -17,6 +17,8 @@ function save_contract(contract_id,save_type){
             body_rule=body[2]
             body_mini_gar=body[3]
         //save contracts
+            count=document.getElementById("count")
+            count.value=0
             fetch(`/save_contract_basic_info/${contract_id}/${save_type}`, {
                 method: 'POST',
                 body: body_basic_info
@@ -33,41 +35,71 @@ function save_contract(contract_id,save_type){
 
                     contract_file_table=document.getElementById(id="contract_file_table").children[1]
                     length_table=contract_file_table.rows.length
-                    list_pdf=[]
 
+                    list_pdf=[]
+                    nb_new=0
                     for (var i = 0; i < length_table; i++) {
                         row=contract_file_table.rows[i]
                         id= row.cells[0].children[0].innerHTML
-                        if (id=="NEW"){
-                            file_=row.cells[1].children[0]
-                            name_file=file_.files[0].name
-                            let formData = new FormData();
-                            formData.append('name', name_file);
-                            formData.append('contract_id', contract_id);
-                            formData.append('file', file_.files[0], name_file);
-                            //book in database
-                            fetch('/new_contract_file', {
-                                method: 'POST',
-                                body: formData//JSON.stringify({name:name_value,acc_year:year_value,acc_month:month_id,})
-                                })
-                        }else{
+                        if (id!="NEW"){
                             list_pdf.push(id)
-                        }
+                            }else{nb_new=1+nb_new}
                     }
-                    if (list_pdf.length!=0){ // then it means that some contract must be copied/paste from Change to Proposal     
-                        fetch(`/pdf_file_to_keep/${contract_id}`, {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                list : list_pdf,
-                                })
+                    fetch(`/pdf_file_to_keep/${contract_id}`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            list : list_pdf,
                             })
-                            .then(response => response.json())
-                            .then(result => {
-                                if (!!result.error) {
-                                    alert(result.error);
-                                    location.reload();}
-                            })
-                    }
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            contract_file_table=document.getElementById(id="contract_file_table").children[1]
+                            length_table=contract_file_table.rows.length
+                            if (!!result.error) {
+                                alert(result.error);
+                                location.reload();}
+                            if (nb_new==0){
+                                count.value=Number(count.value)+1
+                                if (count.value==5 ){end_function_message()}
+                                }
+
+                            for (var i = 0; i < length_table; i++) {
+                                row=contract_file_table.rows[i]
+                                id= row.cells[0].children[0].innerHTML
+                                if (id=="NEW"){
+                                    file_=row.cells[1].children[0]
+                                    name_file=file_.files[0].name
+                                    
+                                    let formData = new FormData();
+                                    formData.append('name', name_file);
+                                    formData.append('contract_id', contract_id);
+                                    formData.append('file', file_.files[0], name_file);
+                                    //book in database
+                                    fetch('/new_contract_file', {
+                                        method: 'POST',
+                                        body: formData//JSON.stringify({name:name_value,acc_year:year_value,acc_month:month_id,})
+                                    })
+                                    .then(response => response.json())
+                                    .then(result => {
+                                        nb_new=nb_new-1
+                                        if (nb_new==0){
+                                            count.value=Number(count.value)+1
+                                            if (count.value==5 ){end_function_message()}
+                                            }
+                                            })
+                                }else{
+
+                                    if(i==length_table-1){
+                                        count.value=Number(count.value)+1
+                                        if (count.value==5 ){end_function_message()}
+                                        }
+                                }
+                            }
+                        })
+
+                     // then it means that some contract must be copied/paste from Change to Proposal     
+
+                    
                 //save beneficiaries
                     fetch(`/save_contract_partner/${contract_id}`, {
                         method: 'POST',
@@ -76,6 +108,8 @@ function save_contract(contract_id,save_type){
                         .then(response => response.json())
                         .then(result => {
                             if (!!result.error) {alert(result.error);location.reload();}
+                            count.value=Number(count.value)+1
+                            if (count.value==5 ){end_function_message()}
                         })
                 //save rules
                     fetch(`/save_rule/${contract_id}`, {
@@ -85,6 +119,9 @@ function save_contract(contract_id,save_type){
                         .then(response => response.json())
                         .then(result => {
                             if (!!result.error) {alert(result.error);location.reload();}
+                                            
+                            count.value=Number(count.value)+1
+                            if (count.value==5 ){end_function_message()}
                         })
                 //save mini guar
                     fetch(`/save_mini/${contract_id}`, {
@@ -93,6 +130,8 @@ function save_contract(contract_id,save_type){
                     }).then(response => response.json())
                         .then(result => { 
                             if (!!result.error) {alert(result.error);location.reload();}
+                            count.value=Number(count.value)+1
+                            if (count.value==5 ){end_function_message()}
                         })  
                 //save invoice breakdown
                     table_breakdown=document.getElementById(id="sales_breakdown_table").children[1]
@@ -117,18 +156,27 @@ function save_contract(contract_id,save_type){
                         .then(response => response.json())
                         .then(result => {
                             if (!!result.error) {alert(result.error);return}
+                            count.value=Number(count.value)+1
+                            if (count.value==5 ){end_function_message()}
                         })
-                    
-                    // display a message stating that it is saved
-                    saved_message.style.display="block"
-                    spinner.style.display="none"
-                    setTimeout(function() { 
-                        saved_message.style.display = "None";
-                        button.style.display = "Block";
-                        }, 1000)
             })
 
     //reload page
+}
+
+
+function end_function_message(){
+    // display a message stating that it is saved
+    //prepare the spinner
+    spinner=document.getElementById("spinner")
+    saved_message=document.getElementById("saved_message")
+    saved_message.style.display="block"
+    spinner.style.display="none"
+    setTimeout(function() { 
+        saved_message.style.display = "None";
+        location.reload()
+        }, 1000)
+
 }
 
 function check_each_table(){
@@ -138,8 +186,6 @@ function check_each_table(){
           division_input=document.getElementById(id="division")
           division_via_input=document.getElementById(id="division_via")
           transaction_direction_input=document.getElementById(id="transaction_direction")
-          currency_input=document.getElementById(id="currency")
-          payment_periodicity_input=document.getElementById(id="payment_periodicity")
           payment_terms_input=document.getElementById(id="payment_terms")
           payment_terms=payment_terms_input.value
           if (payment_terms==""){
@@ -153,8 +199,6 @@ function check_each_table(){
                         transaction_direction: transaction_direction_input.value,
                         division_id: division_input.value,   
                         division_via_id:division_via_input.value,
-                        contract_currency:currency_input.value, 
-                        payment_periodicity:payment_periodicity_input.value, 
                         payment_terms:payment_terms, 
                         m3_brand:brand_input.value, 
                     })
@@ -621,3 +665,4 @@ function submit_validator_decision(reponse_validator){
     document.getElementById("reponse_validator").value=reponse_validator
     document.getElementById("reponse_validator_form").submit()
 }
+

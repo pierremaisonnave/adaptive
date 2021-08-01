@@ -66,15 +66,21 @@ function add_new_record(){
             var brand_id= document.getElementById("hidden_item_code_m3_brand_new").value
         //mini_gar_status
             var mini_gar_status_input=document.getElementById("mini_gar_status_new")
-            var mini_gar_status= mini_gar_status_input.value 
-        //minimum_guar_amount
-            var minimum_guar_amount_input=document.getElementById("minimum_guar_amount_new")
-             var minimum_guar_amount_comma=minimum_guar_amount_input.value
-            var minimum_guar_amount= minimum_guar_amount_input.value.split(',').join("") // remove comma   
-        //minimum_guar_remaining_allocation_country
-            var country_input=document.getElementById("displayed_item_name_country_new")
-            var country_name=country_input.value
-            var country_id= document.getElementById("hidden_item_code_country_new").value
+            var mini_gar_status= mini_gar_status_input.value
+
+        if (mini_gar_status=="YES"){
+            //minimum_guar_amount
+                var minimum_guar_amount_input=document.getElementById("minimum_guar_amount_new")
+                var minimum_guar_amount_comma=minimum_guar_amount_input.value
+                var minimum_guar_amount= minimum_guar_amount_input.value.split(',').join("") // remove comma   
+            //minimum_guar_remaining_allocation_country
+                var country_input=document.getElementById("displayed_item_name_country_new")
+                var country_name=country_input.value
+                var country_id= document.getElementById("hidden_item_code_country_new").value
+        }else{
+            minimum_guar_amount=""
+            country_id=""
+        }
     //create a dictionnary based on the element here above:
         field_dictionnary=[
             {field_name:'contract_name',value:contract_name,object:name_input,mandatory:true},

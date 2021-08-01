@@ -150,7 +150,7 @@ class Rule(models.Model):
     rate_value=models.FloatField(null=True,blank=True)
     qty_value=models.FloatField(null=True,blank=True)
     report_currency=models.ForeignKey(Currency, related_name="rule_report_currency", on_delete=models.PROTECT, default="USD")
-    qty_value_currency=models.ForeignKey(Currency,on_delete=models.PROTECT, default="USD")
+    qty_value_currency=models.ForeignKey(Currency,on_delete=models.PROTECT, default="USD" ,related_name="qty_value_currency")
     def __str__(self):
         return f"{self.id}"
     
@@ -226,7 +226,7 @@ class Conso(models.Model):
     consolidation_currency= models.CharField(max_length=10,null=True,blank=True)
     amount_consolidation_curr= models.FloatField(null=True,blank=True)
 
-class Gls(models.Model):
+class Accounting_entry(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
     sheet_name= models.CharField(max_length=100,null=True,blank=True)
     division= models.CharField(max_length=10,null=True,blank=True)

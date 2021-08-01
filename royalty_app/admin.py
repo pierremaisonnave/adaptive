@@ -3,7 +3,7 @@ from .models import (Invoice,Country,Region,Partner,
     Payment_type,Accounting,Brand,Formulation,Currency,
     Division,Tax,Periodicity,Payment_structure,Contract,
     Contract_partner,Rule,Tranche,Periodicity_cat,
-    File,Sale,Fx,Rule_calc,Conso,Gls,Consolidation_currency,
+    File,Sale,Fx,Rule_calc,Conso,Accounting_entry,Consolidation_currency,
     Detail,Wht,Sales_breakdown_for_contract_report,Sales_breakdown_per_contract,
     Contract_file,Month_table,User)
 
@@ -76,6 +76,9 @@ class Rule_calcAdmin(admin.ModelAdmin):
 class Sales_breakdown_per_contractAdmin(admin.ModelAdmin):
     list_display=("contract","sales_breakdown_item","sales_breakdown_contract_definition")
 
+class Contract_fileAdmin(admin.ModelAdmin):
+    list_display=("name","contract")
+
 
 
 admin.site.register(Country, CountryAdmin)
@@ -101,11 +104,11 @@ admin.site.register(Sale,SaleAdmin)
 admin.site.register(Fx,FxAdmin)
 admin.site.register(Rule_calc,Rule_calcAdmin)
 admin.site.register(Conso)
-admin.site.register(Gls)
+admin.site.register(Accounting_entry)
 admin.site.register(Consolidation_currency)
 admin.site.register(Detail)
 admin.site.register(Wht)
-admin.site.register(Contract_file)
+admin.site.register(Contract_file,Contract_fileAdmin)
 admin.site.register(Sales_breakdown_per_contract,Sales_breakdown_per_contractAdmin)
 admin.site.register(Sales_breakdown_for_contract_report)
 admin.site.register(Month_table)

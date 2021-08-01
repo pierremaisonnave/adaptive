@@ -54,7 +54,7 @@
               </li>
             {% endif %}
               <input  hidden name="reponse_validator" id="reponse_validator" >
-              <input   name="contract_id" value= "{% if contract.status == 'PROPOSAL' %} {{inital_contract_id}} {% else %}{{contract.id}}{%endif%}" >
+              <input hidden  name="contract_id" value= "{% if contract.status == 'PROPOSAL' %} {{inital_contract_id}} {% else %}{{contract.id}}{%endif%}" >
           </form>
         </div>
       </div>
@@ -152,7 +152,7 @@
           {% for cf in contract_file_list %}
           <tr >
             <td ><!--File Name-->
-              <a href='{{cf.upload.url}}' target="_blank"><span class="fname"  >{{cf.name}}</span></a>
+              <a href='{{cf.upload.url}}' ><span class="fname"  >{{cf.name}}</span></a>
             </td>
             <td ><!--Button-->
             </td>

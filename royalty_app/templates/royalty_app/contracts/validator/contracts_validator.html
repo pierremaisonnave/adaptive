@@ -16,7 +16,7 @@
   
   <!----setting to unhide/hide column--->  
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" >
-    <div>{% if user.role == "VALIDATOR"%}<a   href="{% url 'contracts_to_validate' %}"  target="_blank">{{message_validator}}{%endif%}<a></div>
+    <div>{% if user.role == "VALIDATOR"%}<a   href="{% url 'contracts_to_validate' %}"  >{{message_validator}}{%endif%}<a></div>
     <div></div>
     <div class="btn-toolbar mb-2 mb-md-0">
       <div class="btn-group mr-2">
