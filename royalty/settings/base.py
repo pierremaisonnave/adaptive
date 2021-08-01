@@ -96,7 +96,7 @@ WSGI_APPLICATION = 'royalty.wsgi.application'
 
 #see https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
 
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -114,7 +114,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
+'''
 AUTH_USER_MODEL = 'royalty_app.User'
 
 # Password validation
@@ -232,4 +232,4 @@ GOOGLE_RECAPTCHA_SITE_KEY=os.getenv('GOOGLE_RECAPTCHA_SITE_KEY')
 GOOGLE_RECAPTCHA_SECRET_KEY =os.getenv('GOOGLE_RECAPTCHA_SECRET_KEY')
 
 #conneciton to database
-DATABASE_URL=os.getenv("DATABASE_URL")
+DATABASE_URL_VIEW=os.getenv("DATABASE_URL_VIEW")

@@ -35,7 +35,7 @@ import time
 import requests
 
 #CAPTCHA
-from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY,DATABASE_URL
+from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SECRET_KEY,DATABASE_URL_VIEW
 
 # to create connection with database 
 from sqlalchemy.engine.create import create_engine
@@ -1934,6 +1934,9 @@ def new_report(request):
         #Contract
         contract_list=Contract.objects.filter(status__in=["CURRENT","DELETE","CHANGE"])
         df_contract = pd.DataFrame(list(contract_list.values()))
+        if (df_contract.empty):
+              file.delete()
+              return JsonResponse({"error": "Please make sure that at least one contract is valid"}, status=201)   
         df_contract=df_contract.rename(columns={'id':'contract_id','contract_currency_id':'contract_currency','division_id':'division'})
 
         #Contract_partner
@@ -2696,8 +2699,10 @@ def new_report(request):
 
         '''
         #DATABASE_URL='acucxettlkslgy:94a33c4d67c61724d9fb6590f17b4dae0d0c6640f820657601173e278bdf54e5@ec2-54-87-112-29.compute-1.amazonaws.com:5432/d7dq3h8tda4f4j'
+        
           
-        final_db_url = f"postgresql+psycopg2://{DATABASE_URL}"
+        final_db_url = f"postgresql+psycopg2://{DATABASE_URL_VIEW}"
+        #final_db_url = 'postgres://acucxettlkslgy:94a33c4d67c61724d9fb6590f17b4dae0d0c6640f820657601173e278bdf54e5@ec2-54-87-112-29.compute-1.amazonaws.com:5432/d7dq3h8tda4f4j'
         conn = create_engine(final_db_url)
 
 
