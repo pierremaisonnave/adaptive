@@ -211,6 +211,10 @@ function check_each_table(){
             length_table=td_percent_list.length-1
             var sum=0
             var import_array = []
+            if (length_table==0){
+                    alert(`you must select at least one partner`)
+                    return
+                }
             for (var i = 0; i < length_table; i++) {
                 sum=Number(td_percent_list[i].value)+sum
                 import_array.push(`[${td_select_list[i].value},"${td_percent_list[i].value}"]`)
@@ -666,3 +670,28 @@ function submit_validator_decision(reponse_validator){
     document.getElementById("reponse_validator_form").submit()
 }
 
+function submit_delete_contract_request(contract_id){
+        //prepare the spinner
+        spinner=document.getElementById("spinner")
+        saved_message=document.getElementById("saved_message")
+        button=document.getElementById("button")
+        button.style.display="none"
+        spinner.style.display="block"
+
+        fetch(`/submit_delete_contract_request/${contract_id}`, {
+        method: 'POST',
+        })
+        .then(response => response.json())
+        .then(result => {
+            
+            if (!!result.error) {
+                button.style.display="block"
+                spinner.style.display="none"
+                alert(result.error);
+                return;}else{
+                    end_function_message()
+                    location.reload()  
+                }
+        })
+
+}

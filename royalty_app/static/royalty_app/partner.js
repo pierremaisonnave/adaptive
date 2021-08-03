@@ -93,69 +93,79 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function delete_row(partner_id) {
     // Here we grab the values from the form
-    fetch(`/cancel_row_partner/${partner_id}`)
-    //First, get the info from database 
-    .then(response => response.json())
-    .then(result => {
-        unhide_column()
-        restate_color_button(partner_id,"DELETE")
-        //get the row
-            var t = $('#partners_table').DataTable()
-            var row_to_modify=document.getElementById(`partner_${partner_id}`) 
-            td_list=row_to_modify.querySelectorAll('td')
-        //change the dom
-            //tr 1 M3 Code
-            td_list[1].innerHTML=`
-                <span hidden=true id="span_m3_code_${partner_id}">${result.partner_m3_code}</span>
-                <span style="cursor:default; padding-left:2px" >${result.partner_m3_code}</span>
-            `,
-            //tr 2 Name
-            td_list[2].innerHTML=`
-                <span hidden=true id="span_name_${partner_id}">${result.partner_name}</span>
-                <span style="cursor:default; padding-left:2px" >${result.partner_name}</span>
-            `,
-            //tr 3 ico_3rd
-            td_list[3].innerHTML=`
-                <span hidden=true id="span_ico_3rd_${partner_id}">searched_value:${result.ico_3rd}</span>
-                <span style="cursor:default; padding-left:4px" >${result.ico_3rd}</span>
-            `,
-            //tr 4 Country
-            td_list[4].innerHTML=`   <span hidden=true id="span_country_${partner_id}">searched_value:${result.country_id}</span>
-                <span style="cursor:default; padding-left:4px" >${result.country_id}:${result.country_name}</span>
-            `,
-            //tr 5 Bank
-            td_list[5].innerHTML=`
-                <span hidden=true id="span_bank_${partner_id}">${result.partner_bank_account}</span>
-                <span style="cursor:default; padding-left:2px" >${result.partner_bank_account}</span>
-            `,
-            //tr 6 Payment Type
-            td_list[6].innerHTML=`<span hidden=true id="span_payment_type_${partner_id}">searched_value:${result.partner_payment_type}</span>
-            <span style="cursor:default; padding-left:0px" >${result.partner_payment_type}</span>
-            `,
-            //tr 7 Button
-            td_list[7].outerHTML=`<td><span style="color:orange"> DELETE pending validation</span></td>`,
+    spinner=document.getElementById(`spinner_top`)
+    spinner.style.display="block"
 
-        // save the value in the datatable
-            td_list_html=[
-                td_list[0].innerHTML,
-                td_list[1].innerHTML,
-                td_list[2].innerHTML,
-                td_list[3].innerHTML,
-                td_list[4].innerHTML,
-                td_list[5].innerHTML,
-                td_list[6].innerHTML,
-                td_list[7].innerHTML,
-            ]
-            t.row(row_to_modify).data(td_list_html).draw(false)
-
-        hide_column()
-    })
-    //Secondly, we send the request to the database 
+    //First, we send the request to the database 
     fetch(`/delete_row_partner/${partner_id}`, {
             method: 'POST',})
         .then(response => response.json())
         .then(result => {
-            if (result.error){alert(result.error)}
+            if (!!result.error) {
+                alert(result.error);
+                cancel_row_partner(partner_id)
+                
+                return;
+            }else{
+                fetch(`/cancel_row_partner/${partner_id}`)
+                //Secondly, if there is not pb, we get the info from database 
+                .then(response => response.json())
+                .then(result => {
+
+                    unhide_column()
+                    restate_color_button(partner_id,"DELETE")
+                    //get the row
+                        var t = $('#partners_table').DataTable()
+                        var row_to_modify=document.getElementById(`partner_${partner_id}`) 
+                        td_list=row_to_modify.querySelectorAll('td')
+                    //change the dom
+                        //tr 1 M3 Code
+                        td_list[1].innerHTML=`
+                            <span hidden=true id="span_m3_code_${partner_id}">${result.partner_m3_code}</span>
+                            <span style="cursor:default; padding-left:2px" >${result.partner_m3_code}</span>
+                        `,
+                        //tr 2 Name
+                        td_list[2].innerHTML=`
+                            <span hidden=true id="span_name_${partner_id}">${result.partner_name}</span>
+                            <span style="cursor:default; padding-left:2px" >${result.partner_name}</span>
+                        `,
+                        //tr 3 ico_3rd
+                        td_list[3].innerHTML=`
+                            <span hidden=true id="span_ico_3rd_${partner_id}">searched_value:${result.ico_3rd}</span>
+                            <span style="cursor:default; padding-left:4px" >${result.ico_3rd}</span>
+                        `,
+                        //tr 4 Country
+                        td_list[4].innerHTML=`   <span hidden=true id="span_country_${partner_id}">searched_value:${result.country_id}</span>
+                            <span style="cursor:default; padding-left:4px" >${result.country_id}:${result.country_name}</span>
+                        `,
+                        //tr 5 Bank
+                        td_list[5].innerHTML=`
+                            <span hidden=true id="span_bank_${partner_id}">${result.partner_bank_account}</span>
+                            <span style="cursor:default; padding-left:2px" >${result.partner_bank_account}</span>
+                        `,
+                        //tr 6 Payment Type
+                        td_list[6].innerHTML=`<span hidden=true id="span_payment_type_${partner_id}">searched_value:${result.partner_payment_type}</span>
+                        <span style="cursor:default; padding-left:0px" >${result.partner_payment_type}</span>
+                        `,
+                        //tr 7 Button
+                        td_list[7].outerHTML=`<td><span style="color:orange"> DELETE pending validation</span></td>`,
+
+                    // save the value in the datatable
+                        td_list_html=[
+                            td_list[0].innerHTML,
+                            td_list[1].innerHTML,
+                            td_list[2].innerHTML,
+                            td_list[3].innerHTML,
+                            td_list[4].innerHTML,
+                            td_list[5].innerHTML,
+                            td_list[6].innerHTML,
+                            td_list[7].innerHTML,
+                        ]
+                        t.row(row_to_modify).data(td_list_html).draw(false)
+                    hide_column()
+                    spinner.style.display="none"
+                }) 
+            }
         })
 }               
 
@@ -163,6 +173,8 @@ function delete_row(partner_id) {
 
 
 function cancel_row_partner(partner_id){
+    spinner=document.getElementById("spinner_top")
+    spinner.style.display="block"
     //Everytime the user decide to cancel a modification, we must go thought a 3 steps approache
     //firts, we must get the original info from the database, through a fetch, Second, we modify the DOM, Thirds we load it in the Database
     fetch(`/cancel_row_partner/${partner_id}`)
@@ -243,12 +255,15 @@ function cancel_row_partner(partner_id){
         //------------------------------------------------------------------------
 
 
-        hide_column()   
+        hide_column() 
+        spinner.style.display="none"  
     }); 
 }
 
 
 function change_row(partner_id){
+    spinner=document.getElementById("spinner_top")
+    spinner.style.display="block"
     unhide_column()
     partner_m3_code = document.getElementById(`m3_code_${partner_id}`).value,
     partner_name = document.getElementById(`name_${partner_id}`).value,
@@ -327,12 +342,15 @@ function change_row(partner_id){
         })
       }).then(response => response.json())
         .then(result => {
-            if (!!result.error) {alert(result.error);return}
+            if (!!result.error) {
+                alert(result.error);
+                spinner.style.display="none" ;
+                return}
             tr_newlycreated=document.getElementById(`partner_${partner_id}`)
             color_tr_newlycreated=tr_newlycreated.style.backgroundColor
             tr_newlycreated.style.backgroundColor="#b3e3be"
             message_save.hidden=false
-
+            spinner.style.display="none" 
             setTimeout(function() { message_save.hidden=true;tr_newlycreated.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that thje load has been done
 
 

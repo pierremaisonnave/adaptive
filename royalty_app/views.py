@@ -40,6 +40,7 @@ from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SEC
 # to create connection with database 
 from sqlalchemy.engine.create import create_engine
 
+
 def login_view(request):
     if request.method == "POST":
         #check if user is active:
@@ -163,7 +164,7 @@ def register(request):
 
 
 
-@login_required
+@login_required(login_url='/login')
 def logout_view(request):
   logout(request)
   return HttpResponseRedirect(reverse("home"))    
@@ -186,7 +187,7 @@ def home(request):
     year_list.sort()
 
     consolidation_currency=Consolidation_currency.objects.all().first()
-    contract_list=Contract.objects.all()
+    contract_list=Contract.objects.filter(status__in=["CURRENT","DELETE","CHANGE"])
     contract_id_list=contract_list.values_list('id')
     contract_id_list=[c[0] for c in contract_id_list]
 
@@ -649,7 +650,7 @@ def cancel_row_partner(request,partner_id):
   except partner.DoesNotExist:
     return JsonResponse({"error": "post not found."}, status=404)
 
-  if request.method == "GET" and partner.status=="CURRENT":
+  if request.method == "GET" :
     return JsonResponse({
       "partner_name": partner.partner_name,
       "country_id": partner.partner_country.country_id,
@@ -674,6 +675,28 @@ def delete_row_partner(request,partner_id):
       try:
         partner=Partner.objects.get(pk=partner_id)
         if  partner.status=="CURRENT" :
+          #We verify that the partner is not already used in a contract
+          contract_partners=Contract_partner.objects.filter(partner=partner)
+          if contract_partners: 
+            df_contract_partner = pd.DataFrame(list(contract_partners.values())).drop_duplicates(subset=['contract_id'])
+            contracts=Contract.objects.all()
+            df_contract=pd.DataFrame(list(contracts.values()))
+            df_contract_partner=pd.merge(df_contract_partner,df_contract, how="inner",left_on=['contract_id'], right_on=['id'] )[['contract_name']]
+            df_contract_partner=df_contract_partner.values.tolist()
+            contract_list=','.join([y[0] for y in df_contract_partner])
+            return JsonResponse({"error": f'You cannot delete this partner, as it is already used in the following contract(s):{contract_list} '}, status=404)
+
+          #We verify that the partner is not already used in a report
+          details=Detail.objects.filter(partner=partner)
+          if details: 
+            df_detail = pd.DataFrame(list(details.values())).drop_duplicates(subset=['import_file_id'])
+            files=File.objects.all()
+            df_file=pd.DataFrame(list(files.values()))
+            df_detail=pd.merge(df_detail,df_file, how="inner",left_on=['import_file_id'], right_on=['id'] )[['name']]
+            df_detail=df_detail.values.tolist()
+            report_list=','.join([y[0] for y in df_detail])
+            return JsonResponse({"error": f'You cannot delete this partner, as it is already used in the following report(s):{report_list} -please delete them first '}, status=404)
+
           partner.status="DELETE"
           partner.save()
           return JsonResponse({"result": "all done"}, status=201)
@@ -752,13 +775,29 @@ def delete_contract(request,contract_id):
   Contract.objects.get(id=contract_id).delete()
   return HttpResponseRedirect(reverse("contracts_writer")) 
 
+@csrf_exempt 
 @login_required
 def submit_delete_contract_request(request,contract_id):
-  contract=Contract.objects.get(id=contract_id)
-  contract.status="DELETE"
-  contract.save()
-  return HttpResponseRedirect(reverse("contracts_writer"))  
+  user=request.user
+  if user.role=="WRITER":
+    contract=Contract.objects.get(id=contract_id)
+    #we must verify that the contract is not used in any of the reports
+    details=Detail.objects.filter(contract=contract)
 
+    if details: 
+      df_detail = pd.DataFrame(list(details.values())).drop_duplicates(subset=['import_file_id'])
+      files=File.objects.all()
+      df_file=pd.DataFrame(list(files.values()))
+      df_detail=pd.merge(df_detail,df_file, how="inner",left_on=['import_file_id'], right_on=['id'] )[['name']]
+      df_detail=df_detail.values.tolist()
+      report_list=','.join([y[0] for y in df_detail])
+
+      return JsonResponse({"error": f'You cannot delete this contract, as it is already used in the following report(s):{report_list} - please delete those reports first'}, status=404)
+    contract.status="DELETE"
+    contract.save()
+    return HttpResponseRedirect(reverse("contracts_writer"))  
+  else:
+    return JsonResponse({"error": "you are not a writer"}, status=404)
 @login_required(login_url='/login')
 def contracts_current(request):
 
@@ -1809,16 +1848,21 @@ def new_report(request):
         df_year_month = pd.DataFrame(rows, columns=["year", "month"])    
         df_year_nb_month=df_year_month.groupby(['year']).size().reset_index(name='month_nb')
         print("df_year_nb_month : Done")
-   
-        #Tranche
-        tranche_list=Tranche.objects.all()
-        df_tranche = pd.DataFrame(list(tranche_list.values()))
 
-        filehandle = request.FILES.get("file")
+        #Contract
+        contract_list=Contract.objects.filter(status__in=["CURRENT","DELETE","CHANGE"]) # we only select contracts that are valid
+        df_contract = pd.DataFrame(list(contract_list.values()))
+        if (df_contract.empty):
+              file.delete()
+              return JsonResponse({"error": "Please make sure that at least one contract is valid"}, status=201)   
+        df_contract=df_contract.rename(columns={'id':'contract_id','contract_currency_id':'contract_currency','division_id':'division'})
+        print("contract")
 
         #Rule
-        rule_list=Rule.objects.all().values_list('id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value','report_currency','qty_value_currency')
-        df_rule = pd.DataFrame.from_records(list(rule_list), columns=['rule_id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value','report_currency','qty_value_currency'])
+        rule_list=Rule.objects.filter(contract__in=contract_list) # we only select the rules related to the authorised contract ( see above)
+        rule_values_list=rule_list.values_list('id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value','report_currency','qty_value_currency')
+        print("rule_list")
+        df_rule = pd.DataFrame.from_records(list(rule_values_list), columns=['rule_id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value','report_currency','qty_value_currency'])
         
           #Each rule is composed on a beginning and end date. If the period goes across different years, we must break the row- i.e. 01/01/2019 to 10/10/2020 --> 01/01/2019 to 31/12/2019 // 01/01/2020 to 10/10/2020
         df_rule= df_year_nb_month.merge(df_rule, how="cross" ) #some contracts have a long period (i.e. 01/01/1990 to 01/01/2030), while the period under analysis only concernd a few years- do that reason, we utilise the "df_year_nb_month", which is the period chosen by the user for the analysis 
@@ -1865,6 +1909,13 @@ def new_report(request):
           })
         print('df_rule')
 
+   
+        #Tranche
+        tranche_list=Tranche.objects.filter(rule__in=rule_list) # we only select the tranches that are related to the rules previously selected
+        df_tranche = pd.DataFrame(list(tranche_list.values()))
+        filehandle = request.FILES.get("file")
+        print("tranche")
+        print(tranche_list)
         #Payment_structure
         payment_structure_list=Payment_structure.objects.all()
         df_payment_structure = pd.DataFrame(list(payment_structure_list.values()))
@@ -1931,13 +1982,7 @@ def new_report(request):
         print("df_breakdown_per_contract")
 
       
-        #Contract
-        contract_list=Contract.objects.filter(status__in=["CURRENT","DELETE","CHANGE"])
-        df_contract = pd.DataFrame(list(contract_list.values()))
-        if (df_contract.empty):
-              file.delete()
-              return JsonResponse({"error": "Please make sure that at least one contract is valid"}, status=201)   
-        df_contract=df_contract.rename(columns={'id':'contract_id','contract_currency_id':'contract_currency','division_id':'division'})
+
 
         #Contract_partner
         contract_partner_list=Contract_partner.objects.all()
@@ -2140,7 +2185,9 @@ def new_report(request):
         if not df_tranche.empty : 
           t1= pd.merge(df_rule,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
           #t1 and Sale
+          
           print('t1')
+
 
           t2=pd.merge(t1,df_sales, how="inner",left_on=['formulation','year'], right_on=['formulation' ,'year'])
           print('t2 beginning')
@@ -2167,12 +2214,15 @@ def new_report(request):
             t3 = t3.rename(columns={'exchange_rate': 'exchange_rate_to'})
             # calculate sales amount in report currency
             t3['sales_in_report_curr']=t3['sales']*t3['exchange_rate_from']/t3['exchange_rate_to']
+            
             t3=t3.fillna("")
             print("T3")
-            #t4=t3[['rule_id','sales_in_report_curr']].groupby(['rule_id']).sum()
+
             t4=t3.groupby(['rule_id','year'], as_index=False).agg({"sales_in_report_curr": "sum"})
             #t5 - calculate amount sales and roy
+            
             print("T4")
+
 
 
             t5=pd.merge(df_tranche,t4, how="left",left_on=['rule_id'], right_on=['rule_id'] )
@@ -2191,6 +2241,7 @@ def new_report(request):
             t5['roy']=t5['amount']*t5['percentage']/100
             t5=t5[['rule_id','amount','roy','mini_rate','year']]
             #t6 - average rate
+            
             t5=t5.fillna("")
             print("T5")
 
@@ -2202,6 +2253,7 @@ def new_report(request):
             print('t6')
 
             #-----------------link tranche average rate to general Rule -----------------
+
             df_rule_calc=pd.merge(df_rule,t6, how="left",left_on=['rule_id','year'], right_on=['rule_id','year'] )
             df_rule_calc['sales_rate']=np.where(pd.notna(df_rule_calc['average_rate']),df_rule_calc['average_rate'],df_rule_calc['rate_value'])
             df_rule_calc=df_rule_calc.drop(['average_rate','amount','roy','rate_value','mini_rate'], axis = 1)

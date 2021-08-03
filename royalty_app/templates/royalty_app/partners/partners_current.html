@@ -15,7 +15,7 @@
   
 <!----setting to unhide/hide column--->  
   <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" >
-    <div>{% if user.role == "VALIDATOR"%}<a   href="{% url 'partners_to_validate' %}"  target="_blank">{{message_validator}}{%endif%}<a></div>
+    <div>{% if user.role == "VALIDATOR"%}<a   href="{% url 'partners_to_validate' %}"  >{{message_validator}}{%endif%}<a></div>
     <div class="btn-toolbar mb-2 mb-md-0">
       <div class="btn-group mr-2">
         <button class="btn btn-sm btn-outline-secondary" type="button" onclick="column_sel()" title="column selection" ><span class="bi bi-gear"></span> </button>

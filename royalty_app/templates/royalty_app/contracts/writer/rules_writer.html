@@ -32,7 +32,7 @@
               <button class="approve_button" onclick='save_contract({{contract.id}},"SUBMIT_CHANGE")'>Submit change to validator</button>
             </li>
             <li style="display: block; padding-left:0px; margin:2px"  >
-              <a href="{% url 'submit_delete_contract_request' contract_id=contract.id %}" ><button class="reject_button" > Submit delete to validator</button></a>
+              <button onclick='submit_delete_contract_request({{contract.id}})'  class="reject_button" >Submit delete to validator</button>
             </li>
             {% endif %}
 
