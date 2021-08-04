@@ -73,9 +73,9 @@
             <select  id="division"  style="width: 100%; margin-left:5px; padding:2px">
               {% for division in division_list %}
                 {% if division == contract.division  %}
-                  <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}</option>
+                  <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}:{{ division.division_name }}</option>
                 {% else%}
-                <option value="{{ division.division_id }}" >{{ division.division_id }}</option>
+                <option value="{{ division.division_id }}" >{{ division.division_id }}:{{ division.division_name }}</option>
                 {% endif %}
               {% endfor %}
             </select>
@@ -85,9 +85,9 @@
           <select  id="division_via" style="width: 100%; margin-left:5px; padding:2px">
             {% for division in division_list %}
               {% if division == contract.division_via  %}
-                <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}</option>
+                <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}:{{ division.division_name }}</option>
               {% else%}
-              <option value="{{ division.division_id }}" >{{ division.division_id }}</option>
+              <option value="{{ division.division_id }}" >{{ division.division_id }}:{{ division.division_name }}</option>
               {% endif %}
             {% endfor %}
           </select>
