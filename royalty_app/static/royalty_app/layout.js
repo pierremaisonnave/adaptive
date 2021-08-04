@@ -52,3 +52,21 @@ function hide_dropdown_user(){
     }
 
 }
+
+
+function spinner(){
+    document.querySelector("main").style.display = "None"
+    document.getElementById("spinner_load_page").style.display = "block"
+    return true
+}
+
+function hide_table(table){
+    document.getElementById(table).hidden=true
+    document.getElementById(`hide_${table}`).hidden=true
+    document.getElementById(`unhide_${table}`).hidden=false
+}
+function unhide_table(table){
+    document.getElementById(table).hidden=false
+    document.getElementById(`hide_${table}`).hidden=false
+    document.getElementById(`unhide_${table}`).hidden=true
+}

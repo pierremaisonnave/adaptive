@@ -654,16 +654,7 @@ function hide_unhide_mini(elm){
 
 
 // general functions
-function hide_table(table){
-    document.getElementById(table).hidden=true
-    document.getElementById(`hide_${table}`).hidden=true
-    document.getElementById(`unhide_${table}`).hidden=false
-}
-function unhide_table(table){
-    document.getElementById(table).hidden=false
-    document.getElementById(`hide_${table}`).hidden=false
-    document.getElementById(`unhide_${table}`).hidden=true
-}
+
 
 function submit_validator_decision(reponse_validator){
     document.getElementById("reponse_validator").value=reponse_validator

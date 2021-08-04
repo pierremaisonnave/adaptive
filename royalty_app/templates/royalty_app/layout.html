@@ -6,7 +6,9 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+    <!--enable the label inside the chart-->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>   
 
   
  
@@ -38,7 +40,7 @@
   </head>
 
   <body >
-    <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar">
+    <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar" style="width:100%;position: fixed">
       <a href="https://www.pierre-maisonnave-consulting.ch/" id="your_logo"> <img src="{% static 'photo/pmconsulting.png' %}" style="width: 150px;margin: 10px " ></a> 
       <div id="central_spinner" style="display: None;">
         <span style="  position: relative;top: 15px;right :7px; font-size: smaller;color:green">saving</span>
@@ -78,7 +80,7 @@
                   </div>
                 </H6>
                 <li style="display: block;" class="item_single_select" dd_id="user" >
-                  <a  href="{% url 'logout' %}" style="color: inherit;text-decoration:none" > <span class="bi bi-box-arrow-right" style="margin-right: 4px;"></span>logout</a>
+                  <a  href="{% url 'logout' %}" style="color: inherit;text-decoration:none"  onclick="spinner()"> <span class="bi bi-box-arrow-right" style="margin-right: 4px;"></span>logout</a>
                 </li>
                 <li style="display: block;" class="item_single_select" dd_id="user" >
                   <div >
@@ -120,34 +122,34 @@
             <div class="sidebar-sticky" >
               <ul class="nav flex-column">
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar " id="item_in_sidebar_1"  href="{% url 'home' %}" title="Dashboard" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar " id="item_in_sidebar_1"  href="{% url 'home' %}" title="Dashboard" style="display: grid; grid-template-columns:20px  auto" onclick="spinner()"> 
                     <span class="bi bi-house"></span>
                     <span class="item_name">Dashboard</span>
                   </a>
                 </li>
             
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar"  id="item_in_sidebar_2"  {% if user.role == "WRITER"%}   href="{% url 'partners' %}"  {%else%} href="{% url 'partners_current' %}" {%endif%}   title="Partners" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar"  id="item_in_sidebar_2"  {% if user.role == "WRITER"%}   href="{% url 'partners' %}"  {%else%} href="{% url 'partners_current' %}" {%endif%}   title="Partners" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-people"></span>
                     <span class="item_name">Partners</span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_3"  href="{% url 'contracts_writer' %}" title="Contracts" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_3"  href="{% url 'contracts_writer' %}" title="Contracts" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-book"></span>
                     <span class="item_name">Contracts</span>
                   </a>
                 </li>
 
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_5"  href="{% url 'invoices' %}" title="Invoices" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_5"  href="{% url 'invoices' %}" title="Invoices" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-receipt"></span>
                     <span class="item_name">Invoices</span>
                     
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_6"  href="{% url 'static_data' %}" title="Static Data" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_6"  href="{% url 'static_data' %}" title="Static Data" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-server"></span>
                     <span class="item_name">Static Data</span>
                   </a>
@@ -160,21 +162,21 @@
               </h6>
               <ul class="nav flex-column mb-2">
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_8"  href="{% url 'monthly_accruals' %}" title="Monthly Accruals" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_8"  href="{% url 'monthly_accruals' %}" title="Monthly Accruals" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-journals"></span>
                     <span class="item_name">Monthly Accruals</span>
                     
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_9" href="{% url 'cash_flow_forecast' %}" title="Cash Flow Forecast" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_9" href="{% url 'cash_flow_forecast' %}" title="Cash Flow Forecast" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-graph-up"></span>
                     
                     <span class="item_name">Cash Flow Forecast </span>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_10" href="{% url 'partner_report' %}" title="Partner payment report" style="display: grid; grid-template-columns:20px  auto">
+                  <a class="nav-link item_in_sidebar" id="item_in_sidebar_10" href="{% url 'partner_report' %}" title="Partner payment report" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-cash"></span>
                     
                     <span class="item_name">Partner payment report</span>
@@ -188,7 +190,7 @@
     
     {% endif %}
     {% if user.is_authenticated %}
-      <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 main_authentificated" style="visibility: hidden" >
+      <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 main_authentificated" style="visibility: hidden;margin-top:50px" >
     {% else %}  
       <main  style="visibility: hidden" >
     {% endif %}  
@@ -198,7 +200,18 @@
 
         
          {% endif %}-->
+      <div id="spinner_load_page" >
+          <img src="{% static 'photo/logo_me.png' %}" style="width: 180px;margin: 10px; position:relative; top:100px; right:30px " >
+          <div class="sk-chase-big" >
+            <div class="sk-chase-dot-big"></div>
+            <div class="sk-chase-dot-big"></div>
+            <div class="sk-chase-dot-big"></div>
+            <div class="sk-chase-dot-big"></div>
+            <div class="sk-chase-dot-big"></div>
+            <div class="sk-chase-dot-big"></div>
 
+          </div>
+      </div>      
 
 
 

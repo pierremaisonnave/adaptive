@@ -31,15 +31,15 @@
     <tbody>
 
       <tr >
-        <td style="padding-left: 18px;"> <a href="{% url 'partners' %}">Partners</a></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'partners_current' %}"  onclick="spinner()">Partners</a></td>
         <td><input type="checkbox" name="partner"></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'division' %}">Divisions</a></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'division' %}"  onclick="spinner()">Divisions</a></td>
         <td ><input type="checkbox" name="division"></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'contracts_current' %}">Contracts</a></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'contracts_current' %}" onclick="spinner()">Contracts</a></td>
         <td ><input type="checkbox" name="contract"></td>
       </tr>
       <tr >
@@ -47,55 +47,55 @@
         <td><input type="checkbox" name="contract_partner"></td>
       </tr>
       <tr >
-        <td style="padding-left: 18px;"> <a href="{% url 'invoices' %}">Invoices</a></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'invoices' %}" onclick="spinner()">Invoices</a></td>
         <td><input type="checkbox" name="invoice"></td>
       </tr>
       <tr >
         <td style="padding-left: 18px;">Rules</td>
-        <td><input type="checkbox" name="rule"></td>
+        <td><input type="checkbox" name="rule" ></td>
       </tr>
       <tr>
         <td style="padding-left: 18px;" >Tranches</td>
-        <td ><input type="checkbox" name="tranche"></td>
+        <td ><input type="checkbox" name="tranche" ></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'country' %}">Countries</a></td>
-        <td ><input type="checkbox" name="country"></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'country' %}"onclick="spinner()">Countries</a></td>
+        <td ><input type="checkbox" name="country" ></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'region' %}">Regions</a></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'region' %}" onclick="spinner()">Regions</a></td>
         <td ><input type="checkbox" name="region"></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'formulation' %}">Formulations</a></td>
-        <td ><input type="checkbox" name="formulation"></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'formulation' %}"onclick="spinner()">Formulations</a></td>
+        <td ><input type="checkbox" name="formulation" ></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'brand' %}">Brands</a></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'brand' %}" onclick="spinner()">Brands</a></td>
         <td ><input type="checkbox" name="brand"></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'currency' %}">Currencies</a></td>
-        <td ><input type="checkbox" name="currency"></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'currency' %}"onclick="spinner()">Currencies</a></td>
+        <td ><input type="checkbox" name="currency" ></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'consolidation_currency' %}">Consolidation Currency</a></td>
-        <td ><input type="checkbox" name="consolidation_currency"></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'consolidation_currency' %}"onclick="spinner()">Consolidation Currency</a></td>
+        <td ><input type="checkbox" name="consolidation_currency" ></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'accounting' %}">Accounting</a></td>
-        <td ><input type="checkbox" name="accounting"></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'accounting' %}"onclick="spinner()">Accounting</a></td>
+        <td ><input type="checkbox" name="accounting" ></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'tax' %}">Tax Rules</a></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'tax' %}" onclick="spinner()">Tax Rules</a></td>
         <td ><input type="checkbox" name="tax"></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'sales_breakdown_item' %}">Sales Breakdown Definition</a></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'sales_breakdown_item' %}" onclick="spinner()">Sales Breakdown Definition</a></td>
         <td ><input type="checkbox" name="sales_breakdown_item"></td>
       </tr>
       <tr>
-        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'payment_type' %}">Payment Type</a></td>
+        <td style="padding-left: 18px;"> <a href="{% url 'modif_static' 'payment_type' %}" onclick="spinner()">Payment Type</a></td>
         <td ><input type="checkbox" name="payment_type"></td>
       </tr>
 

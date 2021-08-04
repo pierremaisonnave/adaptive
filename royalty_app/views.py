@@ -223,18 +223,54 @@ def home(request):
     labels_cash_forecast=result[0]
     data_cash_forecast=result[1] 
     year_list_cash_forecast=result[2]
+    #data for countract pies
+    labels_contract=result[3]
+    data_contract=result[4]
+    color_contract=result[5]
+    # data for country pie
+    labels_country=result[6]
+    data_country=result[7]
+    color_country=result[8]
+    # data for currency pie
+    labels_currency=result[9]
+    data_currency=result[10]
+    color_currency=result[11]
 
+    #previous year for bar chart
     result=chart_cash_forecast(CFF_report_id,currency_list,current_year-1)
     data_cash_forecast_last_year=result[1] 
 
-    return render(request, 'royalty_app/home.html', {"CFF_report_list":CFF_report_list,"CFF_report_id":CFF_report_id,"currency_list":currency_list,"year_list_cash_forecast":year_list_cash_forecast,"data_cash_forecast_last_year":data_cash_forecast_last_year,"data_cash_forecast":data_cash_forecast,"labels_cash_forecast":labels_cash_forecast,"data_accruals_last_year":data_accruals_last_year,"data_roy_ytd_last_year":data_roy_ytd_last_year,"contract_id_list":contract_id_list,"contract_list":contract_list,"consolidation_currency":consolidation_currency,"labels":labels,"data_accruals":data_accruals,"data_roy_ytd":data_roy_ytd,"year_list":year_list,"current_year":current_year})
 
+
+
+
+
+    return render(request, 'royalty_app/home.html', {
+      "total_amount":round(sum(data_country)/1000000,2),
+      "labels_currency":labels_currency,"data_currency":data_currency,"color_currency":color_currency,
+      "color_country":color_country,"data_country":data_country,"labels_country":labels_country,
+      "color_contract":color_contract,"labels_contract":labels_contract,"data_contract":data_contract,
+      "CFF_report_list":CFF_report_list,"CFF_report_id":CFF_report_id,"currency_list":currency_list,"year_list_cash_forecast":year_list_cash_forecast,
+      "data_cash_forecast_last_year":data_cash_forecast_last_year,
+      "data_cash_forecast":data_cash_forecast,
+      "labels_cash_forecast":labels_cash_forecast,
+      "data_accruals_last_year":data_accruals_last_year,
+      "data_roy_ytd_last_year":data_roy_ytd_last_year,
+      "contract_id_list":contract_id_list,
+      "contract_list":contract_list,
+      "consolidation_currency":consolidation_currency,
+      "labels":labels,
+      "data_accruals":data_accruals,
+      "data_roy_ytd":data_roy_ytd,
+      "year_list":year_list,
+      "current_year":current_year})
 
 
 @csrf_exempt
 #@login_required
 def chart_cash_forecast(CFF_report_id,currency_list,year):
   #get Year List
+  print("cash data retreival: 1")
   current_year=datetime.now().year
   detail_list=Detail.objects.filter(import_file=CFF_report_id)
   year_list_cash_forecast=detail_list.values_list('payment_date')
@@ -246,18 +282,30 @@ def chart_cash_forecast(CFF_report_id,currency_list,year):
   if current_year not in year_list_cash_forecast:
     year_list_cash_forecast.append(current_year)
   year_list_cash_forecast.sort()
-
+  print("cash data retreival: 2")
   #import detail tab:
-  detail_list=Detail.objects.filter(import_file=CFF_report_id,contract_currency__in=currency_list,payment_date__year=year).values_list('payment_date','contract_currency','amount_consolidation_curr','entry_type','transaction_direction')
-  df_detail_list=pd.DataFrame.from_records(list(detail_list), columns=['payment_date','contract_currency','amount_consolidation_curr','entry_type','transaction_direction'])
+  detail_list=Detail.objects.filter(import_file=CFF_report_id,contract_currency__in=currency_list,payment_date__year=year).values_list('payment_date','amount_consolidation_curr','entry_type','transaction_direction','contract__contract_name','market_id','contract_currency')
 
+ 
 
   if not detail_list :
-    labels=[ "Jan", "Feb", "Mar", "Apr", "Mai", "Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-    data=[0,0,0,0,0,0,0,0,0,0,0,0]
+
+    labels_bar_chart=[ "Jan", "Feb", "Mar", "Apr", "Mai", "Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+    data_bar_chart=[0,0,0,0,0,0,0,0,0,0,0,0]
+    labels_contract=["NA"]
+    data_contract=[0]
+    color_contract=['rgba(54, 162, 235,1.5)']
+    labels_country=["NA"]
+    data_country=[0]
+    color_country=['rgba(54, 162, 235,1.5)']
+    labels_currency=["NA"]
+    data_currency=[0]
+    color_currency=['rgba(54, 162, 235,1.5)']
   else:
- 
-    df_data=df_detail_list.groupby(['payment_date','contract_currency','entry_type','transaction_direction'], as_index=False).agg({"amount_consolidation_curr": "sum"})
+    df_detail_list=pd.DataFrame.from_records(list(detail_list), columns=['payment_date','amount_consolidation_curr','entry_type','transaction_direction','contract','market_id','contract_currency'])
+    print("cash data retreival: 3")
+    #data for bar
+    df_data=df_detail_list.groupby(['payment_date','entry_type','transaction_direction','contract','market_id','contract_currency'], as_index=False).agg({"amount_consolidation_curr": "sum"})
 
     df_data['payment_month'] =  pd.DatetimeIndex(df_data['payment_date']).month
     df_data['payment_month'] = df_data['payment_month'].astype(int)
@@ -281,7 +329,7 @@ def chart_cash_forecast(CFF_report_id,currency_list,year):
       'month': ["Jan", "Feb", "Mar", "Apr", "Mai", "Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
     })
 
-
+    df_pie=df_data.copy()
     df_data=pd.merge(df_month,df_data,how="left",left_on=["month_nb"],right_on=["payment_month"])
     
     df_data=df_data.groupby(['month_nb','month'], as_index=False,dropna=False).agg({"amount": "sum"})
@@ -289,11 +337,89 @@ def chart_cash_forecast(CFF_report_id,currency_list,year):
     df_data=df_data.drop(['month_nb'], axis = 1)
     df_data=df_data.fillna("0")
 
-
     datas=df_data.values.tolist()
-    labels=[ d[0] for d in datas]
-    data=[ d[1] for d in datas]
-  return [labels, data,year_list_cash_forecast]
+    labels_bar_chart=[ d[0] for d in datas]
+    data_bar_chart=[ d[1] for d in datas]
+
+    #-------- pie contract
+    df_contract_pie=df_pie.groupby(['contract'], as_index=False).agg({"amount_consolidation_curr": "sum"}).sort_values(by=['amount_consolidation_curr'],ascending=False)
+    datas=df_contract_pie.values.tolist()
+    labels_contract=[]
+    data_contract=[]
+    color_contract=[]
+    nb_items=min(len(datas),10)
+    t=1
+    small_value=0
+    for data in datas:
+      if t>9 :
+        small_value=data[1]+small_value
+        transparance=1/nb_items
+        color= f'rgba(54, 162, 235,{transparance})'
+      else:  
+        transparance=(nb_items-t+1)/nb_items
+        t=t+1
+        color= f'rgba(54, 162, 235,{transparance})'
+        color_contract.append(color)
+        labels_contract.append(data[0][:15] + (data[0][15:] and '..'))
+        data_contract.append(round(data[1],0))
+    if small_value!=0:
+      labels_contract.append('other')
+      data_contract.append(round(small_value,0))
+      color_contract.append(color)
+    #---------------- pie country------------
+    df_country_pie=df_pie.groupby(['market_id'], as_index=False).agg({"amount_consolidation_curr": "sum"}).sort_values(by=['amount_consolidation_curr'],ascending=False)
+    datas=df_country_pie.values.tolist()
+
+    labels_country=[]
+    data_country=[]
+    color_country=[]
+    nb_items=min(len(datas),10)
+    t=1
+    small_value=0
+    for data in datas:
+      if t>9 :
+        small_value=data[1]+small_value
+        transparance=1/nb_items
+        color= f'rgba(54, 162, 235,{transparance})'
+      else:  
+        transparance=(nb_items-t+1)/nb_items
+        t=t+1
+        color= f'rgba(54, 162, 235,{transparance})'
+        color_country.append(color)
+        labels_country.append(data[0])
+        data_country.append(round(data[1],0))
+    if small_value!=0:
+      labels_country.append('other')
+      data_country.append(round(small_value,0))
+      color_country.append(color)
+    #---------------- pie currency------------
+    df_currency_pie=df_pie.groupby(['contract_currency'], as_index=False).agg({"amount_consolidation_curr": "sum"}).sort_values(by=['amount_consolidation_curr'],ascending=False)
+    datas=df_currency_pie.values.tolist()
+
+    labels_currency=[]
+    data_currency=[]
+    color_currency=[]
+    nb_items=min(len(datas),10)
+    t=1
+    small_value=0
+    for data in datas:
+      if t>9 :
+        small_value=data[1]+small_value
+        transparance=1/nb_items
+        color= f'rgba(54, 162, 235,{transparance})'
+      else:  
+        transparance=(nb_items-t+1)/nb_items
+        t=t+1
+        color= f'rgba(54, 162, 235,{transparance})'
+        color_currency.append(color)
+        labels_currency.append(data[0])
+        data_currency.append(round(data[1],0))
+    if small_value!=0:
+      labels_currency.append('other')
+      data_currency.append(round(small_value,0))
+      color_currency.append(color)
+  print("finish cash flow retreival")
+  return [labels_bar_chart, data_bar_chart,year_list_cash_forecast,labels_contract,data_contract,color_contract,labels_country,data_country,color_country,labels_currency,data_currency,color_currency]
 
 
 
@@ -343,12 +469,30 @@ def cash_forecast_change(request):
       result=chart_cash_forecast(CFF_report_id,currency_list,year)
       data_cash_forecast=result[1]
       year_list_cash_forecast=result[2]
+      labels_contract=result[3]
+      data_contract=result[4]
+      color_contract=result[5]
+      labels_country=result[6]
+      data_country=result[7]
+      color_country=result[8]
+      labels_currency=result[9]
+      data_currency=result[10]
+      color_currency=result[11]
+
+
 
       result=chart_cash_forecast(CFF_report_id,currency_list,year-1)
       data_cash_forecast_last_year=result[1] 
+    
 
 
-      return JsonResponse({"success": "data loaded","data_cash_forecast":data_cash_forecast,"data_cash_forecast_last_year":data_cash_forecast_last_year,"year_list_cash_forecast":year_list_cash_forecast,}, status=201)
+      return JsonResponse({
+        "success": "data loaded",
+        "total_amount":round(sum(data_country)/1000000,2),
+        "labels_currency":labels_currency,"data_currency":data_currency,"color_currency":color_currency,
+        "labels_country":labels_country,"data_country":data_country,"color_country":color_country,
+        "labels_contract":labels_contract,"data_contract":data_contract,"color_contract":color_contract,
+        "data_cash_forecast":data_cash_forecast,"data_cash_forecast_last_year":data_cash_forecast_last_year,"year_list_cash_forecast":year_list_cash_forecast,}, status=201)
     except Exception as e:
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 

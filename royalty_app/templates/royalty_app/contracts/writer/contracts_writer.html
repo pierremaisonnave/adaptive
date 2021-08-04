@@ -5,7 +5,7 @@
 
       <div class=" pb-2 mb-3 border-bottom" style="display: flex" >
          <h1 class="h2">Contracts </h1>
-         <a  style="padding-top:16px" href="{% url 'contracts_current' %}"  >(click here to see the contracts currently used in the system)<a>
+         <a  style="padding-top:16px" href="{% url 'contracts_current' %}"  onclick="spinner()">(click here to see the contracts currently used in the system)<a>
    
       </div>
 
@@ -262,7 +262,7 @@
         <button class="btn btn-sm btn-outline-secondary" type="button" onclick="column_sel()" title="column selection" ><span class="bi bi-gear"></span> </button>
       </div>
       <div class="btn-group mr-2">
-        <a class="btn btn-sm btn-outline-secondary" href="/export/contract,contract_partner,rule"><span class="bi bi-download" ></span> download </a>
+        <a class="btn btn-sm btn-outline-secondary" href="/export/contract,contract_partner,rule" ><span class="bi bi-download" ></span> download </a>
       </div>
 
     </div>
@@ -365,7 +365,7 @@
         {% for contract in contract_list %}
           <tr>
             <td><!--ID-->
-              <a href="{% url 'rules_writer' contract_id=contract.id %}"><span class="fname" contract_id={{contract.id}} id="id_{{contract.id}}" >{{contract.id}}</span></a>
+              <a href="{% url 'rules_writer' contract_id=contract.id %}"  onclick="spinner()"><span class="fname" contract_id={{contract.id}} id="id_{{contract.id}}" >{{contract.id}}</span></a>
             </td>
             <td><!--Name-->
               <span >{{contract.contract_name}}</span>
