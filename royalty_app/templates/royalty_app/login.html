@@ -1,5 +1,57 @@
-<div>test for log in</div>
-{{user.is_authenticated}}
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+{% load static %}
+
+
+  <!----------------------------------------------------------------------------->
+  <!----------------------------Main table-------------------------------->
+  <!----------------------------------------------------------------------------->
+
+
+  {% if user.is_authenticated %}
+    <span>you are already logged in, click <a  href="{% url 'logout' %}"  > here</a> to log out</span>
+  {% else %}
+
+
+
+
+    <form action="{% url 'login_view' %}" method="post" style=" max-width:500px;" class="form_log" onsubmit="spinner()">
+      {% csrf_token %}
+      <h1 class="h3 mb-3 font-weight-normal" style="margin-top:50px">An innovative way to manage your license agreements and calculate your royalties effortlessly</h1>
+      <h1 class="h3 mb-3 font-weight-normal" style="margin-top:150px">Login</h1>
+      <div>
+        {% if error_message %}
+          <div style="margin-bottom:10px">
+            {% for mess in error_message %}
+              <div style="color:red">{{ mess }}</div>
+            {% endfor %} 
+          </div>
+        {% endif %}
+        {% if message_confirmation %}
+          <div style="color:green">{{ message_confirmation }}</div>
+        {% endif %}
+      </div>
+      <div class="form-group">
+          <input autofocus class="form-control" type="email" name="username" placeholder="Email">
+      </div>
+      <div class="form-group">
+          <input class="form-control" type="password" name="password" placeholder="Password">
+      </div>
+      <div class="form-group">
+        <input class="btn btn-primary form-control " type="submit" value="Login">
+      </div>
+      <input type="hidden" name="next" value="{{ request.GET.next }}"/>
+      <div>Don't have an account? <a href="{% url 'register' %}">Register here.</a> </div> 
+      <div> Forgot Password? <a href="{% url 'password_reset' %}">click here.</a> </div> 
+    </form>
+  </div>  
+  {% endif %} 
+
+
+  <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+  <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
+  <link rel="stylesheet" href="{% static 'css/loged_out_form.css'%}">
+{% endblock %}
 
 
   
