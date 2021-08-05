@@ -192,7 +192,8 @@
     {% if user.is_authenticated %}
       <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 main_authentificated" style="visibility: hidden;margin-top:50px" >
     {% else %}  
-      <main  style="visibility: hidden;margin-top:50px;background-image: url({% static 'photo/capturer.png' %});background-repeat: yes-repeat;height:1200px;background-attachment: fixed; " >
+     <!-- <main  style="visibility: hidden;margin-top:50px;background-image: url({% static 'photo/capturer.png' %});background-repeat: yes-repeat;height:1200px;background-attachment: fixed; " >-->
+      <main  style="visibility: hidden;margin-top:50px" >
     {% endif %}  
     {% block content %}{% endblock %}  
     </main>
