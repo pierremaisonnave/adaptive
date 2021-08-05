@@ -330,6 +330,7 @@ def chart_cash_forecast(CFF_report_id,currency_list,year):
     })
 
     df_pie=df_data.copy()
+
     df_data=pd.merge(df_month,df_data,how="left",left_on=["month_nb"],right_on=["payment_month"])
     
     df_data=df_data.groupby(['month_nb','month'], as_index=False,dropna=False).agg({"amount": "sum"})
@@ -342,7 +343,7 @@ def chart_cash_forecast(CFF_report_id,currency_list,year):
     data_bar_chart=[ d[1] for d in datas]
 
     #-------- pie contract
-    df_contract_pie=df_pie.groupby(['contract'], as_index=False).agg({"amount_consolidation_curr": "sum"}).sort_values(by=['amount_consolidation_curr'],ascending=False)
+    df_contract_pie=df_pie.groupby(['contract'], as_index=False).agg({"amount": "sum"}).sort_values(by=['amount'],ascending=False)
     datas=df_contract_pie.values.tolist()
     labels_contract=[]
     data_contract=[]
@@ -367,7 +368,8 @@ def chart_cash_forecast(CFF_report_id,currency_list,year):
       data_contract.append(round(small_value,0))
       color_contract.append(color)
     #---------------- pie country------------
-    df_country_pie=df_pie.groupby(['market_id'], as_index=False).agg({"amount_consolidation_curr": "sum"}).sort_values(by=['amount_consolidation_curr'],ascending=False)
+    df_country_pie=df_pie.groupby(['market_id'], as_index=False).agg({"amount": "sum"}).sort_values(by=['amount'],ascending=False)
+    print(df_country_pie)
     datas=df_country_pie.values.tolist()
 
     labels_country=[]
@@ -393,7 +395,7 @@ def chart_cash_forecast(CFF_report_id,currency_list,year):
       data_country.append(round(small_value,0))
       color_country.append(color)
     #---------------- pie currency------------
-    df_currency_pie=df_pie.groupby(['contract_currency'], as_index=False).agg({"amount_consolidation_curr": "sum"}).sort_values(by=['amount_consolidation_curr'],ascending=False)
+    df_currency_pie=df_pie.groupby(['contract_currency'], as_index=False).agg({"amount": "sum"}).sort_values(by=['amount'],ascending=False)
     datas=df_currency_pie.values.tolist()
 
     labels_currency=[]
