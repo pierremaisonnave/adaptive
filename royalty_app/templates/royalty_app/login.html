@@ -12,9 +12,13 @@
     <span>you are already logged in, click <a  href="{% url 'logout' %}"  > here</a> to log out</span>
   {% else %}
 
-    <form action="{% url 'login_view' %}" method="post" style="max-width:500px" class="form_log" onsubmit="spinner()">
+
+
+
+    <form action="{% url 'login_view' %}" method="post" style=" max-width:500px;" class="form_log" onsubmit="spinner()">
       {% csrf_token %}
-      <h1 class="h3 mb-3 font-weight-normal">Login</h1>
+      <h1 class="h3 mb-3 font-weight-normal" style="margin-top:50px">An innovative way to manage your license agreements and calculate your royalties effortlessly</h1>
+      <h1 class="h3 mb-3 font-weight-normal" style="margin-top:150px">Login</h1>
       <div>
         {% if error_message %}
           <div style="margin-bottom:10px">
@@ -40,8 +44,7 @@
       <div>Don't have an account? <a href="{% url 'register' %}">Register here.</a> </div> 
       <div> Forgot Password? <a href="{% url 'password_reset' %}">click here.</a> </div> 
     </form>
-
-
+  </div>  
   {% endif %} 
 
 

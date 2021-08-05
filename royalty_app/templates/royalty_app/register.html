@@ -11,7 +11,7 @@
     {% else %}
 
 
-        <form action="{% url 'register' %}" method="post" style="max-width:500px" class="form_log" onsubmit="return validateRecaptcha();">
+        <form action="{% url 'register' %}" method="post" style="max-width:500px; margin-top:100px" class="form_log" onsubmit="return validateRecaptcha();">
             {% csrf_token %}
             <h1 class="h3 mb-3 font-weight-normal">Register</h1>
             <div>
