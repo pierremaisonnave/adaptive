@@ -164,6 +164,7 @@ AWS_S3_FILE_OVERWRITE = False # prevent user from overwritting
 AWS_DEFAULT_ACL= None
 
 use_aws = True
+
 if use_aws:
     #static file
 
