@@ -41,48 +41,63 @@ from royalty.settings.base import GOOGLE_RECAPTCHA_SITE_KEY,GOOGLE_RECAPTCHA_SEC
 from sqlalchemy.engine.create import create_engine
 
 
-def login_view(request):
-    if request.method == "POST":
-        #check if user is active:
-        username = request.POST["username"]
-        password = request.POST["password"]
-        # Attempt to sign user in
-        active_user=User.objects.filter(username=username)
-        if active_user :
-          user=get_user_model().objects.get(username=username)
-          error_message=[]
-          if user.is_active == False:
-            error_message.append(f"your email has not been verified yet- another token was sent to {username}")
-            error_message.append("If your token expired, or you did not receive the email, please contact your administrator")
-            send_email(user)
-            return render(request, "royalty_app/login.html", {
-              "error_message": error_message
-            })
-            
-        user = authenticate(request, username=username, password=password)
-        # Check if authentication successful
-        if user is not None:
-          # if None, then it's a first time user, I should redirect him to a welcome page
-          login(request, user)
-          redirect=request.POST.get('next')
-          if redirect=="":
-            redirect="/"
-          
-          return HttpResponseRedirect(redirect) 
-          # If the user clicked on "Partner", and if he is not logged in, he is automatically redirected t
-          #..on the loggin page thanks to the "login_required", the login page keeps tracks of the original URL
-          #i.e. "/login?next=/partners"- In order for the user to be directed on the "Partner" page rigth after entering the password
-          #we must utilise request.POST.get('next')
-
-        else:
+def login_check(request):
+  if request.method == "POST":
+    #---- captcha -----#
+    recaptcha_response = request.POST.get('g-recaptcha-response')    
+    data = {
+        'secret': GOOGLE_RECAPTCHA_SECRET_KEY,
+        'response': recaptcha_response
+    }
+    r = requests.post('https://www.google.com/recaptcha/api/siteverify', data=data)
+    result = r.json()
+    #---- process data  -----#
+    if result['success']: # if captcha is successful 
+      #check if user is active:
+      username = request.POST["username"]
+      password = request.POST["password"]
+      # Attempt to sign user in
+      active_user=User.objects.filter(username=username)
+      if active_user :
+        user=get_user_model().objects.get(username=username)
+        error_message=[]
+        if user.is_active == False:
+          error_message.append(f"your email has not been verified yet- another token was sent to {username}")
+          error_message.append("If your token expired, or you did not receive the email, please contact your administrator")
+          send_email(user)
           return render(request, "royalty_app/login.html", {
-              "error_message": ['Invalid username and/or password.']
+            "error_message": error_message,
+            'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
           })
-    else:
-        return render(request, "royalty_app/login.html")
+          
+      user = authenticate(request, username=username, password=password)
+      # Check if authentication successful
+      if user is not None:
+        # if None, then it's a first time user, I should redirect him to a welcome page
+        login(request, user)
+        redirect=request.POST.get('next')
+        if redirect=="":
+          redirect="/"
+        
+        return HttpResponseRedirect(redirect) 
+        # If the user clicked on "Partner", and if he is not logged in, he is automatically redirected t
+        #..on the loggin page thanks to the "login_required", the login page keeps tracks of the original URL
+        #i.e. "/login?next=/partners"- In order for the user to be directed on the "Partner" page rigth after entering the password
+        #we must utilise request.POST.get('next')
 
-def login_page(request):
-  return render(request, "royalty_app/login.html")
+      else:
+        return render(request, "royalty_app/login.html", {
+            "error_message": ['Invalid username and/or password.'],
+            'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
+        })
+    else:  
+      return render(request, "royalty_app/login.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY,"error_message": ["CAPTCHA must be validated"]})
+  else:
+    print(GOOGLE_RECAPTCHA_SITE_KEY)
+    print(GOOGLE_RECAPTCHA_SECRET_KEY)
+    return render(request, "royalty_app/login.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
+
+
 
 @csrf_exempt
 @login_required
@@ -95,15 +110,6 @@ def new_profile_pict(request):
       return JsonResponse({"new_picture_url":user.profile_picture.url}, status=201)
     except Exception as e:
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
-
-
-
-def register_page(request):
-
-  return render(request, "royalty_app/register.html")
-
-
-
 
 
 def register(request):
@@ -119,7 +125,7 @@ def register(request):
     result = r.json()
     #---- process data  -----#
     if result['success']: # if captcha is successful 
-
+      print("Captcha OK")
       username = request.POST["email"]
       email = request.POST["email"]
       first_name = request.POST["first_name"]
@@ -132,16 +138,19 @@ def register(request):
           return render(request, "royalty_app/register.html", {
               "error_message": ["Passwords must match."],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
           })
+      print("password OK")
       if User.objects.filter(email=email):
           return render(request, "royalty_app/register.html", {
               "error_message": ["Email already exists"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
           })
+      print("New email OK")
       try: 
         password_validation.validate_password(password, request)
       except Exception as e:
         return render(request, "royalty_app/register.html",{
           "error_message":e ,'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY}
           )
+      print("password and email OK")
       # Attempt to create new user
       try:
         user = User.objects.create_user(username, email, password)
@@ -151,14 +160,12 @@ def register(request):
         user.is_active = False
         user.save()
         send_email(user)
-        pass#return HttpResponseRedirect(reverse("login"))     
+        print("email sent")
+        return render(request, "royalty_app/register.html", {"message_confirmation": "email for confimation has been sent",'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})    
       except IntegrityError:
-        return render(request, "royalty_app/register.html", {
-            "error_message": ["Username already taken"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
-        })
-      return render(request, "royalty_app/login.html", {"message_confirmation": "email for confimation has been sent"})
+        return render(request, "royalty_app/register.html", {"error_message": ["Username already taken"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
     else:
-      return render(request, "royalty_app/register.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY,"error_message": ["CAPTCHA must be validated"]})
+      return render(request, "royalty_app/register.html",{"error_message": ["CAPTCHA must be validated"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
   else:
     return render(request, "royalty_app/register.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
 

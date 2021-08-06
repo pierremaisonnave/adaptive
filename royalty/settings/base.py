@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
     "debug_toolbar", #use to generate the toolbar to view bugs
 
+
 ]
 
 MIDDLEWARE = [
@@ -231,6 +232,7 @@ INTERNAL_IPS=[
 #CAPTCHA
 GOOGLE_RECAPTCHA_SITE_KEY=os.getenv('GOOGLE_RECAPTCHA_SITE_KEY')
 GOOGLE_RECAPTCHA_SECRET_KEY =os.getenv('GOOGLE_RECAPTCHA_SECRET_KEY')
+
 
 #conneciton to database
 DATABASE_URL_VIEW=os.getenv("DATABASE_URL_VIEW")

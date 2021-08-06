@@ -145,9 +145,11 @@ span.comboTreeItemTitle{
 
 
 @media (min-width: 0px){
+    #logon_and_register_frame{
+        margin-top:0px;
+    }    
     .main_authentificated {
         padding-left: 60px!important;
-
     }
     #displayed_item_name_user{
         display: None;
@@ -178,7 +180,10 @@ span.comboTreeItemTitle{
 @media (min-width: 500px){
     #displayed_item_name_user{
         display: Block;
-        }   
+        } 
+    #logon_and_register_frame{
+        margin-top:100px!important;
+    }    
 }
 
 @media (min-width: 992px){

@@ -40,25 +40,22 @@
   </head>
 
   <body >
-    <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar" style="width:100%;position: fixed">
-      <a href="https://www.pierre-maisonnave-consulting.ch/" id="your_logo"> <img src="{% static 'photo/pmconsulting.png' %}" style="width: 150px;margin: 10px " ></a> 
-      <div id="central_spinner" style="display: None;">
-        <span style="  position: relative;top: 15px;right :7px; font-size: smaller;color:green">saving</span>
-        <div class="sk-chase" >
-          
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
-          <div class="sk-chase-dot"></div>
+    {% if user.is_authenticated %}
+      <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar" style="width:100%;position: fixed">
+        <a href="https://www.pierre-maisonnave-consulting.ch/" id="your_logo"> <img src="{% static 'photo/pmconsulting.png' %}" style="width: 150px;margin: 10px " ></a> 
+        <div id="central_spinner" style="display: None;">
+          <span style="  position: relative;top: 15px;right :7px; font-size: smaller;color:green">saving</span>
+          <div class="sk-chase" >
+            
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+          </div>
         </div>
-    </div>
-      <ul class="navbar-nav px-3"  style="display: grid; grid-template-columns:auto auto auto" id="nav-top"> 
-        
-
-
-        {% if user.is_authenticated %}
+        <ul class="navbar-nav px-3"  style="display: grid; grid-template-columns:auto auto auto" id="nav-top"> 
           <div style="background-color: #f8f9fa! ;" id="user_menu"  >
               <div id="user_photo_on_layout" class="comboTreeInputWrapper" dd_id="user" style="display: grid; grid-template-columns:auto  auto; margin: 10px ">
                 <div class="comboTreeInputBox  bi bi-gear" dd_id="user" style="margin:7px; font-size: 1.2rem " > </div>
@@ -105,7 +102,7 @@
               </div>
             </div>
 
-        {% endif %}
+        
 
         <li>
           <img src="{% static 'photo/logo_me.png' %}" style="width: 150px;margin: 10px " >
@@ -114,8 +111,6 @@
       </ul>
 
     </nav>
-
-    {% if user.is_authenticated %}
       <div class="container-fluid">
         <div class="row">
           <nav class="col-md-2 d-none d-md-block bg-light sidebar" style="max-width:180px">
@@ -187,12 +182,10 @@
           </nav>
         </div> 
       </div>
-    
-    {% endif %}
-    {% if user.is_authenticated %}
       <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 main_authentificated" style="visibility: hidden;margin-top:50px" >
-    {% else %}  
-      <main  style="visibility: hidden;margin-top:50px;background-image: url({% static 'photo/capturer.png' %});background-repeat: yes-repeat;height:1200px;background-attachment: fixed; " >
+    {% else %} 
+ 
+      <main  style="position:relative;background-image: url({% static 'photo/capturer.png' %}) ; background-repeat: yes-repeat;height:1200px;background-attachment: fixed; " >
     {% endif %}  
     {% block content %}{% endblock %}  
     </main>
@@ -220,7 +213,15 @@
     <script src="{% static 'royalty_app/layout.js'%}"></script> 
     <script type="text/javascript" src="{% static 'royalty_app/jquery.min.js'%}"></script>     
     <script type="text/javascript" src="{% static 'royalty_app/jquery.dataTables.min.js'%}"></script> 
-
+    <script src='https://www.google.com/recaptcha/api.js?render={{recaptcha_site_key}}'></script>
+    <script>
+      //global grecaptcha
+      grecaptcha.ready(function() {
+        grecaptcha.execute('{{recaptcha_site_key}}', {action: "/contact/"}).then(function(token) {
+          document.getElementById('g-recaptcha-response').value = token;
+        });
+      });
+    </script>
     
 
     
