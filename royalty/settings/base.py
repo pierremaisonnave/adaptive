@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     'django_filters',
 
     "debug_toolbar", #use to generate the toolbar to view bugs
-
+    "cookie_consent", #for cookie consent
 
 ]
 
@@ -236,3 +236,8 @@ GOOGLE_RECAPTCHA_SECRET_KEY =os.getenv('GOOGLE_RECAPTCHA_SECRET_KEY')
 
 #conneciton to database
 DATABASE_URL_VIEW=os.getenv("DATABASE_URL_VIEW")
+
+#How session are kept:
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # opional, as this will log you out when browser is closed
+SESSION_COOKIE_AGE =  5*60    # log out after x seconds
+SESSION_SAVE_EVERY_REQUEST = True  # Will prrevent from logging you out after x seconds

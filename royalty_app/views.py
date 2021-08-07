@@ -93,8 +93,6 @@ def login_check(request):
     else:  
       return render(request, "royalty_app/login.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY,"error_message": ["CAPTCHA must be validated"]})
   else:
-    print(GOOGLE_RECAPTCHA_SITE_KEY)
-    print(GOOGLE_RECAPTCHA_SECRET_KEY)
     return render(request, "royalty_app/login.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
 
 

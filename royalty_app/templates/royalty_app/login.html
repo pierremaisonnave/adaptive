@@ -14,17 +14,16 @@
 
 
   <div style="color: transparent; height: 0.001px;"> _</div>
-   <div id="logon_and_register_frame" style=" background-color: white;margin:auto;max-width:700px; border: 1px solid rgb(187, 187, 187)">
-      <div style="height: 7px;background-color: red; border-bottom: 1px solid rgb(187, 187, 187)"></div>
-      <div style="margin-top:3px;height: 7px;background-color: rgb(219, 218, 218)"></div>
+   <div id="logon_frame_l1" >
+      <div id="logon_red-band" ></div>
+      <div id="logon_grey-band"></div>
       <div style="text-align: right"><img src="{% static 'photo/logo_me.png' %}" style="width: 120px;margin: 10px 30px 0px 0px " ></div>
-      <b style="margin-left:30px; font-size:15px; color:rgb(88, 88, 88)">Log on to SwissRoy</b>
-      <div style="margin: 3px 3px 20px 3px;border-top:2px solid rgb(187, 187, 187);border-bottom:2px solid rgb(187, 187, 187)">
-        <div style="margin:20px auto 20px auto; max-width: 600px;">
+      <b id="logon_top-message" >Log on to SwissRoy</b>
+      <div id="logon_frame_l2">
+        <div id="logon_frame_l3" >
           <b>Enter your user information and click on Log on.</b>
- 
           <form action="{% url 'login' %}" method="post" onsubmit="spinner()">
-            <div style=" border:1px solid rgb(187, 187, 187); padding:0px 10px 0px 10px; margin:30px 0px 30px 0px; background-color:rgb(246, 246, 246)"> 
+            <div  id="logon_frame_l4"> 
               {% csrf_token %}
               <div style="margin:30px auto 30px auto; max-width: 400px;">
                 <div>
@@ -52,7 +51,7 @@
             </div>
             <input type="hidden" name="next" value="{{ request.GET.next }}"/>
       
-            <div>Don't have an account? <a href="{% url 'register' %}">Register here.</a> </div> 
+            <div>Don't have an account? <a href="{% url 'register' %}">Register here for free.</a> </div> 
             <div> Forgot Password? <a href="{% url 'password_reset' %}">click here.</a> </div> 
       
       
@@ -78,8 +77,7 @@
 
   <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
 
-  <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
-  <link rel="stylesheet" href="{% static 'css/loged_out_form.css'%}">
+
 {% endblock %}
 
 

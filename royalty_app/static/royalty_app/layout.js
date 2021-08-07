@@ -70,3 +70,16 @@ function unhide_table(table){
     document.getElementById(`hide_${table}`).hidden=false
     document.getElementById(`unhide_${table}`).hidden=true
 }
+
+const cookieContainer=document.querySelector(".cookie-container")
+const cookieButton=document.querySelector(".cookie-btn")
+cookieButton.addEventListener("click",()=>{
+    cookieContainer.classList.remove("active");
+    localStorage.setItem("cookieContainerDisplayed",true)
+});
+
+setTimeout(() => {
+    if (!localStorage.getItem("cookieContainerDisplayed")){
+        cookieContainer.classList.add("active");
+    }
+}, 2000);
