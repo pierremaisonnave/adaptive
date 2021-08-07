@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'django_filters',
 
     "debug_toolbar", #use to generate the toolbar to view bugs
-    "cookie_consent", #for cookie consent
 
 ]
 

@@ -14,6 +14,11 @@
 
 
   <div style="color: transparent; height: 0.001px;"> _</div>
+  <div id="welcomeContainer"> 
+    <div><b>Make you life simple!</b></div>
+    <div>The only management tool for license agreements and royalty calculation in the pharmaceutical world</div>
+    
+  </div>
    <div id="logon_frame_l1" >
       <div id="logon_red-band" ></div>
       <div id="logon_grey-band"></div>
@@ -22,7 +27,7 @@
       <div id="logon_frame_l2">
         <div id="logon_frame_l3" >
           <b>Enter your user information and click on Log on.</b>
-          <form action="{% url 'login' %}" method="post" onsubmit="spinner()">
+          <form action="{% url 'login' %}" redirect="{% url 'home' %}" method="post" id="form_login">
             <div  id="logon_frame_l4"> 
               {% csrf_token %}
               <div style="margin:30px auto 30px auto; max-width: 400px;">
@@ -47,7 +52,7 @@
               </div>
             </div> 
             <div class="form-group">
-              <input class="btn btn-primary form-control " type="submit" value="Log on">
+              <input type="button" class="btn btn-primary form-control " value="Log on" onclick="isauthenticated(this.form)">
             </div>
             <input type="hidden" name="next" value="{{ request.GET.next }}"/>
       

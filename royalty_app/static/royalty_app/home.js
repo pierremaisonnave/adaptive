@@ -1,8 +1,8 @@
 
 function accruals_change(elm){
     //spinner activated
-    spinner=document.getElementById("spinner_load_page")
-    spinner.style.display = "block"
+
+    spinner_load_page.style.display = "block"
 
     myChart.reset()
     //make sure we are not missing any field
@@ -35,14 +35,14 @@ function accruals_change(elm){
                     myChart.data.datasets[0].data[i]=data_accruals[i]
                 }
                 myChart.update();
-                spinner.style.display = "none"
+                spinner_load_page.style.display = "none"
             }
         })
 }
 function cash_forecast_change(){
     //spinner activated
-    spinner=document.getElementById("spinner_load_page")
-    spinner.style.display = "block"
+
+    spinner_load_page.style.display = "block"
 
     myChart2.reset()
     pie_contract.reset()
@@ -102,7 +102,7 @@ function cash_forecast_change(){
                 //total amount:
                 document.getElementById("total_amount").innerHTML=result.total_amount
                 //spinner desactivated
-                spinner.style.display = "none"
+                spinner_load_page.style.display = "none"
             }
         })
 }

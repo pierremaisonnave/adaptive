@@ -171,7 +171,7 @@ span.comboTreeItemTitle{
         display: block;
         }
 }
-@media (min-width: 400px){
+@media (min-width: 445px){
     #your_logo{
         display: Block;
         }   
@@ -182,7 +182,7 @@ span.comboTreeItemTitle{
         display: Block;
         } 
     #logon_frame_l1{
-        margin-top:100px!important;
+        margin-top:200px!important;
     }    
 }
 
@@ -212,11 +212,12 @@ span.comboTreeItemTitle{
 
 .nav-item:hover{
     background-color:white;
-    color:red
+    color:red;
+    border-right: solid 2px red;
 }
 .nav-item:hover span{
-
-    color:red
+    color:red;
+    
 }
 #user_menu:hover{
     background-color:white;
@@ -245,6 +246,7 @@ span.comboTreeItemTitle{
     padding:0 32px;
     transition: 400ms;
     box-shadow:0 -2px 16px black;
+    z-index: 200; 
 }
 .cookie-container.active{
     bottom:0;
@@ -258,6 +260,28 @@ span.comboTreeItemTitle{
     cursor:pointer
 }
 /* Login register frame */
+#welcomeContainer{
+    position:fixed;
+    top:-100%;
+    left:0;
+    right:0;
+    max-width:700px;
+    margin: auto;
+    background:#ea8787;
+    color:white;
+    border-radius:8px;
+    padding:0 32px;
+    transition: 1000ms;
+    box-shadow:0 -2px 16px black;
+    z-index: 200; 
+}
+#welcomeContainer.active{
+    top:80px;
+}
+
+#welcomeContainer>div{
+    font-size:20px
+}
 
 #logon_frame_l1{
     background-color: white;

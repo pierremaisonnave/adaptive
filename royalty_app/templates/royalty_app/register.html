@@ -20,7 +20,7 @@
          <div id="logon_frame_l3">
            <b>Enter your user information and click on Register.</b>
   
-           <form action="{% url 'register' %}" method="post" onsubmit="spinner()">
+           <form action="{% url 'register' %}" redirect="{% url 'home' %}" method="post" id="form_login">
              <div id="logon_frame_l4"> 
                {% csrf_token %}
                <div style="margin:30px auto 30px auto; max-width: 400px;">
@@ -54,7 +54,7 @@
                </div>
              </div> 
              <div class="form-group">
-               <input class="btn btn-primary form-control " type="submit" value="Register">
+               <input class="btn btn-primary form-control "type="button" value="Register" onclick="isauthenticated(this.form)">
              </div>
              <input type="hidden" name="next" value="{{ request.GET.next }}"/>
        

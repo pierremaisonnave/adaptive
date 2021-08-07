@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if ( element.id=="user_menu" || element.id=="user_photo_on_layout") {
             // is dropdown hidden?
-            dropdown_user=document.getElementById(`dropdown_user`)
             if (dropdown_user.style.display === "block"){dropdown_user.style.display = "none"} else { dropdown_user.style.display = "block"} 
         }     
     })
@@ -102,7 +101,6 @@ function isindropdownlist(event){
         if (grandparentelement.childNodes[3].style.display=="block"){return true}
     }
     if (e.id== "user_menu" || e.id=="user_photo_on_layout"){
-        dropdown_user=document.getElementById(`dropdown_user`)
         if (dropdown_user.style.display=="block"){return true }
     }
 

@@ -1,3 +1,9 @@
+const main= document.querySelector("main")
+const spinner_load_page=document.getElementById("spinner_load_page")
+const dropdown_user= document.getElementById("dropdown_user")
+const cookieContainer=document.querySelector(".cookie-container")
+const cookieButton=document.querySelector(".cookie-btn")
+const welcomeContainer=document.getElementById("welcomeContainer")
 
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelector("main").style.visibility = "visible";  
@@ -11,8 +17,7 @@ function change_profile_picture(){
 
     //definition od the elements
     
-    spinner_top=document.getElementById('central_spinner')
-    spinner_top.style.display = "Block"
+    spinner_load_page.style.display = "Block"
 
     file_=document.getElementById("fileSelect_pic")
     name_file=file_.files[0].name
@@ -30,33 +35,20 @@ function change_profile_picture(){
         .then(response => response.json())
         .then(result => {
             if (result.error){
-                spinner_top.style.display = "None"  
+                spinner_load_page.style.display = "None"  
             }else{
                 //change the profile pict of the current page
                 img_list=document.getElementById('picture') 
-               
                 img_list.src=result.new_picture_url
-
-                spinner_top.style.display = "None"  
-            }
-             
+                spinner_load_page.style.display = "None"  
+            }     
         })
-    
-}
-
-function hide_dropdown_user(){
-    dropdown_user=document.getElementById("dropdown_user")
-    alert(dropdown_user.style.display)
-    if (dropdown_user.style.display == "None"  ){
-        dropdown_user.style.display = "Block"
-    }
-
 }
 
 
 function spinner(){
-    document.querySelector("main").style.display = "None"
-    document.getElementById("spinner_load_page").style.display = "block"
+    main.style.display = "None"
+    spinner_load_page.style.display = "block"
     return true
 }
 
@@ -71,8 +63,8 @@ function unhide_table(table){
     document.getElementById(`unhide_${table}`).hidden=true
 }
 
-const cookieContainer=document.querySelector(".cookie-container")
-const cookieButton=document.querySelector(".cookie-btn")
+//Cookie
+
 cookieButton.addEventListener("click",()=>{
     cookieContainer.classList.remove("active");
     localStorage.setItem("cookieContainerDisplayed",true)
@@ -82,4 +74,56 @@ setTimeout(() => {
     if (!localStorage.getItem("cookieContainerDisplayed")){
         cookieContainer.classList.add("active");
     }
-}, 2000);
+}, 1000);
+
+//Welcome message when on "Login page"
+
+setTimeout(() => {
+    if (welcomeContainer){
+        welcomeContainer.classList.add("active")
+    }
+}, 1000);
+
+
+
+setTimeout(
+    () => {
+    if (welcomeContainer){
+        welcomeContainer.classList.remove("active")
+    }  
+}, 7000);
+
+function openlink(self){
+    dropdown_user.style.display = "None"
+    spinner()
+    redirect=self.getAttribute("redirect")
+    url=self.getAttribute("url")
+    fetch('/isauthenticated', {method: 'GET'})
+        .then(response => response.json())
+        .then(result => {
+            
+            if (result.isauthenticated=="YES"){
+                window.open(url,"_self");
+            }else{
+                window.open(redirect,"_self");
+            }
+        })
+
+}
+
+function isauthenticated(form){
+    redirect=form.getAttribute("redirect")
+    //goal is to check if user is already authentified, if so we redirect user to home page
+    fetch('/isauthenticated', {method: 'GET'})
+    //retreive the partner ID  (result.partner_id ) and create the additional row
+        .then(response => response.json())
+        .then(result => {
+            spinner()
+            if (result.isauthenticated=="NO"){
+                form.submit();
+            }else{
+                window.open(redirect,"_self");
+            }
+            
+        })    
+}
