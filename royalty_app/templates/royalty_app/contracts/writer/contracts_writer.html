@@ -22,6 +22,31 @@
         </tr>
         <tr>
 
+          <td>
+            <!--contract-type-->
+            <div style="width: 100%; margin-left:5px;">
+              {% if type_list %}
+                <div  class="comboTreeInputWrapper" dd_id="type_new">
+                  <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Type" readonly dd_id="type_new" id="displayed_item_name_type_new" >
+                  <input type="text"   hidden id="hidden_item_code_type_new">
+                </div>
+                <div  class="comboTreeDropDownContainer" id="dropdown_type_new" style="display: none;">
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="type_new" >
+                    <ul  >
+                      {% for type in type_list %}
+                        <li style="display: block;" class="item_single_select" dd_id="type_new">
+                          <span hidden>{{ type.id }}</span><span hidden> : </span><span>{{ type.name }}</span>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                </div>
+              {% else %}
+                <input type="text" readonly placeholder="Type: Empty"  style="width:100%" title="please insert Divisions in static data tab" id="displayed_item_name_type_new">
+                <input type="text"   hidden id="hidden_item_code_type_new">
+              {% endif %}
+            </div>
+
+          </td>
           <td > <!--Name-->
             <input type="text" id="contract_name_new" placeholder="Contract Name"  maxlength="50" style="width: 100%; margin-left:5px;">
           </td>
@@ -86,6 +111,9 @@
               </select>
             </div>
           </td>
+
+        </tr>
+        <tr>
           <td>
             <!--Currency-->
             <div style="width: 100%; margin-left:5px;">
@@ -111,9 +139,6 @@
             </div>
 
           </td>
-        </tr>
-        <tr>
-
           
           <td>
             <!--periodicity-->
@@ -279,41 +304,46 @@
 
         <tr >
           <td ><input type="checkbox" checked value=1 onclick="column_visibility(this,1)"></td>
-          <td >Name</td>
+          <td >Type</td>
 
           <td ><input type="checkbox" checked value=2 onclick="column_visibility(this,2)"></td>
-          <td >Division</td>
+          <td >Name</td>
 
           <td ><input type="checkbox" checked value=3 onclick="column_visibility(this,3)"></td>
-          <td >Pay/Rec</td>
+          <td >Division</td>
 
           <td ><input type="checkbox" checked value=4 onclick="column_visibility(this,4)"></td>
+          <td >Pay/Rec</td>
+
+        </tr>
+        <tr >
+          <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5)"></td>
           <td >Curr</td>
 
-        </tr>
-        <tr >
-          
-          <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5)"></td>
+          <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6)"></td>
           <td >periodicity</td>
 
-          <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6)"></td>
+          <td ><input type="checkbox" checked value=7 onclick="column_visibility(this,7)"></td>
           <td >payment terms:nb days</td>
 
-          <td ><input type="checkbox" checked value=7 onclick="column_visibility(this,7)"></td>
+          <td ><input type="checkbox" checked value=8 onclick="column_visibility(this,8)"></td>
           <td >Brand</td>
 
-          <td ><input style="display: None;" type="checkbox"  value=8 onclick="column_visibility(this,8)"></td>
-          <td ><span style="display: None;">Division via</span></td>
+
         </tr>
         <tr >
-          <td ><input type="checkbox"   value=9 onclick="column_visibility(this,9)"></td>
-          <td >Minimum Guarantee:Yes/No</td>
+
+
           <td ><input type="checkbox"   value=10 onclick="column_visibility(this,10)"></td>
-          <td >Minimum Guarantee:Amount</td>
+          <td >Minimum Guarantee:Yes/No</td>
+
           <td ><input type="checkbox"   value=11 onclick="column_visibility(this,11)"></td>
+          <td >Minimum Guarantee:Amount</td>
+
+          <td ><input type="checkbox"   value=12 onclick="column_visibility(this,12)"></td>
           <td >Minimum Guarantee:Country</td>
-          <td></td>
-          <td></td>
+          <td ><input style="display: None;" type="checkbox"  value=9 onclick="column_visibility(this,9)"></td>
+          <td ><span style="display: None;">Division via</span></td>
         </tr>
         
       </tbody>
@@ -338,14 +368,16 @@
           <th style="padding-left:8px"><input  id="column10_search"  class="fname2" placeholder="..." column=10> </th>
           <th style="padding-left:8px" ><input  id="column11_search"  class="fname2" placeholder="..." column=11 > </th>
           <th style="padding-left:8px"><input  id="column12_search"  class="fname2" placeholder="..." column=12 > </th>
+          <th style="padding-left:8px"><input  id="column13_search"  class="fname2" placeholder="..." column=13 > </th>
         </tr>
         <tr >
-          <th style="border-bottom:none" colspan=9></th>
+          <th style="border-bottom:none" colspan=10></th>
           <th colspan=3 style="text-align: center;border-bottom:none; padding:2px">Minimum Guarantee</th>
           <th style="border-bottom:none"></th>
         </tr>        
         <tr style="height:65px">
           <th style="border-top:none; padding-left: 8px; width:20px">ID</th>
+          <th style="border-top:none; padding-left: 8px">Type</th>
           <th style="border-top:none; padding-left: 8px">Name</th>
           <th style="border-top:none; padding-left: 8px;width:50px;">Division</th>
           <th style="border-top:none; padding-left: 8px;width:50px;">Pay/Rec</th>
@@ -366,6 +398,9 @@
           <tr>
             <td><!--ID-->
               <a href="{% url 'rules_writer' contract_id=contract.id %}"  onclick="spinner()"><span class="fname" contract_id={{contract.id}} id="id_{{contract.id}}" >{{contract.id}}</span></a>
+            </td>
+            <td><!--Type-->
+              <span >{{contract.contract_type}}</span>
             </td>
             <td><!--Name-->
               <span >{{contract.contract_name}}</span>

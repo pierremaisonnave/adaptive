@@ -238,5 +238,5 @@ DATABASE_URL_VIEW=os.getenv("DATABASE_URL_VIEW")
 
 #How session are kept:
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # opional, as this will log you out when browser is closed
-SESSION_COOKIE_AGE =  5*60    # log out after x seconds
+SESSION_COOKIE_AGE =  10*60    # log out after x seconds
 SESSION_SAVE_EVERY_REQUEST = True  # Will prrevent from logging you out after x seconds

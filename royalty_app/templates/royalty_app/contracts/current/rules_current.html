@@ -14,21 +14,49 @@
   <form   id="form_new" > 
     <table>
       <tr>
-        <td style="width:150px"> <!--Name-->
+        <td style="width:150px"> <!--type-->
+          <span>Contract Type:</span>
+        </td>
+        <td > 
+          <span>{{contract.contract_type}}</span>
+        </td>
+        <td style="width:150px"> <!--Currency-->
+          <span style=" margin-left:10px">Currency:</span>
+        </td>
+        <td>
+          <span style="width: 100%" >{{contract.contract_currency}}</span>
+        </td>
+        <td style="display: None;"> <!-- Div via-->
+          <span style="width: 100%" >{{ contract.division_via.division_id }}</span>
+        </td>
+      </tr>
+      <tr>
+        <td > <!--Name-->
           <span>Contract Name:</span>
         </td>
         <td > 
           <span>{{contract.contract_name}}</span>
         </td>
-        <td style="width:150px"> <!--Gald Div list-->
-          <span style=" margin-left:10px">Division:</span>
+        <td > <!--periodicity-->
+          <span style=" margin-left:10px">Payment Periodicity:</span>
+        </td>
+        <td>
+          <span style="width: 100%" >{{contract.payment_periodicity.periodicity}}</span>  
+        </td>
+      </tr>
+      <tr>
+        <td > <!--Gald Div list-->
+          <span >Division:</span>
         </td>
         <td>
             <span style="width: 100%" >{{ contract.division.division_id }}</span>
         </td>
 
-        <td style="display: None;"> <!-- Div via-->
-          <span style="width: 100%" >{{ contract.division_via.division_id }}</span>
+        <td > <!--payment terms-->
+          <span style=" margin-left:10px">Payment terms (days):</span>
+        </td>
+        <td ><!--payment terms-->
+          <span style="width: 100%" >{{contract.payment_terms}}</span> 
         </td>
       </tr>
       <tr>
@@ -38,30 +66,8 @@
         <td >
           <span style="width: 100%" >{{ contract.transaction_direction }}</span>
         </td>
-        <td > <!--Currency-->
-          <span style=" margin-left:10px">Currency:</span>
-        </td>
-        <td>
-          <span style="width: 100%" >{{contract.contract_currency}}</span>
-        </td>
-      </tr>
-      <tr>
-        <td > <!--periodicity-->
-          <span>Payment Periodicity:</span>
-        </td>
-        <td>
-          <span style="width: 100%" >{{contract.payment_periodicity.periodicity}}</span>  
-        </td>
-        <td > <!--payment terms-->
-          <span style=" margin-left:10px">Payment terms (days):</span>
-        </td>
-        <td ><!--payment terms-->
-          <span style="width: 100%" >{{contract.payment_terms}}</span> 
-        </td>
-      </tr>
-      <tr>
         <td > <!--Brand list-->
-          <span>Brand:</span>
+          <span style=" margin-left:10px">Brand:</span>
         </td>
         <td><!--Brand list-->
           <span style="width: 100%" >{{contract.m3_brand.brand_name}}</span> 
@@ -201,7 +207,7 @@
               <thead>
                 <tr>
                   <th>from</th>
-                  <th>to ({{contract.contract_currency}})</th>
+                  <th>to ({{rule.tranche_currency}})</th>
                   <th>rate</th>
                   <th></th>
                 </tr>

@@ -25,7 +25,7 @@
                 <button class="approve_button" onclick='save_contract({{contract.id}},"SUBMIT_NEW")'>Submit change to validator</button>
               </li>
               <li style="display: block; padding-left:0px; margin:2px"  >
-                <a href="{% url 'delete_contract' contract_id=contract.id %}" ><button class="reject_button" >Delete contract</button></a>
+                <button class="reject_button" onclick='delete_contract("{% url 'delete_contract' contract_id=contract.id %}")'>Delete contract</button>
               </li>
             {% else %}
             <li style="display: block; padding-left:0px; margin:2px"  >
@@ -58,58 +58,41 @@
 
   <form   id="form_new" > 
     <table>
-    <tr>
-        <td style="width:150px"> <!--Name-->
-          <span>Contract Name:</span>
+      <tr>
+        <td style="width:150px"> <!--type-->
+          <span>Contract Type:</span>
         </td>
         <td > 
-          <input type="text" id="contract_name" placeholder="Contract Name"  maxlength="50" style="width: 100%; margin-left:5px;"  value='{{contract.contract_name}}'>
+          <input  hidden id="contract_type"  value='{{contract.contract_type.id}}'>
+          <input disabled type="text" placeholder="Contract Type"  maxlength="50" style="width: 100%; margin-left:5px;"  value='{{contract.contract_type.name}}'>
         </td>
-        <td style="width:150px"> <!--Gald Div list-->
-          <span style=" margin-left:10px">Division:</span>
-        </td>
-        <td>
-
-            <select  id="division"  style="width: 100%; margin-left:5px; padding:2px">
-              {% for division in division_list %}
-                {% if division == contract.division  %}
-                  <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}:{{ division.division_name }}</option>
-                {% else%}
-                <option value="{{ division.division_id }}" >{{ division.division_id }}:{{ division.division_name }}</option>
-                {% endif %}
-              {% endfor %}
-            </select>
-        </td>
-      </tr>
-        <td style="display: None;"> <!-- Div via-->
-          <select  id="division_via" style="width: 100%; margin-left:5px; padding:2px">
-            {% for division in division_list %}
-              {% if division == contract.division_via  %}
-                <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}:{{ division.division_name }}</option>
-              {% else%}
-              <option value="{{ division.division_id }}" >{{ division.division_id }}:{{ division.division_name }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
-        </td>
-      <tr>
-        <td > <!--pay/REC-->
-          <span>Pay/REC:</span>
-        </td>
-        <td >
-          <input  id="transaction_direction" style="width: 100%; margin-left:5px;"  value='{{contract.transaction_direction}}' disabled>
-
-        </td>
-        <td > <!--Currency-->
+        <td style="width:150px"> <!--Currency-->
           <span style=" margin-left:10px">Currency:</span>
         </td>
         <td>
           <input  id="currency" style="width: 100%; margin-left:5px;"  value='{{contract.contract_currency}}' disabled>
         </td>
       </tr>
+      <td style="display: None;"> <!-- Div via-->
+        <select  id="division_via" style="width: 100%; margin-left:5px; padding:2px">
+          {% for division in division_list %}
+            {% if division == contract.division_via  %}
+              <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}:{{ division.division_name }}</option>
+            {% else%}
+            <option value="{{ division.division_id }}" >{{ division.division_id }}:{{ division.division_name }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </td>
       <tr>
+        <td > <!--Name-->
+          <span>Contract Name:</span>
+        </td>
+        <td > 
+          <input type="text" id="contract_name" placeholder="Contract Name"  maxlength="50" style="width: 100%; margin-left:5px;"  value='{{contract.contract_name}}'>
+        </td>
         <td > <!--periodicity-->
-          <span>Payment Periodicity:</span>
+          <span style=" margin-left:10px">Payment Periodicity:</span>
         </td>
         <td>
             <select id="payment_periodicity" style="width: 100%; margin-left:5px; padding:2px">
@@ -123,6 +106,23 @@
             </select>
   
         </td>
+      </tr>
+      <tr>
+        <td> <!--Gald Div list-->
+          <span >Division:</span>
+        </td>
+        <td>
+
+            <select  id="division"  style="width: 100%; margin-left:5px; padding:2px">
+              {% for division in division_list %}
+                {% if division == contract.division  %}
+                  <option value="{{ division.division_id }}" selected="selected">{{ division.division_id }}:{{ division.division_name }}</option>
+                {% else%}
+                <option value="{{ division.division_id }}" >{{ division.division_id }}:{{ division.division_name }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+        </td>
         <td > <!--payment terms-->
           <span style=" margin-left:10px">Payment terms (days):</span>
         </td>
@@ -131,8 +131,15 @@
         </td>
       </tr>
       <tr>
+        <td > <!--pay/REC-->
+          <span>Pay/REC:</span>
+        </td>
+        <td >
+          <input  id="transaction_direction" style="width: 100%; margin-left:5px;"  value='{{contract.transaction_direction}}' disabled>
+
+        </td>
         <td > <!--Brand list-->
-          <span>Brand:</span>
+          <span style=" margin-left:10px">Brand:</span>
         </td>
         <td>
           <select  id="brand" style="width: 100%; margin-left:5px; padding:2px">
@@ -348,13 +355,24 @@
           </td>
 
           <td {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}hidden {% endif  %}><!--table for tranches-->
+  
             <table class="table table-striped " style="background-color:white">
               <thead>
                 <tr>
                   <th>from</th>
-                  <th>to ({{contract.contract_currency}})</th>
+                  <th >to</th>
                   <th>rate</th>
-                  <th></th>
+                  <th>
+                    <select style=" background-color:transparent; border:None ;width:60px">
+                      {% for curr in currency_list %}
+                        {% if rule.tranche_currency == curr %}
+                          <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                        {% else %}
+                          <option value={{curr.currency}}>{{curr.currency}}</option>          
+                        {% endif %}
+                      {% endfor %}
+                    </select>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -458,9 +476,19 @@
               <thead>
                 <tr>
                   <th>from</th>
-                  <th>to ({{contract.contract_currency}})</th>
+                  <th>to</th>
                   <th>rate</th>
-                  <th></th>
+                  <th>
+                    <select style=" background-color:transparent; border:None ;width:60px">
+                      {% for curr in currency_list %}
+                        {% if contract.contract_currency == curr %}
+                          <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                        {% else %}
+                          <option value={{curr.currency}}>{{curr.currency}}</option>          
+                        {% endif %}
+                      {% endfor %}
+                    </select>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -597,9 +625,19 @@
               <thead>
                 <tr>
                   <th>from</th>
-                  <th>to ({{contract.contract_currency}})</th>
+                  <th>to </th>
                   <th>rate</th>
-                  <th></th>
+                  <th>
+                    <select style=" background-color:transparent; border:None ;width:60px">
+                      {% for curr in currency_list %}
+                        {% if contract.contract_currency == curr %}
+                          <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                        {% else %}
+                          <option value={{curr.currency}}>{{curr.currency}}</option>          
+                        {% endif %}
+                      {% endfor %}
+                    </select>
+                  </th>
                 </tr>
               </thead>
               <tbody>

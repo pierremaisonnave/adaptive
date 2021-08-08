@@ -5,7 +5,7 @@ from .models import (Invoice,Country,Region,Partner,
     Contract_partner,Rule,Tranche,Periodicity_cat,
     File,Sale,Fx,Rule_calc,Conso,Accounting_entry,Consolidation_currency,
     Detail,Wht,Sales_breakdown_for_contract_report,Sales_breakdown_per_contract,
-    Contract_file,Month_table,User)
+    Contract_file,Month_table,User,Type)
 
 
 
@@ -68,7 +68,7 @@ class FxAdmin(admin.ModelAdmin):
     list_display=("import_file","year","currency","exchange_rate")
 
 class RuleAdmin(admin.ModelAdmin):
-    list_display=("contract","country_incl_excl","country_list","field_type","period_from","period_to","rate_value","qty_value","report_currency")
+    list_display=("contract","country_incl_excl","country_list","field_type","period_from","period_to","rate_value","qty_value","tranche_currency")
 
 class Rule_calcAdmin(admin.ModelAdmin):
     list_display=("import_file","contract_id","country_incl_excl","country_list","formulation","period_from","period_to","tranche_type","field_type","qty_value","sales_rate")
@@ -113,4 +113,5 @@ admin.site.register(Sales_breakdown_per_contract,Sales_breakdown_per_contractAdm
 admin.site.register(Sales_breakdown_for_contract_report)
 admin.site.register(Month_table)
 admin.site.register(User)
+admin.site.register(Type)
 

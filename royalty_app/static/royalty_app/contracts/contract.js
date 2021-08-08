@@ -35,6 +35,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function add_new_record(){
     // Here we grab the values from the form
+        //Type
+            var type_input=document.getElementById("displayed_item_name_type_new")
+            var type_name=type_input.value
+            var type_id= document.getElementById("hidden_item_code_type_new").value
         //Name
             var name_input=document.getElementById("contract_name_new")
             var contract_name= name_input.value
@@ -83,6 +87,7 @@ function add_new_record(){
         }
     //create a dictionnary based on the element here above:
         field_dictionnary=[
+            {field_name:'type_id',value:type_id,object:type_input,mandatory:true},
             {field_name:'contract_name',value:contract_name,object:name_input,mandatory:true},
             {field_name:'transaction_direction',value:transaction_direction,object:transaction_direction_input,mandatory:true},
             {field_name:'division_id',value:division_id,object:division_input,mandatory:true},
@@ -99,6 +104,7 @@ function add_new_record(){
     //check any of the mandatory field are missing- 
         //filter dictionnary based on mandatory elements + element for which there are no value
         var field_dictionnary_mandatory =  field_dictionnary.filter(d =>d.mandatory==true).filter(d =>d.value=="" );
+        
         // if any of the mandatory field is missing, then we should indicate to the user the missing fiels + stop the function
         var length_mandatory= field_dictionnary_mandatory.length 
         if (length_mandatory>0) {
@@ -146,34 +152,36 @@ function add_new_record(){
                 var t = $('#contracts_table').DataTable().row.add( [
                     // for each tr in the td ( eight elements in total, seperated by a ","), we insert the HTML elements
                     //tr 0  ID
-                        `<a href='/contracts/writer/${contract_id}'><span class="fname" contract_id=${contract_id} id="id_${contract_id}" >${contract_id}</span></a>`,
-                    //tr 1 Name
+                        `<a href='/contracts/writer/${contract_id}'><span class="fname" contract_id=${contract_id} id="id_${contract_id}" onclick="spinner()" >${contract_id}</span></a>`,
+                    //tr 1 Type
+                        `<span >${type_name}</span>`,
+                    //tr 2 Name
                         `<span >${contract_name}</span>`,
-                    //tr 2 division
+                    //tr 3 division
                         `<span >${division_id}</span>`,
-                    //tr 3 transaction_direction
+                    //tr 4 transaction_direction
                         `<span >${transaction_direction}</span>`,
-                    //tr 4 payment_currency
+                    //tr 5 payment_currency
                         `<span >${contract_currency_name}</span>`,
-                    //tr 5 periodicity
+                    //tr 6 periodicity
                         `<span >${periodicity_name}</span>`,
-                    //tr 6 payment_terms
+                    //tr 7 payment_terms
                         `<span >${payment_terms}</span>
                         `,                    
-                    //tr 7 Brand
+                    //tr 8 Brand
                         `<span >${m3_brand_name}</span>`,
 
-                    //tr 8 division via
+                    //tr 9 division via
                         `<span >${division_via_id}</span>`,
 
-                    //tr 9 mini_gar_status
+                    //tr 10 mini_gar_status
                         `<span >${mini_gar_status}</span>`,
 
-                    //tr 10 minimum_guar_amount
+                    //tr 11 minimum_guar_amount
                         `<span >${minimum_guar_amount}</span>`,
-                    //tr 11 minimum_guar_remaining_allocation_country
+                    //tr 12 minimum_guar_remaining_allocation_country
                         `<span  >${country_id}</span>`,
-                    //tr 12 Button
+                    //tr 13 Button
                     `<span style="color:orange" >IN_CREATION- not submitted yet </span>`,
                 ] ).draw( false ).node();
                         

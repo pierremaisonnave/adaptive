@@ -106,8 +106,14 @@ class Consolidation_currency(models.Model):
     def __str__(self):
         return f"{self.currency}"   
 
+class Type(models.Model):
+    name=  models.CharField(max_length=50)
+    def __str__(self):
+        return f"{self.name}"   
+
 class Contract(models.Model):
     contract_name= models.CharField(max_length=50)
+    contract_type=  models.ForeignKey(Type, related_name="type",on_delete=models.PROTECT)
     transaction_direction=models.CharField(max_length=3,choices=(('PAY','PAY'),('REC','REC')), default='PAY')
     division=  models.ForeignKey(Division, related_name="contract_division",on_delete=models.PROTECT)
     division_via=  models.ForeignKey(Division, related_name="contract_division_via",on_delete=models.SET_NULL,null=True,blank=True)
@@ -139,6 +145,7 @@ class Contract_partner(models.Model):
 
 class Rule(models.Model):
     contract=  models.ForeignKey(Contract, related_name="rule_contract",on_delete=models.CASCADE)
+    rule_type=models.CharField(max_length=20,choices=(('SALES','SALES'),('COGS','COGS'),('ROYALTY','ROYALTY'),('MARGIN','MARGIN')), default='ROYALTY')
     formulation=models.ManyToManyField(Formulation, related_name="rule_formulation")
     country_incl_excl=models.CharField(max_length=7,choices=(('EXCLUDE','EXCLUDE'),('INCLUDE','INCLUDE')), default='INCLUDE')
     country=models.ManyToManyField(Country, related_name="rule_country",blank=True)
@@ -149,7 +156,7 @@ class Rule(models.Model):
     tranche_type=models.CharField(max_length=7,choices=(('YES','YES'),('NO','NO')), default='NO')
     rate_value=models.FloatField(null=True,blank=True)
     qty_value=models.FloatField(null=True,blank=True)
-    report_currency=models.ForeignKey(Currency, related_name="rule_report_currency", on_delete=models.PROTECT, default="USD")
+    tranche_currency=models.ForeignKey(Currency, related_name="rule_tranche_currency", on_delete=models.PROTECT, default="USD")
     qty_value_currency=models.ForeignKey(Currency,on_delete=models.PROTECT, default="USD" ,related_name="qty_value_currency")
     def __str__(self):
         return f"{self.id}"
@@ -266,6 +273,8 @@ class Detail(models.Model):
     amount_consolidation_curr= models.FloatField(null=True,blank=True)
     consolidation_currency= models.CharField(max_length=10,null=True,blank=True)
     contract=models.ForeignKey(Contract, on_delete=models.PROTECT)
+    contract_type=models.ForeignKey(Type, on_delete=models.PROTECT)
+    rule_type=models.CharField(max_length=20,null=True,blank=True)
     contract_name= models.CharField(max_length=100,null=True,blank=True)
     partner=models.ForeignKey(Partner, on_delete=models.PROTECT)
     ico_3rd= models.CharField(max_length=3,null=True,blank=True)

@@ -1,14 +1,15 @@
 
 function save_contract(contract_id,save_type){
     //check that each table is properly done
+
         body=check_each_table()
         if (!body){return}
     //prepare the spinner
-        spinner=document.getElementById("spinner")
+
         saved_message=document.getElementById("saved_message")
         button=document.getElementById("button")
         button.style.display="none"
-        spinner.style.display="block"
+        spinner_load_page.style.display="block"
 
     //book the modification in views.py for each table
         //create the bodies:
@@ -168,10 +169,10 @@ function save_contract(contract_id,save_type){
 function end_function_message(){
     // display a message stating that it is saved
     //prepare the spinner
-    spinner=document.getElementById("spinner")
+
     saved_message=document.getElementById("saved_message")
     saved_message.style.display="block"
-    spinner.style.display="none"
+    spinner_load_page.style.display="none"
     setTimeout(function() { 
         saved_message.style.display = "None";
         location.reload()
@@ -182,6 +183,7 @@ function end_function_message(){
 function check_each_table(){
     //table: basic_info
         //verify coherence data 
+          contract_type_input=document.getElementById(id="contract_type")
           contract_name_input=document.getElementById(id="contract_name")
           division_input=document.getElementById(id="division")
           division_via_input=document.getElementById(id="division_via")
@@ -195,6 +197,7 @@ function check_each_table(){
           brand_input=document.getElementById(id="brand")
         //prepare body
             body_basic_info=JSON.stringify({
+                        contract_type : contract_type_input.value,
                         contract_name : contract_name_input.value,
                         transaction_direction: transaction_direction_input.value,
                         division_id: division_input.value,   
@@ -254,8 +257,7 @@ function check_each_table(){
             //if (length_table ==0){return}
             for (var i = 0; i < length_table; i++) {
                 row=rule_table.rows[i]
-                //Report_currency
-                    Report_currency="same_as_contract"
+
                 //Formulation
                     formulation= row.cells[0].children[0].children[0].children[0].value
                     formulation=formulation.replaceAll(',','","')
@@ -285,7 +287,7 @@ function check_each_table(){
                     if ((field_type =="QTY")&&(tranche_type=="NO")){
                         qty_value= Number(row.cells[8].children[0].value.split(',').join(""))
                     }
-                //Report_currency
+                //qty_value_currency
                     qty_value_currency=row.cells[8].children[1].value
                 //tranches
                     var tranche_list=[]
@@ -306,11 +308,16 @@ function check_each_table(){
                                 rate_value=rate_tranche
                             }
                         }
+                        tranche_currency=row.cells[7].children[0].children[0].children[0].children[3].children[0].value
+
+                    }else{
+                        //tranche_currency
+                        tranche_currency="same_as_contract"
                     }
-                
+
                 //create sublist before looping 
                     sub_list.push(`{
-                        "Report_currency":"${Report_currency}",
+                        "tranche_currency":"${tranche_currency}",
                         "formulation":["${formulation}"],
                         "country_incl_excl":"${country_incl_excl}",
                         "country":["${country}"],
@@ -657,17 +664,18 @@ function hide_unhide_mini(elm){
 
 
 function submit_validator_decision(reponse_validator){
+    spinner_load_page.style.display="block"
     document.getElementById("reponse_validator").value=reponse_validator
     document.getElementById("reponse_validator_form").submit()
 }
 
 function submit_delete_contract_request(contract_id){
         //prepare the spinner
-        spinner=document.getElementById("spinner")
+
         saved_message=document.getElementById("saved_message")
         button=document.getElementById("button")
         button.style.display="none"
-        spinner.style.display="block"
+        spinner_load_page.style.display="block"
 
         fetch(`/submit_delete_contract_request/${contract_id}`, {
         method: 'POST',
@@ -677,12 +685,24 @@ function submit_delete_contract_request(contract_id){
             
             if (!!result.error) {
                 button.style.display="block"
-                spinner.style.display="none"
+                spinner_load_page.style.display="none"
                 alert(result.error);
                 return;}else{
                     end_function_message()
                     location.reload()  
                 }
         })
+
+}
+
+function delete_contract(url){
+        //prepare the spinner
+
+        saved_message=document.getElementById("saved_message")
+        button=document.getElementById("button")
+        button.style.display="none"
+        spinner_load_page.style.display="block"
+
+        window.open(url,"_self");  
 
 }
