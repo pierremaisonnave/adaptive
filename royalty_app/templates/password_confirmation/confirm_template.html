@@ -1,9 +1,248 @@
-{% extends "royalty_app/layout.html" %}
-{% block content %}
-{% load static %}
+  {% if success %}
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <!--enable the label inside the chart-->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.0/dist/chart.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>   
+    
+      
+    
+        <title>Royalty</title>
+    
+        {% load static %}
+    
+    
+        <link rel="icon" href="{% static 'photo/minilogo.png' %}">   <!-- logo on page title -->
+        
+        <!-- dataTables CSS- used to design the datatables -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css" >
+    
+        <!-- Bootstrap core CSS- used to design the frame of the webpage
+        <link href="https://getbootstrap.com/docs/4.5/dist/css/bootstrap.min.css" rel="stylesheet"> --> 
+        <link href="{% static 'royalty_app/layout.css' %}" rel="stylesheet">
+    
+        
+        <!-- Custom styles for this template -->
+        <link href="{% static 'royalty_app/app.css' %}" rel="stylesheet">
+        <link href="{% static 'css/loader.css' %}" rel="stylesheet">
+    
+    
+    
+        
+        <!-- Boostrap ICON -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+    
+      </head>
+    
+      <body >
+        {% if user.is_authenticated %}
+          <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar" style="width:100%;position: fixed">
+            <a href="https://www.pierre-maisonnave-consulting.ch/" id="your_logo"> <img src="{% static 'photo/pmconsulting.png' %}" style="width: 150px;margin: 10px " ></a> 
+            <div id="central_spinner" style="display: None;">
+              <span style="  position: relative;top: 15px;right :7px; font-size: smaller;color:green">saving</span>
+              <div class="sk-chase" >
+                
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+                <div class="sk-chase-dot"></div>
+              </div>
+            </div>
+            <ul class="navbar-nav px-3"  style="display: grid; grid-template-columns:auto auto auto" id="nav-top"> 
+              <div style="background-color: #f8f9fa! ;" id="user_menu"  >
+                  <div id="user_photo_on_layout" class="comboTreeInputWrapper" dd_id="user" style="display: grid; grid-template-columns:auto  auto; margin: 10px ">
+                    <div class="comboTreeInputBox  bi bi-gear" dd_id="user" style="margin:7px; font-size: 1.2rem " > </div>
+                    <div   class=" justAnInputBox comboTreeInputBox   " style="margin:10px " id="displayed_item_name_user" dd_id="user" >{{ user.first_name }}   </div>
+                  </div>
+                  <div  class="comboTreeDropDownContainer" id="dropdown_user" style="display: none;margin-top: 9px;border-radius: 0.35rem;width:250px;overflow: hidden">
+                    <H6 style="display: grid; grid-template-columns:45px auto" >
+                      
+                        <div id="imput_label_select" style="margin: 2px;">
+                            {% if  user.profile_picture %}
+                              <img class="" src="{{ user.profile_picture.url}}" style="border-radius: 50%; width:40px; height:40px" id="picture">
+                            {% else %}
+                              <img class="" src="{% static 'photo/default.png'%}"  style="border-radius: 50%; width:40px; height:40px" id="picture">
+                            {% endif %}
+                        </div>
+                      <div class="dropdown-user-details">
+                        <div >{{ user.first_name }} {{ user.last_name }}  </div>
+                        <div style="color:#69707a;    font-size: 11px" >{{ user.email }}</div>
+                      </div>
+                    </H6>
+                    <li title ="Change logout" style="display: block;" class="item_single_select" dd_id="user" url="{% url 'logout' %}" redirect="{% url 'login' %}" onclick="openlink(this)">
+                      <div style="color: inherit;text-decoration:none" > <span class="bi bi-box-arrow-right" style="margin-right: 4px;"></span>logout</div>
+                    </li>
+                    <li style="display: block;" class="item_single_select" dd_id="user" >
+                      <div >
+                        <input  type="file" name="loaded_file" id="fileSelect_pic" accept="image/png, image/jpeg" onchange="change_profile_picture(this)"  hidden >
+                        <input  type="text" name="sheet_list_to_upload" id="sheet_list_to_upload"  hidden >
+                        <label for="fileSelect_pic" title ="Change picture" style="margin: 0px;"> 
+                          <span class="bi bi-camera" style="margin-right: 4px;"></span>Change Picture
+                        </label>
+                      </div> 
+                    </li>
+                    <li title="password change" style="display: block;" class="item_single_select" dd_id="user" url="{% url 'password_change' %}" redirect="{% url 'login' %}"  onclick="openlink(this)">
+                      <div  style="color: inherit;text-decoration:none" > 
+                        <span class="bi bi-arrow-clockwise" style="margin-right: 4px;"></span>
+                        reset password</a>
+                      </div>
+                    <li title="Change role" style="display: block;" class="item_single_select" dd_id="user" url="{% url 'change_role' %}"   redirect="{% url 'login' %}" onclick="openlink(this)">
+                      <div  class="bi bi-arrow-left-right"  style="color: inherit;text-decoration:none">
+                        {% if user.role == "WRITER"%}change to VALIDATOR role{% else %}change to WRITER role{% endif %}
+                      </div>
+    
+                    </li>
+                  </div>
+                </div>
+    
+            
+    
+            <li>
+              <img src="{% static 'photo/logo_me.png' %}" style="width: 150px;margin: 10px " >
+            </li>
+    
+          </ul>
+    
+        </nav>
+          <div class="container-fluid">
+            <div class="row">
+              <nav class="col-md-2 d-none d-md-block bg-light sidebar" style="max-width:180px">
+                <div class="sidebar-sticky" >
+                  <ul class="nav flex-column">
+                    <li class="nav-item">
+                      <a class="nav-link item_in_sidebar " id="item_in_sidebar_1"  href="{% url 'home' %}" title="Dashboard" style="display: grid; grid-template-columns:20px  auto" onclick="spinner()"> 
+                        <span class="bi bi-house"></span>
+                        <span class="item_name">Dashboard</span>
+                      </a>
+                    </li>
+                
+                    <li class="nav-item">
+                      <a class="nav-link item_in_sidebar"  id="item_in_sidebar_2"  {% if user.role == "WRITER"%}   href="{% url 'partners' %}"  {%else%} href="{% url 'partners_current' %}" {%endif%}   title="Partners" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
+                        <span class="bi bi-people"></span>
+                        <span class="item_name">Partners</span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link item_in_sidebar" id="item_in_sidebar_3"  href="{% url 'contracts_writer' %}" title="Contracts" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
+                        <span class="bi bi-book"></span>
+                        <span class="item_name">Contracts</span>
+                      </a>
+                    </li>
+    
+                    <li class="nav-item">
+                      <a class="nav-link item_in_sidebar" id="item_in_sidebar_5"  href="{% url 'invoices' %}" title="Invoices" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
+                        <span class="bi bi-receipt"></span>
+                        <span class="item_name">Invoices</span>
+                        
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link item_in_sidebar" id="item_in_sidebar_6"  href="{% url 'static_data' %}" title="Static Data" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
+                        <span class="bi bi-server"></span>
+                        <span class="item_name">Static Data</span>
+                      </a>
+                    </li>
+    
+                  </ul>
+    
+                  <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span class="item_name" >Reports</span>
+                  </h6>
+                  <ul class="nav flex-column mb-2">
+                    <li class="nav-item">
+                      <a class="nav-link item_in_sidebar" id="item_in_sidebar_8"  href="{% url 'monthly_accruals' %}" title="Monthly Accruals" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
+                        <span class="bi bi-journals"></span>
+                        <span class="item_name">Monthly Accruals</span>
+                        
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link item_in_sidebar" id="item_in_sidebar_9" href="{% url 'cash_flow_forecast' %}" title="Cash Flow Forecast" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
+                        <span class="bi bi-graph-up"></span>
+                        
+                        <span class="item_name">Cash Flow Forecast </span>
+                      </a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link item_in_sidebar" id="item_in_sidebar_10" href="{% url 'partner_report' %}" title="Partner payment report" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
+                        <span class="bi bi-cash"></span>
+                        
+                        <span class="item_name">Partner payment report</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </nav>
+            </div> 
+          </div>
+          <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 main_authentificated" style="visibility: hidden;margin-top:50px" >
+        {% else %} 
+    
+          <main  style="position:relative;background-image: url({% static 'photo/capturer.png' %}) ; background-repeat: yes-repeat;height:1200px;background-attachment: fixed; " >
+        {% endif %}  
+        {% block content %}{% endblock %}  
+        </main>
+            <!--{% if user.is_authenticated %}
+    
+            
+            {% endif %}-->
+          <div id="spinner_load_page" >
+              <img src="{% static 'photo/logo_me.png' %}" style="width: 180px;margin: 10px; position:relative; top:100px; right:30px " >
+              <div class="sk-chase-big" >
+                <div class="sk-chase-dot-big"></div>
+                <div class="sk-chase-dot-big"></div>
+                <div class="sk-chase-dot-big"></div>
+                <div class="sk-chase-dot-big"></div>
+                <div class="sk-chase-dot-big"></div>
+                <div class="sk-chase-dot-big"></div>
+    
+              </div>
+          </div>      
+    
+        <div class="cookie-container">
+          <p>
+            We use cookies in this website to make the identification possible- Those cookies are not used for any other purpose.
+          </p>
+          <button class="cookie-btn" >ACCEPT</button>
+        </div>  
+    
+        <!-- Placed at the end of the document so the pages load faster -->
+      
+        <script src="{% static 'royalty_app/layout.js'%}"></script> 
+        <script type="text/javascript" src="{% static 'royalty_app/jquery.min.js'%}"></script>     
+        <script type="text/javascript" src="{% static 'royalty_app/jquery.dataTables.min.js'%}"></script> 
+        <script src='https://www.google.com/recaptcha/api.js?render={{recaptcha_site_key}}'></script>
+        <!--global grecaptcha//global grecaptcha-->
+        <script>
+          grecaptcha.ready(function() {
+            grecaptcha.execute('{{recaptcha_site_key}}', {action: "/contact/"}).then(function(token) {
+              document.getElementById('g-recaptcha-response').value = token;
+            });
+          });
+        </script>
+        
+    
+        
+    
+      </body>
+    </html>
+    
+    
+      
+  {% else %}
+      <div>Error, invalid token!</div>
+      <div>Make sure your link is not expired, otherwise contact your administrator</div>
+  {% endif %}
 
-<div>you are loggin</div>
 
-{% endblock %}
+
 
 
