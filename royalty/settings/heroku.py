@@ -41,7 +41,7 @@ AWS_SECRET_ACCESS_KEY=env('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME=env('AWS_STORAGE_BUCKET_NAME')
 
 
-EMAIL_PAGE_DOMAIN ='https://swissroy.ch/' #'https://swissroy-public.herokuapp.com/' 
+EMAIL_PAGE_DOMAIN ='https://www.swissroy.ch/' #'https://swissroy-public.herokuapp.com/' 
 EMAIL_FROM_ADDRESS =env('EMAIL_FROM')
 
 EMAIL_HOST_USER = env('EMAIL_ID') 
