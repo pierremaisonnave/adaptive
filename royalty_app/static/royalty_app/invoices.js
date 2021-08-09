@@ -112,6 +112,10 @@ function add_new_record(){
     period_value=period_.options[period_.selectedIndex].text
     period_id=period_.value
 
+    market_=document.getElementById("market_")
+    market_value=market_.options[market_.selectedIndex].text
+    market_id=market_.value
+
     comment_=document.getElementById("comment_")
     comment_value=comment_.value
     //message
@@ -139,6 +143,7 @@ function add_new_record(){
         fetch('/new_invoice', {
             method: 'POST',
             body: JSON.stringify({
+                market_id:market_id,
                 contract_id:contract_id,
                 partner_id:partner_id,
                 amount_value:amount_value_wo_comma,
@@ -170,6 +175,7 @@ function add_new_record(){
                     `${period_value}`,
                     `${comment_value}`,
                     `${booking_date_value}`,
+                    `${market_value}`,
                     `<input type="checkbox" onclick="save_paid_status(this)">`,
                     `<button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)"><span class="bi bi-trash"></span></button>`,
                 ]).draw( false ).node();

@@ -142,12 +142,18 @@ span.comboTreeItemTitle{
 }
 
 
-
+@media (min-height: 500px){
+    #logon_frame_l1{
+        margin-top:7vh!important;
+    }    
+}
+@media (min-height: 1000px){
+    #logon_frame_l1{
+        margin-top:20vh!important;
+    }    
+}
 
 @media (min-width: 0px){
-    #logon_frame_l1{
-        margin-top:0px;
-    }    
     .main_authentificated {
         padding-left: 60px!important;
     }
@@ -181,9 +187,6 @@ span.comboTreeItemTitle{
     #displayed_item_name_user{
         display: Block;
         } 
-    #logon_frame_l1{
-        margin-top:200px!important;
-    }    
 }
 
 @media (min-width: 992px){
@@ -271,12 +274,13 @@ span.comboTreeItemTitle{
     color:white;
     border-radius:8px;
     padding:0 32px;
+    opacity:0.7;
     transition: 1000ms;
     box-shadow:0 -2px 16px black;
     z-index: 200; 
 }
 #welcomeContainer.active{
-    top:80px;
+    top:5vh;
 }
 
 #welcomeContainer>div{
@@ -284,6 +288,7 @@ span.comboTreeItemTitle{
 }
 
 #logon_frame_l1{
+    margin-top:0px;
     background-color: white;
     margin:auto;
     max-width:700px;

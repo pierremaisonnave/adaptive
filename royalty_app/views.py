@@ -1109,7 +1109,8 @@ def invoices(request):
   contract_partner_list=Contract_partner.objects.all().select_related('partner','contract')
   periodicity_cat_list=Periodicity_cat.objects.all().select_related('periodicity')
   invoice_list=Invoice.objects.all()
-  return render(request, 'royalty_app/invoices.html', {"invoice_list":invoice_list,"periodicity_cat_list":periodicity_cat_list,"contract_partner_list":contract_partner_list,"contract_list":contract_list})
+  country_list=Country.objects.all()
+  return render(request, 'royalty_app/invoices.html', {"country_list":country_list,"invoice_list":invoice_list,"periodicity_cat_list":periodicity_cat_list,"contract_partner_list":contract_partner_list,"contract_list":contract_list})
 
 @login_required(login_url='/login')
 def static_data(request):
@@ -1177,8 +1178,8 @@ def export(request,file):
   df_contract_partner = pd.DataFrame(list(list_to_pd.values()))
 
   #Rule
-  list_to_pd=Rule.objects.all().values_list('id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value')
-  df_rule = pd.DataFrame.from_records(list(list_to_pd), columns=['rule_id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value'])
+  list_to_pd=Rule.objects.all().values_list('rule_type','id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value')
+  df_rule = pd.DataFrame.from_records(list(list_to_pd), columns=['rule_type','rule_id','contract_id','country_incl_excl','country_list','formulation','period_from','period_to','tranche_type','field_type','rate_value','qty_value'])
   
   #Invoice
   list_to_pd=Invoice.objects.all()
@@ -1294,7 +1295,7 @@ def export(request,file):
     df_invoice=pd.merge(df_invoice,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] ) 
     df_invoice=pd.merge(df_invoice,df_partner, how="inner",left_on=['partner_id'], right_on=['partner_id'] ) 
     df_invoice=pd.merge(df_invoice,df_periodicity_cat, how="inner",left_on=['periodicity_cat_id'], right_on=['id'] ) 
-    df_invoice=df_invoice[['contract_name','partner_name','amount','year','periodicity_cat','comment','paid']]
+    df_invoice=df_invoice[['contract_name','partner_name','amount','year','periodicity_cat','comment','booking_date','market_id','paid']]
 
   #Rule
   if df_rule.empty:
@@ -1869,6 +1870,7 @@ def new_invoice(request):
         year=data["year_value"],
         periodicity_cat= Periodicity_cat.objects.get(id=data["period_id"]),
         comment = data["comment_value"],
+        market = Country.objects.get(country_id=data["market_id"]),
       )
       invoice.save()
       
@@ -2176,6 +2178,7 @@ def new_report(request):
             'year': [0],
             'periodicity_cat_id': [0],
             'comment': [''],
+            'market_id': [''],
             'paid': [False],
           })        
         if df_invoice.empty:
@@ -2190,7 +2193,7 @@ def new_report(request):
           # if the invoices have been booked at a time not mentionned in the from/to period, the dataframe will be empty- same as mention before, we must fill in the table anyway
           if df_invoice.empty:
             df_invoice=df_invoice_empty
-
+        print(df_invoice)
         print("definition of DF expect Sale: Done")
 
         #Sale
@@ -2346,7 +2349,6 @@ def new_report(request):
             df_sales_breakdown=pd.merge(df_sales_breakdown,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
             df_sales_breakdown = df_sales_breakdown.rename(columns={'exchange_rate': 'exchange_rate_contract_curr'})
             print("df_sales_breakdown 4")
-            print(df_sales_breakdown.dtypes)
             df_sales_breakdown["sales_in_contract_curr"]=df_sales_breakdown["sales_in_market_curr"]*df_sales_breakdown["exchange_rate_sales_curr"]/df_sales_breakdown["exchange_rate_contract_curr"]
             df_sales_breakdown=df_sales_breakdown[['contract_id','contract_name','year','month','country_id','formulation','SKU','SKU_name','sales_currency','volume','sales_in_market_curr','sales_in_contract_curr','sales_breakdown_definition','contract_currency']]
 
@@ -2643,7 +2645,6 @@ def new_report(request):
         df_invoice['rule_type']=""
         df_invoice['SKU']=""
         df_invoice['SKU_name']=""
-        df_invoice['market_id']=""
         df_invoice['market_curr']=""
         df_invoice['field_type']=""
         df_invoice['sales_rate']=0
@@ -2886,6 +2887,7 @@ def new_report(request):
           if mini_gar_empty and roy_on_sales_empty and invoice_empty :
             df_accounting_entry=pd.DataFrame({
               'sheet_name': [''],
+              'contract_type_id': [0],
               'division': [''],
               'contract_currency': [''],
               'accountingdate': [''],
@@ -2893,7 +2895,7 @@ def new_report(request):
               'dim1': [''],
               'dim2': [''],
               'dim3': [''],
-              'dim4': [''],
+              'market_acc': [''],
               'accruals_contract_curr': [0],
               'd_c': [''],
               'text_voucherline': [''],
@@ -2901,10 +2903,15 @@ def new_report(request):
           else:
             df_accounting_entry= df_detail.copy()
             df_accounting_entry["accruals_contract_curr"]=np.where(df_accounting_entry["entry_type"]=="Invoice",-df_accounting_entry["amount_contract_curr"],df_accounting_entry["amount_contract_curr"])
-            df_accounting_entry=df_accounting_entry[['division','m3_brand_code','brand_name','transaction_direction','contract_currency','accruals_contract_curr']]
+            
+            df_accounting_entry=df_accounting_entry[['market_id','division','contract_type_id','m3_brand_code','brand_name','transaction_direction','contract_currency','accruals_contract_curr']]
             df_accounting_entry=df_accounting_entry.fillna("")
-            df_accounting_entry=df_accounting_entry.groupby(['division','m3_brand_code','brand_name','transaction_direction','contract_currency'], as_index=False).agg({"accruals_contract_curr": "sum"})
-            df_accounting_entry=pd.merge(df_accounting_entry,df_accounting, how="inner",left_on=['transaction_direction'], right_on=['transaction_direction'] )
+ 
+            df_accounting_entry=pd.merge(df_accounting_entry,df_accounting, how="inner",left_on=['transaction_direction','contract_type_id'], right_on=['transaction_direction','contract_type_id'] )
+            df_accounting_entry["market_acc"]=np.where(df_accounting_entry["market_acc"]=="SPLIT",df_accounting_entry["market_id"],df_accounting_entry["market_acc"])
+
+            df_accounting_entry=df_accounting_entry.groupby(['division','contract_type_id','m3_brand_code','brand_name','transaction_direction','contract_currency','dim1','dim2','market_acc','pl_bs','d_c_if_amount_positiv'], as_index=False).agg({"accruals_contract_curr": "sum"})
+            
             df_accounting_entry["dim3"]=np.where(df_accounting_entry["pl_bs"]=="PL",df_accounting_entry["m3_brand_code"],"")
             df_accounting_entry["d_c_if_amount_negativ"]=np.where(df_accounting_entry["d_c_if_amount_positiv"]=="C","D","C")
             df_accounting_entry["d_c"]=np.where(df_accounting_entry["accruals_contract_curr"]>0,df_accounting_entry["d_c_if_amount_positiv"],df_accounting_entry["d_c_if_amount_negativ"])
@@ -2924,7 +2931,7 @@ def new_report(request):
             
             df_accounting_entry["sheet_name"]= "Accounting_" +df_accounting_entry["division"]+"_"+df_accounting_entry["contract_currency"]
             df_accounting_entry=df_accounting_entry.sort_values(['sheet_name','pl_bs','brand_name'], ascending=[1,0,1])
-            df_accounting_entry=df_accounting_entry[['sheet_name','division','contract_currency','accountingdate','reverseDate','dim1','dim2','dim3','dim4','accruals_contract_curr','d_c','text_voucherline']]
+            df_accounting_entry=df_accounting_entry[['sheet_name','contract_type_id','division','contract_currency','accountingdate','reverseDate','dim1','dim2','dim3','market_acc','accruals_contract_curr','d_c','text_voucherline']]
           print("df_accounting_entry")
 
    
@@ -3054,8 +3061,16 @@ def export_report(request,file_array,table_array):
 
       if table_name=="accounting_entry":
         accounting_entry_list=Accounting_entry.objects.filter(import_file__in=file_object_list)
-        df_accounting_entry = pd.DataFrame(list(accounting_entry_list.values()))
-        df_accounting_entry=df_accounting_entry.drop(['id'], axis = 1)
+        df_accounting_entry = pd.DataFrame(list(accounting_entry_list.values())).drop(['id'], axis = 1)
+        #add contract_type name
+        type_list=Type.objects.all()
+        df_type=pd.DataFrame(list(type_list.values()))
+        df_accounting_entry=pd.merge(df_type,df_accounting_entry,how="left",left_on=["id"],right_on=["contract_type_id"])
+        df_accounting_entry=df_accounting_entry.drop(['contract_type_id','id'], axis = 1)
+        df_accounting_entry=df_accounting_entry.rename(columns={'name':'contract_type'})
+
+
+
         df_accounting_entry.to_excel(writer, sheet_name='Accounting',index=False)
 
       if table_name =="wht":
@@ -3123,8 +3138,15 @@ def modif_static(request,table_name):
     return render(request, 'royalty_app/consolidation_currency.html',  { "consolidation_currency":consolidation_currency,"currency_list":currency_list})
 
   if table_name=="accounting":
-    accounting_list=Accounting.objects.all()
-    return render(request, 'royalty_app/accounting.html',  { "accounting_list":accounting_list})
+    accounting_list=Accounting.objects.all().select_related('contract_type')
+
+    contract_type_list = Type.objects.all()
+    country_list = Country.objects.all()
+    country_list=list(country_list.values_list("country_id"))
+    country_list=[ d[0] for d in country_list]
+    market_list=['','SPLIT']+ country_list
+
+    return render(request, 'royalty_app/accounting.html',  { "market_list":market_list,"contract_type_list":contract_type_list,"accounting_list":accounting_list})
 
   if table_name=="tax":
     tax_list=Tax.objects.all().select_related('country_from','country_to')
@@ -3444,17 +3466,19 @@ def save_accounting(request):
     #Save File
     try:
       data = json.loads(request.body)
+
       for d in data :
         accounting_id=d["accounting_id"]
         item_to_modify=Accounting.objects.get(id=accounting_id)
 
-        
+        item_to_modify.contract_type=Type.objects.get(id=d["contract_type_id"])
         item_to_modify.transaction_direction=d["transaction_direction"]
         item_to_modify.dim1=dim1=d["dim1"]
         item_to_modify.dim2=dim2=d["dim2"]
-        item_to_modify.dim4=dim4=d["dim4"]
+        item_to_modify.market_acc=market_acc=d["market_acc"]
         item_to_modify.pl_bs=pl_bs=d["pl_bs"]
         item_to_modify.d_c_if_amount_positiv=d["d_c_if_amount_positiv"]
+        
         item_to_modify.save()
 
       return JsonResponse({"success": "data loaded"}, status=201)

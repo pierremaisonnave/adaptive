@@ -26,6 +26,11 @@ class Country(models.Model):
     def __str__(self):
         return f"{self.country_id}"
 
+class Type(models.Model):
+    name=  models.CharField(max_length=50)
+    def __str__(self):
+        return f"{self.name}" 
+
 class Partner(models.Model):
     partner_name = models.CharField(max_length=100)
     partner_m3_code=models.CharField(max_length=50,null=True,blank=True)
@@ -38,10 +43,11 @@ class Partner(models.Model):
     def __str__(self):
         return f"{self.partner_name}"
 class Accounting(models.Model):
+    contract_type=  models.ForeignKey(Type, related_name="accounting_type",on_delete=models.PROTECT)
     transaction_direction= models.CharField(max_length=3,choices=(('PAY','PAY'),('REC','REC')), default='PAY')
     dim1= models.CharField(max_length=20,null=True,blank=True)
     dim2= models.CharField(max_length=20,null=True,blank=True)
-    dim4= models.CharField(max_length=20,null=True,blank=True)
+    market_acc= models.CharField(max_length=20,null=True,blank=True)
     pl_bs= models.CharField(max_length=2,choices=(('PL','PL'),('BS','BS')), default='PL')
     d_c_if_amount_positiv= models.CharField(max_length=1,choices=(('D','D'),('C','C')), default='C')
 
@@ -99,17 +105,10 @@ class Payment_structure(models.Model):
     sales_month= models.ForeignKey(Month_table, related_name="month_payment_structure",on_delete=models.PROTECT)
     periodicity_cat= models.ForeignKey(Periodicity_cat, related_name="periodicity_cat_structure",on_delete=models.PROTECT)
 
-
-
 class Consolidation_currency(models.Model):
     currency=  models.ForeignKey(Currency,on_delete=models.PROTECT)
     def __str__(self):
-        return f"{self.currency}"   
-
-class Type(models.Model):
-    name=  models.CharField(max_length=50)
-    def __str__(self):
-        return f"{self.name}"   
+        return f"{self.currency}"     
 
 class Contract(models.Model):
     contract_name= models.CharField(max_length=50)
@@ -178,6 +177,7 @@ class Invoice(models.Model):
     periodicity_cat=  models.ForeignKey(Periodicity_cat, related_name="invoice_periodicity_cat",on_delete=models.PROTECT)
     comment= models.CharField(max_length=50,null=True,blank=True)
     paid=models.BooleanField(default=False)
+    market=models.ForeignKey(Country, related_name="invoice_market",on_delete=models.PROTECT,null=True)
     def __str__(self):
         return f"{self.id}"
 class File(models.Model):
@@ -235,6 +235,7 @@ class Conso(models.Model):
 
 class Accounting_entry(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
+    contract_type=  models.ForeignKey(Type, related_name="contract_type_acc_entr",on_delete=models.PROTECT)
     sheet_name= models.CharField(max_length=100,null=True,blank=True)
     division= models.CharField(max_length=10,null=True,blank=True)
     contract_currency= models.CharField(max_length=10,null=True,blank=True)
@@ -243,7 +244,7 @@ class Accounting_entry(models.Model):
     dim1= models.CharField(max_length=50,null=True,blank=True)
     dim2= models.CharField(max_length=50,null=True,blank=True)
     dim3= models.CharField(max_length=50,null=True,blank=True)
-    dim4= models.CharField(max_length=50,null=True,blank=True)
+    market_acc= models.CharField(max_length=50,null=True,blank=True)
     accruals_contract_curr= models.FloatField(null=True,blank=True)
     d_c= models.CharField(max_length=10,null=True,blank=True)
     text_voucherline= models.CharField(max_length=100,null=True,blank=True)

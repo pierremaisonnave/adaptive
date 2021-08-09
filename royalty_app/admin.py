@@ -26,7 +26,7 @@ class PartnerAdmin(admin.ModelAdmin):
     list_display = ("partner_name","partner_m3_code","partner_country","partner_payment_type")
 
 class AccountingAdmin(admin.ModelAdmin):
-    list_display = ("transaction_direction","dim1","dim2","dim4","pl_bs","d_c_if_amount_positiv")
+    list_display = ("transaction_direction","dim1","dim2","market_acc","pl_bs","d_c_if_amount_positiv")
 
 class BrandAdmin(admin.ModelAdmin):
     list_display = ("id","m3_brand_code","brand_name")
