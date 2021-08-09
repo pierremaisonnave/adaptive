@@ -1200,12 +1200,13 @@ def export(request,file):
   df_periodicity_cat = pd.DataFrame(list(list_to_pd.values()))
 
   #Accounting
-  list_to_pd=Accounting.objects.all()
-  df_accounting = pd.DataFrame(list(list_to_pd.values()))
+  list_to_pd=Accounting.objects.all().values_list('contract_type__name','transaction_direction','pl_bs','account_nb','cost_center_acc','market_acc','d_c_if_amount_positiv')
+  df_accounting = pd.DataFrame.from_records(list(list_to_pd), columns=['contract type','transaction direction','PL or BS','account_nb','cost_center','market','D or C'])
+
   if df_accounting.empty:
     df_accounting=pd.DataFrame({'No Data': []})
   else:
-    df_accounting=df_accounting.drop(['id'], axis = 1)
+    pass
 
   #Brand
   list_to_pd=Brand.objects.all()
@@ -2892,8 +2893,8 @@ def new_report(request):
               'contract_currency': [''],
               'accountingdate': [''],
               'reverseDate': [''],
-              'dim1': [''],
-              'dim2': [''],
+              'account_nb': [''],
+              'cost_center_acc': [''],
               'dim3': [''],
               'market_acc': [''],
               'accruals_contract_curr': [0],
@@ -2910,7 +2911,7 @@ def new_report(request):
             df_accounting_entry=pd.merge(df_accounting_entry,df_accounting, how="inner",left_on=['transaction_direction','contract_type_id'], right_on=['transaction_direction','contract_type_id'] )
             df_accounting_entry["market_acc"]=np.where(df_accounting_entry["market_acc"]=="SPLIT",df_accounting_entry["market_id"],df_accounting_entry["market_acc"])
 
-            df_accounting_entry=df_accounting_entry.groupby(['division','contract_type_id','m3_brand_code','brand_name','transaction_direction','contract_currency','dim1','dim2','market_acc','pl_bs','d_c_if_amount_positiv'], as_index=False).agg({"accruals_contract_curr": "sum"})
+            df_accounting_entry=df_accounting_entry.groupby(['division','contract_type_id','m3_brand_code','brand_name','transaction_direction','contract_currency','account_nb','cost_center_acc','market_acc','pl_bs','d_c_if_amount_positiv'], as_index=False).agg({"accruals_contract_curr": "sum"})
             
             df_accounting_entry["dim3"]=np.where(df_accounting_entry["pl_bs"]=="PL",df_accounting_entry["m3_brand_code"],"")
             df_accounting_entry["d_c_if_amount_negativ"]=np.where(df_accounting_entry["d_c_if_amount_positiv"]=="C","D","C")
@@ -2931,7 +2932,7 @@ def new_report(request):
             
             df_accounting_entry["sheet_name"]= "Accounting_" +df_accounting_entry["division"]+"_"+df_accounting_entry["contract_currency"]
             df_accounting_entry=df_accounting_entry.sort_values(['sheet_name','pl_bs','brand_name'], ascending=[1,0,1])
-            df_accounting_entry=df_accounting_entry[['sheet_name','contract_type_id','division','contract_currency','accountingdate','reverseDate','dim1','dim2','dim3','market_acc','accruals_contract_curr','d_c','text_voucherline']]
+            df_accounting_entry=df_accounting_entry[['sheet_name','contract_type_id','division','contract_currency','accountingdate','reverseDate','account_nb','cost_center_acc','dim3','market_acc','accruals_contract_curr','d_c','text_voucherline']]
           print("df_accounting_entry")
 
    
@@ -3473,8 +3474,8 @@ def save_accounting(request):
 
         item_to_modify.contract_type=Type.objects.get(id=d["contract_type_id"])
         item_to_modify.transaction_direction=d["transaction_direction"]
-        item_to_modify.dim1=dim1=d["dim1"]
-        item_to_modify.dim2=dim2=d["dim2"]
+        item_to_modify.account_nb=account_nb=d["account_nb"]
+        item_to_modify.cost_center_acc=cost_center_acc=d["cost_center_acc"]
         item_to_modify.market_acc=market_acc=d["market_acc"]
         item_to_modify.pl_bs=pl_bs=d["pl_bs"]
         item_to_modify.d_c_if_amount_positiv=d["d_c_if_amount_positiv"]
