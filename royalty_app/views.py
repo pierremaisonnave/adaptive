@@ -258,8 +258,6 @@ def home(request):
 
 
     print("contact")
-    print(contract_id_list)
-    print(contract_list)
 
 
     return render(request, 'royalty_app/home.html', {
@@ -1565,10 +1563,10 @@ def response_validator(request):
       return HttpResponseRedirect(reverse("contracts_to_validate"))
 
     if response_validator=="approve_contract_modification":
-      #when modification is approved, we deleve the old contract, we copy the new contract and save it with the contract_id
+      #when modification is approved, we delete the old contract, we copy the new contract and save it with the contract_id
 
       contract_proposal_id=contract.contract_proposal.id
-      #contract.delete()
+
      
       #  loop though the Contract_file//Contract_partner//Rule//Tranche//Sales_breakdown_per_contract and delete
       Contract_file.objects.filter(contract=contract).delete()
@@ -1578,18 +1576,18 @@ def response_validator(request):
       Rule.objects.filter(contract=contract).delete()
       Sales_breakdown_per_contract.objects.filter(contract=contract).delete()
       
-
+      # Copy contract summary from contract proposal
       contract_changed=contract.contract_proposal
       contract_changed.status="CURRENT"
       contract_changed.pk=contract_id
       contract_changed.save()
-      #contract_changed=Contract.objects.get(id=contract_proposal_id)   
-      #contract_changed.pk=contract_id
-      #contract_changed.status="CURRENT"
-      #contract_changed.save()
+      
       contract_proposal=Contract.objects.get(id=contract_proposal_id)
 
       # now loop though the Contract_file//Contract_partner//Tranche//Sales_breakdown_per_contract- with contract id =contract_proposal_id, and change it to contract_id
+      
+        #we copy the list of file_list currently used in the contract. after we have added the new file_contract , we will remove them 
+      
       contract_file_list=Contract_file.objects.filter(contract=contract_proposal)
       for cf in contract_file_list:
         cf.contract=contract_changed
@@ -1628,6 +1626,7 @@ def response_validator(request):
   else:
     return HttpResponseRedirect(reverse("contracts_to_validate")) 
 
+from django.core.files.base import ContentFile
 @csrf_exempt 
 @login_required(login_url='/login')
 def pdf_file_to_keep(request,contract_id):
@@ -1643,10 +1642,16 @@ def pdf_file_to_keep(request,contract_id):
       contract_file_list=Contract_file.objects.filter(contract =initial_contract).filter (id__in =data["list"])
 
       for c in contract_file_list:
-        contract_file_proposal= c
-        contract_file_proposal.pk=None
-        contract_file_proposal.contract=contract
+        new_file = ContentFile(c.upload.read())
+        new_file.name = c.name
+        contract_file_proposal = Contract_file(
+          upload = new_file,
+          contract = contract,
+          name = c.name,
+        )
+
         contract_file_proposal.save()
+
 
 
     if contract.status in ["IN_CREATION","NEW"]: 
@@ -1742,7 +1747,6 @@ def save_rule(request,contract_id):
     data = json.loads(request.body)
     for item in data :
       try:  
-
         if item['tranche_currency']=="same_as_contract" :
           tranche_currency=contract.contract_currency
         else:
@@ -2938,13 +2942,13 @@ def new_report(request):
    
 
         #---------------Save in database----------------
-        '''     
+             
         conn = sqlite3.connect('royalty/db.sqlite3')
 
         '''
         final_db_url = f"postgresql+psycopg2://{DATABASE_URL_VIEW}"
         conn = create_engine(final_db_url)
-
+        '''
         #-----------------------------------------------
 
         df_sales['import_file_id']=file.id

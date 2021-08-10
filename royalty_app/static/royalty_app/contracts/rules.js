@@ -1,4 +1,4 @@
-
+var count_type=document.getElementById("count_type")
 function save_contract(contract_id,save_type){
     //check that each table is properly done
 
@@ -59,42 +59,37 @@ function save_contract(contract_id,save_type){
                             if (!!result.error) {
                                 alert(result.error);
                                 location.reload();}
+                            //if nb_new=0, it means that there are no new files to load, hence we can skip this part, else we must loop through the remaining of the list, from nb_new till the end of the table
                             if (nb_new==0){
                                 count.value=Number(count.value)+1
+                                count_type.value=count_type.value+"\n"+count.value+":"+"pdf_file_to_keep"
                                 if (count.value==5 ){end_function_message()}
-                                }
-
-                            for (var i = 0; i < length_table; i++) {
-                                row=contract_file_table.rows[i]
-                                id= row.cells[0].children[0].innerHTML
-                                if (id=="NEW"){
-                                    file_=row.cells[1].children[0]
-                                    name_file=file_.files[0].name
-                                    
-                                    let formData = new FormData();
-                                    formData.append('name', name_file);
-                                    formData.append('contract_id', contract_id);
-                                    formData.append('file', file_.files[0], name_file);
-                                    //book in database
-                                    fetch('/new_contract_file', {
-                                        method: 'POST',
-                                        body: formData//JSON.stringify({name:name_value,acc_year:year_value,acc_month:month_id,})
-                                    })
-                                    .then(response => response.json())
-                                    .then(result => {
-                                        nb_new=nb_new-1
-                                        if (nb_new==0){
-                                            count.value=Number(count.value)+1
-                                            if (count.value==5 ){end_function_message()}
-                                            }
-                                            })
                                 }else{
-
-                                    if(i==length_table-1){
-                                        count.value=Number(count.value)+1
-                                        if (count.value==5 ){end_function_message()}
-                                        }
-                                }
+                                    from_new=length_table-nb_new
+                                    for (var i = from_new; i < length_table; i++) {
+                                        row=contract_file_table.rows[i]
+                                        id= row.cells[0].children[0].innerHTML
+                                        file_=row.cells[1].children[0]
+                                        name_file=file_.files[0].name
+                                        let formData = new FormData();
+                                        formData.append('name', name_file);
+                                        formData.append('contract_id', contract_id);
+                                        formData.append('file', file_.files[0], name_file);
+                                        //book in database
+                                        fetch('/new_contract_file', {
+                                            method: 'POST',
+                                            body: formData//JSON.stringify({name:name_value,acc_year:year_value,acc_month:month_id,})
+                                        })
+                                        .then(response => response.json())
+                                        .then(result => {
+                                            nb_new=nb_new-1
+                                            if (nb_new==0){
+                                                count.value=Number(count.value)+1
+                                                count_type.value=count_type.value+"\n"+count.value+":"+"new_contract_file"
+                                                if (count.value==5 ){end_function_message()}
+                                            }
+                                        })
+                                    }
                             }
                         })
 
@@ -110,6 +105,7 @@ function save_contract(contract_id,save_type){
                         .then(result => {
                             if (!!result.error) {alert(result.error);location.reload();}
                             count.value=Number(count.value)+1
+                            count_type.value=count_type.value+"\n"+count.value+":"+"save_contract_partner"
                             if (count.value==5 ){end_function_message()}
                         })
                 //save rules
@@ -120,8 +116,9 @@ function save_contract(contract_id,save_type){
                         .then(response => response.json())
                         .then(result => {
                             if (!!result.error) {alert(result.error);location.reload();}
-                                            
+                                           
                             count.value=Number(count.value)+1
+                            count_type.value=count_type.value+"\n"+count.value+":"+"save_rule"
                             if (count.value==5 ){end_function_message()}
                         })
                 //save mini guar
@@ -132,6 +129,7 @@ function save_contract(contract_id,save_type){
                         .then(result => { 
                             if (!!result.error) {alert(result.error);location.reload();}
                             count.value=Number(count.value)+1
+                            count_type.value=count_type.value+"\n"+count.value+":"+"save_mini"
                             if (count.value==5 ){end_function_message()}
                         })  
                 //save invoice breakdown
@@ -158,6 +156,7 @@ function save_contract(contract_id,save_type){
                         .then(result => {
                             if (!!result.error) {alert(result.error);return}
                             count.value=Number(count.value)+1
+                            count_type.value=count_type.value+"\n"+count.value+":"+"save_invoice_breakdown"
                             if (count.value==5 ){end_function_message()}
                         })
             })
@@ -172,7 +171,6 @@ function end_function_message(){
 
     saved_message=document.getElementById("saved_message")
     saved_message.style.display="block"
-    spinner_load_page.style.display="none"
     setTimeout(function() { 
         saved_message.style.display = "None";
         location.reload()
@@ -269,8 +267,9 @@ function check_each_table(){
                         country_incl_excl="EXCLUDE"
                         country_list_untreated=country_list_untreated.replace('All except : ', '').replace('All', '') 
                     }else {country_incl_excl="INCLUDE"}
-                    country=country_list_untreated.replaceAll(',','","')
-        
+
+                    country=country_list_untreated.replaceAll(', ',',').replaceAll(',','","') //for some reason, the contract_list is diyplayed with a space : "USA, CAD, .."--> we need to remove this space, on top of that, we must place "" between each country
+
                 // field_type
                     field_type= row.cells[2].children[0].value
                 // period

@@ -2,7 +2,9 @@
 {% block content %}
 
 
-      <input  id="count" type="number" value=0 hidden>
+      <input  id="count" type="number" value=0 >
+      <input  id="count_type"  value="" >
+
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
         <div>
           <h1 class="h2">Contract Details</h1>
@@ -299,8 +301,8 @@
           <th>Formulation</th>
           <th>country</th>
           <th>Type</th>
-          <th>Period from</th>
-          <th>Period to</th>
+          <th style="width: 100px">Period from</th>
+          <th style="width: 100px">Period to</th>
           <th>Tranche</th>
           <th>Amount</th>
           <th style="width: 50px; height: 45px;"></th>
@@ -322,7 +324,17 @@
           <td> <!--Country-->
             <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
               <div  class="comboTreeInputWrapper" dd_id="ctry_{{forloop.counter0}}">
-                <input value='{% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "---" %} except : {{ rule.country_list }}{% endif %}{% else %}{{ rule.country_list }}{% endif %}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_{{forloop.counter0}}" id="item_list_display_ctry_{{forloop.counter0}}">
+                <input
+                {% if rule.country_incl_excl == "EXCLUDE" %}
+                  {% if rule.country_list != "---" %}
+                    value='All except : {{ rule.country_list}}'
+                  {% else %}
+                    value='All'
+                  {% endif %}
+                {% else %}
+                  value='{{ rule.country_list }}'
+                {% endif %} 
+                style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_{{forloop.counter0}}" id="item_list_display_ctry_{{forloop.counter0}}">
                 <input  value='{{ rule.country.all|join:"," }}' type="text" hidden  id="item_list_ctry_{{forloop.counter0}}" selection_mode=""> 
               </div>
             </div>
@@ -714,7 +726,7 @@
             </ul>
         </div>
       </div>
-
+    
       <!--import country list-->
       <div id="import_country_list"> 
         <div  class="comboTreeDropDownContainer" id="dropdown_ctry_dynamic" style="display: None;">
@@ -746,14 +758,14 @@
           </ul>
         </div>
       </div>
-    <!--import currency list-->
-    <div id="import_currency_list" style="display: None"> 
-      <select style=" background-color:transparent; border:None ;width:60px">
-        {% for curr in currency_list %}
-            <option value={{curr.currency}}>{{curr.currency}}</option>          
-        {% endfor %}
-      </select>
-    </div>
+      <!--import currency list-->
+      <div id="import_currency_list" style="display: None"> 
+        <select style=" background-color:transparent; border:None ;width:60px">
+          {% for curr in currency_list %}
+              <option value={{curr.currency}}>{{curr.currency}}</option>          
+          {% endfor %}
+        </select>
+      </div>
       
 
   <!----------------------------------------------------------------------------->
