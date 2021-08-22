@@ -3044,8 +3044,6 @@ def new_report(request):
         df_rule_calc.to_sql('royalty_app_rule_calc', con=conn, index=False, if_exists="append")
         print("df_rule_calc loaded succesfully")
 
-
-
         df_detail['import_file_id']=file.id
 
         df_detail.to_sql('royalty_app_detail', con=conn, index=False, if_exists="append")
