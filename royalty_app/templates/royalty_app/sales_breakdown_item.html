@@ -11,7 +11,7 @@
   <!----------------------------------------------------------------------------->
   <!----------------------------Main table-------------------------------->
   <!----------------------------------------------------------------------------->
-
+  {% if user.role == "WRITER" %}
     <table class="table table-striped table-sm" id="main_table" style=" max-width: 500px">
       <thead>
         <tr style="border-top: hidden">
@@ -22,7 +22,7 @@
           <th style="width: 50px">id</th>
           <th >Definition</th>
           <th style="width: 30px">
-            <button   class="btn btn-sm btn-outline-success" title="save" onclick="save()" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+            <button  id="save_button" class="btn btn-sm btn-outline-success" title="save" onclick="save()" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
           </th>
         </tr>
       </thead>
@@ -71,7 +71,32 @@
           <button hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px"><span class="bi bi-trash" ></span></button> 
         </div>
       </div>
+    {% endif %}
+    {% if user.role in "READER,VALIDATOR" %}
+      <table class="table table-striped table-sm" id="main_table" style=" max-width: 500px">
+        <thead>
+          <tr style="border-top: hidden">
+            <th style="color:transparent">:</th>
+            <th colspan="1" style="text-align: end; color:green" id="saved_message"></th>
+          </tr>
+          <tr >
+            <th >Definition</th>
+            <th style="width: 30px"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody_main_table">
+          {% for sbi in sales_breakdown_item_list %}
+          <tr >
 
+            <td><!--column1-->
+              <span>{{sbi.sales_breakdown_definition}}</span>
+            </td>
+            <td > </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
 
 
 

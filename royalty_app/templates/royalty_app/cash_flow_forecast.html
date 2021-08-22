@@ -1,15 +1,13 @@
 {% extends "royalty_app/layout.html" %}
 {% block content %}
 
-
-
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
         <h1 class="h2">Cash Flow Forecast </h1>
       </div>
 
   <!------------------------------------------------------------------------------------->   
   <!---------------------------Form for new accruals-------------------------------------> 
-
+  {% if user.role == "WRITER" %} 
     <form   id="form_new"  > 
     {% csrf_token %} 
       <table>
@@ -23,7 +21,6 @@
             <input  type="text"  id="name_" placeholder="name" maxlength="50" style="width: 100%; margin-left:5px;">
           </td>  
         </tr>
-
         <tr > <!--Row 3-->
           <td style="width:100px"> <!--file selection-->
             <span style=" margin-left:5px">period:from </span>
@@ -92,7 +89,7 @@
       </table> 
     </form>
 
-
+    {% endif %} 
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
         <div id="selection_table">
           <input checked type="checkbox" value="sales"><span>Sales</span>
@@ -139,11 +136,15 @@
           <td>{{file.id}}</td>   
           <td>{{file.name}}</td>
           <td>{{file.date}}</td>
-          <td>
-            <button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)">
-              <span class="bi bi-trash"></span>
-            </button>
-          </td>
+          {% if user.role == "WRITER" %}
+            <td>
+              <button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)">
+                <span class="bi bi-trash"></span>
+              </button>
+            </td>
+          {% else %}
+            <td></td>
+          {% endif %}
         </tr>
       {% endfor %}
       </tbody>

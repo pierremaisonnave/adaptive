@@ -3,10 +3,76 @@
 
 
 
-    <div class=" pb-2 mb-3 border-bottom" style="display: flex" >        
-      <h1 class="h2">Contract Details</h1>
-      <span style="padding-top:16px"> (currently used in the system)<span>
+  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <div>
+    <h1 class="h2">Contract Details</h1>
+    <span style="color:orange">
+      {% if contract.status == 'DELETE'  %} 
+        type of request: DELETE 
+        <a href="{% url 'rules_current' contract_id=contract.id %}" >
+          <i>(click here to see the data currently used )</i>
+      </a>
+      {% elif contract.status == 'NEW'%} 
+        type of request: CREATION 
+      {% elif contract.status == 'PROPOSAL'%} 
+        type of request: MODIFICATION   
+        <a href="{% url 'rules_current' contract_id=inital_contract_id %}" >
+          <i>(click here to see the data currently used )</i>
+      </a>
+      {% endif %}  
+    </span>
     </div>
+    <div >
+      <div style="width:100px ;float: right;" id="button" >
+        <div  class="comboTreeInputWrapper" dd_id="contract" >
+          <button class="comboTreeInputBox" style="width:100px; margin:2px;background-color:transparent" dd_id="contract">ACTION</button>
+        </div>
+        <div  class="comboTreeDropDownContainer " id="dropdown_contract" style="display: none;border-radius: 0.35rem;overflow: hidden; margin-top:5px;position: fixed;right:20px; min-width: 220px;padding:5px">
+          
+          <form action="{% url 'response_validator' %}" method="post" id="reponse_validator_form" >
+            {% csrf_token %}
+            {% if contract.status == 'DELETE'  %}
+              <li style="display: block; padding-left:0px; margin:2px"  >
+                <button type="button" class="approve_button" onclick='submit_validator_decision("approve_contract_deletion")'>Approve delition</button>
+              </li>
+              <li style="display: block; padding-left:0px; margin:2px"  >
+                <button type="button" class="reject_button" onclick='submit_validator_decision("reject_contract_deletion")'>Reject delition</button>
+              </li>
+            {% elif contract.status == 'NEW' %}
+              <li style="display: block; padding-left:0px; margin:2px"  >
+                <button type="button" class="approve_button" onclick='submit_validator_decision("approve_contract_creation")'>Approve creation</button>
+              </li>
+              <li style="display: block; padding-left:0px; margin:2px"  >
+                <button type="button" class="reject_button" onclick='submit_validator_decision("reject_contract_creation")'>Reject creation</button>
+              </li>
+            {% else %} <!--if status= Proposal-->
+              <li style="display: block; padding-left:0px; margin:2px"  >
+                <button type="button" class="approve_button" onclick='submit_validator_decision("approve_contract_modification")'>Approve modification</button>
+              </li>
+              <li style="display: block; padding-left:0px; margin:2px"  >
+                <button type="button" class="reject_button" onclick='submit_validator_decision("reject_contract_modification")'>Reject modification</button>
+              </li>
+            {% endif %}
+              <input  hidden name="reponse_validator" id="reponse_validator" >
+              <input hidden  name="contract_id" value= "{% if contract.status == 'PROPOSAL' %} {{inital_contract_id}} {% else %}{{contract.id}}{%endif%}" >
+          </form>
+        </div>
+      </div>
+      <div id="spinner" style="display: None; padding-top: 6px;padding-left: 4px">
+        <div class="sk-chase" >
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+          <div class="sk-chase-dot"></div>
+        </div>
+      </div>
+      <div style="text-align: end; color:green ;display: None;    position: relative; right: 10px ;top:5px" id="saved_message" >Saved</div>
+    </div>
+  </div>
+
+   
    <!------------------------------------------------------------------------------------->   
   <!---------------------------Basic info on contract -----------------------------------> 
   <!-------------------------------------------------------------------------------------> 
@@ -161,14 +227,12 @@
    <!--Rule table-->  
     <table hidden class="table table-striped table-sm" id="rule_table" >
       <thead>
-
         <tr >
-          <th >Formulation</th>
+          <th>Formulation</th>
           <th>country</th>
-          <th>Type</th>
           <th style="width: 100px">Period from</th>
           <th style="width: 100px">Period to</th>
-          <th>Amount</th>
+          <th>Royalty</th>
           <th style="width: 50px; height: 45px;"></th>
         </tr>
       </thead>
@@ -177,17 +241,13 @@
         {% for rule in rule_list %}
         <tr> 
         <td>
-          <span>{{rule.formulation.all|join:" ,"}}</span>
+          <span>  {{ rule.formulation.all|join:" ," }}</span>
         </td>
 
           <td> <!--Country-->
             <span>
               {% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "---" %} except : {{ rule.country_list }}{% endif %}{% else %}{{ rule.country_list }}{% endif %}
             </span>
-          </td>
-          
-          <td><!--Qty or Rate-->
-            <span>{{rule.field_type }}</span>
           </td>
 
           <td><!--Date From-->
@@ -232,7 +292,7 @@
           </td>
 
           <td {% if rule.tranche_type == 'YES' or rule.field_type == 'RATE' %} hidden {% endif  %} style="display:grid; grid-template-columns: auto auto"><!-- Qty amount-->
-            <span>{{rule.qty_value|floatformat:"-3g"}} {{rule.qty_value_currency}}</span>
+            <span>{{rule.qty_value|floatformat:"-3g"}} {{rule.qty_value_currency}} per unit sold</span>
  
           </td>
           

@@ -10,7 +10,11 @@ function save(contract_id){
     if ( consolidation_currency==""){alert("make sure all fields are filed in"); return}
 
     import_string=`{"consolidation_currency":"${consolidation_currency}"}`
-
+    // set waiting message:
+        saved_message=document.getElementById(id="saved_message")
+        //save_button=document.getElementById(id="save_button")
+        spinner_on()
+        //save_button.style.display="none"
     // We load it via a fetch in the API
     fetch(`/save_consolidation_currency`, {
         method: 'POST',
@@ -23,10 +27,12 @@ function save(contract_id){
                 location.reload();
             }else{
             //message
-                saved_message=document.getElementById(id="saved_message")
                 saved_message.innerHTML="Saved"
                 setTimeout(function() { 
-                    saved_message.innerHTML=""},
+                    saved_message.innerHTML="",
+                    //save_button.style.display="block"
+                    spinner_off()
+                     },
                 1000)
             }
         })

@@ -40,6 +40,7 @@
   </head>
 
   <body >
+    <div id="background_load_page"></div>  
     {% if user.is_authenticated %}
       <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar" style="width:100%;position: fixed">
         <a href="https://www.pierre-maisonnave-consulting.ch/" id="your_logo"> <img src="{% static 'photo/pmconsulting.png' %}" style="width: 150px;margin: 10px " ></a> 
@@ -59,7 +60,7 @@
           <div style="background-color: #f8f9fa! ;" id="user_menu"  >
               <div id="user_photo_on_layout" class="comboTreeInputWrapper" dd_id="user" style="display: grid; grid-template-columns:auto  auto; margin: 10px ">
                 <div class="comboTreeInputBox  bi bi-gear" dd_id="user" style="margin:7px; font-size: 1.2rem " > </div>
-                <div   class=" justAnInputBox comboTreeInputBox   " style="margin:10px " id="displayed_item_name_user" dd_id="user" >{{ user.first_name }}   </div>
+                <div class=" justAnInputBox comboTreeInputBox   " style="margin:10px " id="displayed_item_name_user" dd_id="user" >{{ user.first_name }} </div>
               </div>
               <div  class="comboTreeDropDownContainer" id="dropdown_user" style="display: none;margin-top: 9px;border-radius: 0.35rem;width:250px;overflow: hidden">
                 <H6 style="display: grid; grid-template-columns:45px auto" >
@@ -183,9 +184,11 @@
         </div> 
       </div>
       <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 main_authentificated" style="visibility: hidden;margin-top:50px" >
+      <input hidden type="checkbox" id="is_logged_out" value="false">
     {% else %} 
- 
+        
       <main  style="position:relative;background-image: url({% static 'photo/capturer.png' %}) ; background-repeat: yes-repeat;height:1200px;background-attachment: fixed; " >
+      <input hidden type="checkbox" id="is_logged_out" value="true">
     {% endif %}  
     {% block content %}{% endblock %}  
     </main>

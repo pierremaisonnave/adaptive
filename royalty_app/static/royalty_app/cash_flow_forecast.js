@@ -30,6 +30,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function add_new_record(){
     event.preventDefault(); // prevent the page from reloading
+    //check we are still connected:
+        fetch('/isauthenticated', {method: 'GET'})
+        .then(response => response.json())
+        .then(feedback => {
+            if (feedback.isauthenticated=="NO"){document.location.reload()}
+        })
     //definition od the elements
     name_=document.getElementById("name_")
     name_value=name_.value
@@ -67,12 +73,9 @@ function add_new_record(){
             1000)
     }else{
         //definition of spinner
-        message_wait.hidden=false
-        spinner=document.getElementById("spinner")
-        saved_button=document.getElementById(id="saved_button")
-        saved_message=document.getElementById(id="saved_message")
-        spinner.style.display = "Block"
-        saved_button.style.display = "None"
+            message_wait=document.getElementById("message_wait")
+            spinner_on()
+            message_wait.hidden=false
 
         let formData = new FormData();
         formData.append('name', name_value);
@@ -91,7 +94,6 @@ function add_new_record(){
             .then(response => response.json())
             .then(result => {
                 var file_id=result.file_id
-                spinner.style.display = "None"
                 if (result.error){
                     alert(result.error)
                 }else{
@@ -109,12 +111,13 @@ function add_new_record(){
                     //success message
                         initial_gb_color=t.style.backgroundColor
                         t.style.backgroundColor="#b3e3be"
+                        
+                        message_save=document.getElementById(id="message_save")
+                        message_wait.hidden=true
                         message_save.hidden=false
-                        saved_message.style.display = "Block"
                         setTimeout(function() {
                             message_save.hidden=true;
-                            saved_message.style.display = "None"
-                            saved_button.style.display = "Block";
+                            spinner_off()
                             t.style.backgroundColor=initial_gb_color
                         },
                         1000)
@@ -133,13 +136,11 @@ function delete_row(elm){
     if (r == true) {
         tr_to_delete=elm.parentElement.parentElement
         file_id=tr_to_delete.children[1].innerHTML
-        t.row( tr_to_delete ).remove().draw(false);            
+        smooth_remove_row(tr_to_delete,t)
         fetch(`/delete_row_file/${file_id}`, {
             method: 'POST',})
         .then(response => response.json())
-        .then(result => {
-
-        })
+        .then(result => {})
     }
 }
 

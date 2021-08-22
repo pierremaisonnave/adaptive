@@ -38,7 +38,8 @@ function add_new_row(elm){
 }
 
 function delete_row(elm){
-    elm.parentNode.parentNode.remove()
+    tr_to_delete=elm.parentElement.parentElement
+    smooth_remove_row_nodatatable(tr_to_delete)
 }
 
 function save(contract_id){
@@ -61,7 +62,11 @@ function save(contract_id){
     } 
 
     import_string="["+import_array+"]"
-
+    // set waiting message:
+        saved_message=document.getElementById(id="saved_message")
+        //save_button=document.getElementById(id="save_button")
+        spinner_on()
+        //save_button.style.display="none"
     // We load it via a fetch in the API
     fetch(`/save_formulation`, {
         method: 'POST',
@@ -74,10 +79,12 @@ function save(contract_id){
                 location.reload();
             }else{
             //message
-                saved_message=document.getElementById(id="saved_message")
                 saved_message.innerHTML="Saved"
                 setTimeout(function() { 
-                    saved_message.innerHTML=""},
+                    saved_message.innerHTML="",
+                    //save_button.style.display="block"
+                    spinner_off()
+                     },
                 1000)
             }
         })

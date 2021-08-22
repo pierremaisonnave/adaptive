@@ -1,0 +1,541 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+
+    <div class=" pb-2 mb-3 border-bottom" style="display: flex" >        
+      <h1 class="h2">Contract Details</h1>
+      <span style="padding-top:16px"> (currently used in the system)<span>
+    </div>
+   <!------------------------------------------------------------------------------------->   
+  <!---------------------------Basic info on contract -----------------------------------> 
+  <!-------------------------------------------------------------------------------------> 
+
+  <form   id="form_new" > 
+    <table>
+      <tr>
+        <td style="width:150px"> <!--type-->
+          <span>Contract Type:</span>
+        </td>
+        <td > 
+          <span>{{contract.contract_type}}</span>
+        </td>
+        <td style="width:150px"> <!--Currency-->
+          <span style=" margin-left:10px">Currency:</span>
+        </td>
+        <td>
+          <span style="width: 100%" >{{contract.contract_currency}}</span>
+        </td>
+        <td style="display: None;"> <!-- Div via-->
+          <span style="width: 100%" >{{ contract.division_via.division_id }}</span>
+        </td>
+      </tr>
+      <tr>
+        <td > <!--Name-->
+          <span>Contract Name:</span>
+        </td>
+        <td > 
+          <span>{{contract.contract_name}}</span>
+        </td>
+        <td > <!--periodicity-->
+          <span style=" margin-left:10px">Payment Periodicity:</span>
+        </td>
+        <td>
+          <span style="width: 100%" >{{contract.payment_periodicity.periodicity}}</span>  
+        </td>
+      </tr>
+      <tr>
+        <td > <!--Gald Div list-->
+          <span >Division:</span>
+        </td>
+        <td>
+            <span style="width: 100%" >{{ contract.division.division_id }}</span>
+        </td>
+
+        <td > <!--payment terms-->
+          <span style=" margin-left:10px">Payment terms (days):</span>
+        </td>
+        <td ><!--payment terms-->
+          <span style="width: 100%" >{{contract.payment_terms}}</span> 
+        </td>
+      </tr>
+      <tr>
+        <td > <!--pay/REC-->
+          <span>Pay/REC:</span>
+        </td>
+        <td >
+          <span style="width: 100%" >{{ contract.transaction_direction }}</span>
+        </td>
+        <td > <!--Brand list-->
+          <span style=" margin-left:10px">Brand:</span>
+        </td>
+        <td><!--Brand list-->
+          <span style="width: 100%" >{{contract.m3_brand.brand_name}}</span> 
+        </td>
+      </tr>
+
+    </table> 
+
+  </form>
+
+  <!----------------------------------------------------------------------------->
+  <!----------------------------Contract saved in PDF---------------------------->
+  <!----------------------------------------------------------------------------->
+      <div style="display:grid; grid-template-columns: 20px auto">
+        <span  class="bi-arrow-right-circle " id="unhide_contract_file_table" onclick='unhide_table("contract_file_table")'></span>
+        <span hidden class="bi-arrow-down-circle " id="hide_contract_file_table" onclick='hide_table("contract_file_table")'></span>
+        <h5 >Supporting document(s)</h5>
+      </div>
+
+      <table hidden class="table table-striped table-sm" id="contract_file_table" style="max-width: 500px">
+        <tbody>
+          {% for cf in contract_file_list %}
+          <tr >
+            <td ><!--File Name-->
+              <a href='{{cf.upload.url}}' ><span class="fname"  >{{cf.name}}</span></a>
+            </td>
+            <td ><!--Button-->
+            </td>
+          </tr>
+          {% endfor %}
+          {% if not contract_file_list %}
+          <td>No pdf saved for this contract </td>
+          {%endif%}
+        </tbody>
+      </table>
+
+  <!----------------------------------------------------------------------------->
+  <!----------------------------Beneficiary table-------------------------------->
+  <!----------------------------------------------------------------------------->
+
+    <div style="display:grid; grid-template-columns: 20px auto">
+      <span class="bi-arrow-right-circle " id="unhide_beneficiary_table" onclick='unhide_table("beneficiary_table")'></span>
+      <span hidden class="bi-arrow-down-circle " id="hide_beneficiary_table" onclick='hide_table("beneficiary_table")'></span>
+      <h5 >Beneficiaries</h5>
+    </div>
+
+    <table  hidden class="table table-striped table-sm" id="beneficiary_table" style="max-width: 500px">
+      <thead>
+        <tr >
+          <th > Name</th>
+          <th style="width: 80px">%</th>
+          <th style="width: 50px; height: 45px;">
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cp in contract_partner_list %}
+        <tr >
+          <td ><!--Partner-->
+            <span>{{cp.partner.partner_name}}</span>
+          </td>
+          <td><!--percentage-->
+            <span>{{cp.percentage}} %</span>
+          </td>
+          <td ><!--Button-->
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not contract_partner_list %}
+        <td colspan=3> <!--percentage-->
+          <span>no partner selected for this contract</span>
+        </td>
+        {%endif%}
+      </tbody>
+    </table>
+  <!----------------------------------------------------------------------------->
+  <!----------------------------------Rule table--------------------------------->
+  <!----------------------------------------------------------------------------->
+    <div style="display:grid; grid-template-columns: 20px auto">
+      <span class="bi-arrow-right-circle " id="unhide_rule_table" onclick='unhide_table("rule_table")'></span>
+      <span hidden class="bi-arrow-down-circle " id="hide_rule_table" onclick='hide_table("rule_table")'></span>
+      <h5 >Rules</h5>
+    </div>
+
+    <span hidden  id="unique_row_number">{{rule_list|length}}</span>
+    <div id="rule_table" hidden>
+      <!------------------------SALES------------------------------------->  
+
+       <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
+         <span hidden class="bi-arrow-right-circle " id="unhide_SALES_table" onclick='unhide_table("SALES_table")'></span>
+         <span  class="bi-arrow-down-circle " id="hide_SALES_table" onclick='hide_table("SALES_table")'></span>
+         <span >SALES</span>
+       </div>
+
+       
+       <table  style="min-width:1190px;margin-left:10px" class="table table-striped table-sm" id="SALES_table" >
+         <thead>
+           <tr >
+             <th style="width:15vw; min-width:150px">Formulation</th>
+             <th style="width:15vw; min-width:150px">country</th>
+             <th style="width: 100px">Period from</th>
+             <th style="width: 100px">Period to</th>
+             <th style="height: 45px;"></th>
+           </tr>
+         </thead>   
+         <tbody>
+           {% for rule in rule_list %}
+             {% if rule.rule_type == "SALES" %}
+               <tr> 
+                 <td > <!--Formulation  -->
+                  <span>  {{ rule.formulation.all|join:" ," }}</span>
+                 </td>
+
+                 <td> <!--Country-->
+                  <span>
+                    {% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "---" %} except : {{ rule.country_list }}{% endif %}{% else %}{{ rule.country_list }}{% endif %}
+                  </span>
+                 </td>           
+
+                 <td><!--Date From-->
+                  <span>{{rule.period_from|date:"Y-m-d"}}</span>
+                </td>
+      
+                <td><!--Date To-->
+                  <span>{{rule.period_to|date:"Y-m-d"}}</span>
+                </td>
+
+                 <td ><!-- Delete Button-->
+                 </td>
+               </tr>  
+             {% endif %}    
+           {% endfor %}
+         </tbody>
+       </table>
+
+      <!------------------------COGS------------------------------------->  
+       <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
+         <span hidden class="bi-arrow-right-circle " id="unhide_COGS_table" onclick='unhide_table("COGS_table")'></span>
+         <span  class="bi-arrow-down-circle " id="hide_COGS_table" onclick='hide_table("COGS_table")'></span>
+         <span >COGS</span>
+       </div>
+       <table  style="min-width:1190px;margin-left:10px"  class="table table-striped table-sm" id="COGS_table" >
+         <thead>
+           <tr >
+             <th style="width:15vw; min-width:150px">Formulation</th>
+             <th style="width:15vw; min-width:150px">country</th>
+             <th style="width: 100px">Period from</th>
+             <th style="width: 100px">Period to</th>
+             <th style="width: 140px">COGS per unit</th>
+             <th style=" height: 45px;"></th>
+           </tr>
+         </thead>
+         
+         <tbody>
+           {% for rule in rule_list %}
+             {% if rule.rule_type == "COGS" %}
+               <tr> 
+                <td > <!--Formulation  -->
+                  <span>  {{ rule.formulation.all|join:" ," }}</span>
+                 </td>
+
+                 <td> <!--Country-->
+                  <span>
+                    {% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "---" %} except : {{ rule.country_list }}{% endif %}{% else %}{{ rule.country_list }}{% endif %}
+                  </span>
+                 </td>           
+
+                 <td><!--Date From-->
+                  <span>{{rule.period_from|date:"Y-m-d"}}</span>
+                </td>
+      
+                <td><!--Date To-->
+                  <span>{{rule.period_to|date:"Y-m-d"}}</span>
+                </td>
+                <td {% if rule.tranche_type == 'YES' or rule.field_type == 'RATE' %} hidden {% endif  %} style="display:grid; grid-template-columns: auto auto"><!-- Qty amount-->
+                  <span>{{rule.qty_value|floatformat:"-3g"}} {{rule.qty_value_currency}}</span>
+                </td>
+                 <td ><!-- Delete Button-->
+                 </td>
+               </tr> 
+             {% endif %}    
+           {% endfor %}
+         </tbody>
+
+       </table>
+
+      <!------------------------ROYALTY------------------------------------->  
+       <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
+         <span hidden class="bi-arrow-right-circle " id="unhide_ROYALTY_table" onclick='unhide_table("ROYALTY_table")'></span>
+         <span  class="bi-arrow-down-circle " id="hide_ROYALTY_table" onclick='hide_table("ROYALTY_table")'></span>
+         <span >ROYALTY</span>
+       </div>
+       <table  style="min-width:1190px;margin-left:10px" class="table table-striped table-sm" id="ROYALTY_table" >
+         <thead>
+           <tr >
+             <th style="width:15vw; min-width:150px">Formulation</th>
+             <th style="width:15vw; min-width:150px">country</th>
+             <th style="width: 100px">Period from</th>
+             <th style="width: 100px">Period to</th>
+             <th style="width: 140px">Royalty</th>
+             <th style="height: 45px;"></th>
+           </tr>
+         </thead>
+         
+         <tbody>
+           {% for rule in rule_list %}
+             {% if rule.rule_type == "ROYALTY" %}
+               <tr> 
+                 <td > <!--Formulation  -->
+                  <span>  {{ rule.formulation.all|join:" ," }}</span>
+                </td>
+        
+                <td> <!--Country-->
+                  <span>
+                    {% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "---" %} except : {{ rule.country_list }}{% endif %}{% else %}{{ rule.country_list }}{% endif %}
+                  </span>
+                </td>
+
+                <td><!--Date From-->
+                  <span>{{rule.period_from|date:"Y-m-d"}}</span>
+                </td>
+      
+                <td><!--Date To-->
+                  <span>{{rule.period_to|date:"Y-m-d"}}</span>
+                </td>
+
+                <td {% if rule.tranche_type == 'YES' or rule.field_type == 'QTY' %}hidden {% endif  %}><!-- Rate percentage-->
+                  <span>{{rule.rate_value|floatformat:2}}%</span>
+                </td>
+      
+                <td {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}hidden {% endif  %}><!--table for tranches-->
+                  <table class="table table-striped " style="width: 380px;background-color:white">
+                    <thead>
+                      <tr>
+                        <th>from</th>
+                        <th style="width:120px">to ({{rule.tranche_currency}})</th>
+                        <th style="width:80px">rate</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for tranche in tranche_list %}
+                        {% if tranche.rule == rule %}
+                        <tr>
+                          <td>{{tranche.from_amount|floatformat:"-3g"}}</td>
+                          <td >
+                            <span>{% if tranche.to_amount == 0 %}infinity{% else %}{{tranche.to_amount|floatformat:"-3g"}}{% endif %}</span>
+                          </td>
+                          <td>
+                            <span>{{tranche.percentage}}%</span>
+                          </td>
+                          <td></tr>
+                        {% endif %}
+                      {% endfor %}
+      
+                    <tbody>
+                  </table>
+                </td>
+      
+                <td {% if rule.tranche_type == 'YES' or rule.field_type == 'RATE' %} hidden {% endif  %} style="display:grid; grid-template-columns: auto auto"><!-- Qty amount-->
+                  <span>{{rule.qty_value|floatformat:"-3g"}} {{rule.qty_value_currency}} per unit sold</span>
+        
+                </td>
+                
+                <td {% if rule.tranche_type == 'NO' or rule.field_type == 'RATE' %}hidden {% endif  %}><!-- Tranche for qty : not available-->
+                  <span>functionality not activated</span>
+                </td>
+
+                 <td ><!-- Delete Button-->
+                 </td>
+               </tr> 
+             {% endif %}         
+           {% endfor %}
+         </tbody>
+       </table>
+
+      <!------------------------MARGIN------------------------------------->  
+       <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
+         <span hidden class="bi-arrow-right-circle " id="unhide_MARGIN_table" onclick='unhide_table("MARGIN_table")'></span>
+         <span  class="bi-arrow-down-circle " id="hide_MARGIN_table" onclick='hide_table("MARGIN_table")'></span>
+         <span >MARGIN</span>
+       </div>
+       <table  style="min-width:1190px;margin-left:10px" class="table table-striped table-sm" id="MARGIN_table" >  
+         <thead>
+           <tr >
+             <th style="width:15vw; min-width:150px">Formulation</th>
+             <th style="width:15vw; min-width:150px">country</th>
+             <th style="width: 100px">Period from</th>
+             <th style="width: 100px">Period to</th>
+             <th >Margin</th>
+             <th style=" height: 45px;"></th>
+           </tr>
+         </thead>
+         
+         <tbody>
+           {% for rule in rule_list %}
+             {% if rule.rule_type == "MARGIN" %}
+               <tr> 
+                <td> <!--Formulation-->
+                  <span>  {{ rule.formulation.all|join:" ," }}</span>
+                </td>
+      
+                <td> <!--Country-->
+                  <span>
+                    {% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "---" %} except : {{ rule.country_list }}{% endif %}{% else %}{{ rule.country_list }}{% endif %}
+                  </span>
+                </td>
+                 
+                <td><!--Date From-->
+                  <span>{{rule.period_from|date:"Y-m-d"}}</span>
+                </td>
+      
+                <td><!--Date To-->
+                  <span>{{rule.period_to|date:"Y-m-d"}}</span>
+                </td>
+
+                <td {% if rule.tranche_type == 'YES' or rule.field_type == 'QTY' %}hidden {% endif  %}><!-- Rate percentage-->
+                  <span>{{rule.rate_value|floatformat:2}}%</span>
+                </td>
+      
+                <td {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}hidden {% endif  %}><!--table for tranches-->
+                  <table class="table table-striped " style="width: 380px;background-color:white">
+                    <thead>
+                      <tr>
+                        <th>from</th>
+                        <th style="width:120px">to ({{rule.tranche_currency}})</th>
+                        <th style="width:80px">rate</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for tranche in tranche_list %}
+                        {% if tranche.rule == rule %}
+                        <tr>
+                          <td>{{tranche.from_amount|floatformat:"-3g"}}</td>
+                          <td >
+                            <span>{% if tranche.to_amount == 0 %}infinity{% else %}{{tranche.to_amount|floatformat:"-3g"}}{% endif %}</span>
+                          </td>
+                          <td>
+                            <span>{{tranche.percentage}}%</span>
+                          </td>
+                          <td></tr>
+                        {% endif %}
+                      {% endfor %}
+      
+                    <tbody>
+                  </table>
+                </td>
+
+                 <td ><!-- Delete Button-->
+                 </td>
+               </tr> 
+             {% endif %}       
+           {% endfor %}
+
+         </tbody>
+
+       </table>
+    </div>
+  <!----------------------------------------------------------------------------->
+  <!----------------------------------Mini_guar---------------------------------->
+  <!----------------------------------------------------------------------------->
+
+  <div style="display:grid; grid-template-columns: 20px auto">
+    <span  class="bi-arrow-right-circle " id="unhide_mini_guar" onclick='unhide_table("mini_guar")'></span>
+    <span hidden class="bi-arrow-down-circle " id="hide_mini_guar" onclick='hide_table("mini_guar")'></span>
+    <h5 >Minimum Guarantee</h5>
+  </div>
+
+  <div id="mini_guar" hidden >
+    <div style=" display:grid;grid-template-columns: 320px 50px auto;margin-bottom:10px; width: 578px;">
+      <span>A minimum amount has to be paid/rec every year:</span>
+      <span>{{contract.mini_gar_status}}</span>
+    </div>  
+
+    <table  class="table table-striped table-sm"  style="max-width: 500px  " id="mini_table" {% if 'NO' == contract.mini_gar_status  %} hidden {% endif %} id="head_table" >
+      <thead>
+ 
+        <tr  >
+          <th >
+            <span>Amount</span>
+          </th>
+          <th>
+            <span>Country to allocate</span>
+          </th>
+          <th >
+            <span>From</span>
+          </th>
+          <th >
+            <span>To</span>
+          </th>
+
+        </tr>
+      </thead>
+      <tbody >
+        <tr >
+          <td ><!--Amount-->
+            <span>{{contract.minimum_guar_amount|default_if_none:""|floatformat:"-3g"}} {{contract.contract_currency}}</span>
+
+          </td>
+          <td ><!--Country-->
+            <span>{{contract.minimum_guar_remaining_allocation_country.country_id}}</span>
+          </td>
+          <td><!--Date From-->
+            <span>{{ contract.mini_gar_from }}</span>
+          </td>
+
+          <td><!--Date To-->
+            <span>{{ contract.mini_gar_to }}</span>
+          </td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>  
+
+    
+  <!----------------------------------------------------------------------------->
+  <!----------------------------------Sales_breakdown_per_contract--------------->
+  <!----------------------------------------------------------------------------->
+
+    <div style="display:grid; grid-template-columns: 20px auto">
+      <span class="bi-arrow-right-circle " id="unhide_sales_breakdown_table" onclick='unhide_table("sales_breakdown_table")'></span>
+      <span hidden class="bi-arrow-down-circle " id="hide_sales_breakdown_table" onclick='hide_table("sales_breakdown_table")'></span>
+      <h5 >Breakdown of sales in invoice reporting</h5>
+    </div>
+    <table hidden class="table table-striped table-sm" id="sales_breakdown_table"  style="max-width: 500px">
+      <thead>
+        <tr style="border-top: hidden" >
+          <th style="color:transparent">:</th>
+          <th colspan="3" style="text-align: end; color:green" id="saved_message_breakdown"></th>
+        </tr>
+        <tr >
+          <th hidden></th>
+          <th>In import file</th>
+          <th>In contract report</th>
+          <th style="width: 30px">
+          </th>
+        </tr>
+      </thead>
+      
+      <tbody>
+        {% for item in sales_breakdown_list %}
+        <tr> 
+          <td hidden>{{item.id}}</td>
+          <td >{{item.sales_breakdown_definition}}</td>
+          <td colspan="2" >
+            <span>{{item.sales_breakdown_contract_definition}}</span>
+
+          </td>
+        </tr>
+        {% endfor%}
+      </tbody>
+    </table>
+
+
+
+
+
+
+{% load static %}
+<script src="{% static 'royalty_app/contracts/rules.js'%}"></script>
+<script src="{% static 'royalty_app/dropdown_multiple.js'%}"></script>
+<link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+
+<script src="{% static 'royalty_app/easy-number-separator.js'%}"></script>
+
+{% endblock %}
+
+
+  

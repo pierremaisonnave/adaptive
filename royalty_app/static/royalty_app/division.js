@@ -43,25 +43,30 @@ function add_new_row(elm){
 }
 
 function delete_row(elm){
-    elm.parentNode.parentNode.remove()
+    tr_to_delete=elm.parentElement.parentElement
+    smooth_remove_row_nodatatable(tr_to_delete)
 }
 
 function save(contract_id){
     //make sure we are not missing any field
-    if ( is_any_fied_empty()){alert("make sure all fields are filed in"); return}
+        if ( is_any_fied_empty()){alert("make sure all fields are filed in"); return}
     //check if total =100
-    tbody_main_table=document.getElementById(id="tbody_main_table")
-    tr_list=tbody_main_table.querySelectorAll("tr")
-    length_table=tr_list.length-1
+        tbody_main_table=document.getElementById(id="tbody_main_table")
+        tr_list=tbody_main_table.querySelectorAll("tr")
+        length_table=tr_list.length-1
 
-    var sum=0
-    var import_array = []
-    for (var i = 0; i < length_table; i++) {
-        import_array.push(`{"division_id":"${tr_list[i].children[0].children[0].value}","division_name":"${tr_list[i].children[1].children[0].value}","division_country":"${tr_list[i].children[2].children[0].value}"}`)
-    } 
+        var sum=0
+        var import_array = []
+        for (var i = 0; i < length_table; i++) {
+            import_array.push(`{"division_id":"${tr_list[i].children[0].children[0].value}","division_name":"${tr_list[i].children[1].children[0].value}","division_country":"${tr_list[i].children[2].children[0].value}"}`)
+        } 
 
-    import_string="["+import_array+"]"
-
+        import_string="["+import_array+"]"
+    // set waiting message:
+        saved_message=document.getElementById(id="saved_message")
+        //save_button=document.getElementById(id="save_button")
+        spinner_on()
+        //save_button.style.display="none"
     // We load it via a fetch in the API
     fetch(`/save_division`, {
         method: 'POST',
@@ -74,10 +79,13 @@ function save(contract_id){
                 location.reload();
             }else{
             //message
-                saved_message=document.getElementById(id="saved_message")
+                
                 saved_message.innerHTML="Saved"
                 setTimeout(function() { 
-                    saved_message.innerHTML=""},
+                    saved_message.innerHTML="",
+                    //save_button.style.display="block"
+                    spinner_off()
+                    },
                 1000)
             }
         })

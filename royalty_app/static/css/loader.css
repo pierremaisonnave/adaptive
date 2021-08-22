@@ -1,3 +1,13 @@
+ /* background color ( to prevent user to click on button) used */
+#background_load_page{ 
+  position:fixed;
+  width:100%;
+  height: 100%; 
+  background-color: black;
+  opacity:0.2;
+  z-index: 10000;
+  display : None;
+}
  /*  Big spinner */
  #spinner_load_page{
   display: none;
@@ -8,13 +18,15 @@
   right: 0;
   width: 150px;
   height: 100px;
-  margin: auto
+  margin: auto;
+  z-index: 10001;
  }
 .sk-chase-big {
   width: 150px;
   height: 150px;
   position: relative;
   animation: sk-chase 2.5s infinite linear both;
+  z-index: 10001;
 }
 
 .sk-chase-dot-big {
@@ -24,6 +36,7 @@
   left: 0;
   top: 0; 
   animation: sk-chase-dot 2.0s infinite ease-in-out both; 
+  z-index: 10001;
   
 }
 
@@ -36,6 +49,7 @@
   border-radius: 100%;
   animation: sk-chase-dot-before 2.0s infinite ease-in-out both; 
   background-color: red;
+  z-index: 10001;
 }
 
 .sk-chase-dot-big:nth-child(1) { animation-delay: -1.1s; }
@@ -87,6 +101,8 @@
     
   }
   
+ 
+
   .sk-chase-dot:before {
     content: '';
     display: block;

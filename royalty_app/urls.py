@@ -6,6 +6,7 @@ urlpatterns = [
   # /
   path('', views.home, name='home'),
   path("login", views.login_check, name="login"),
+  path("automatic_logout", views.automatic_logout, name="automatic_logout"),
   path("isauthenticated", views.isauthenticated, name="isauthenticated"),
 
   path("register", views.register, name="register"),

@@ -11,18 +11,18 @@
   <!----------------------------------------------------------------------------->
   <!----------------------------Main table-------------------------------->
   <!----------------------------------------------------------------------------->
-
-    <table class="table table-striped table-sm" id="main_table" style="display: block; max-height: 700px; overflow-y: scroll; max-width: 500px">
+  {% if user.role == "WRITER" %}
+    <table class="table table-striped table-sm" id="main_table" style=" max-height: 700px; overflow-y: scroll; max-width: 700px;width:100%">
       <thead>
         <tr style="border-top: hidden">
           <th style="color:transparent">:</th>
           <th colspan="2" style="text-align: end; color:green" id="saved_message"></th>
         </tr>
         <tr >
-          <th >Formulation_Code</th>
+          <th style="width: 150px">Formulation_Code</th>
           <th >Formulation_Name</th>
           <th style="width: 30px">
-            <button   class="btn btn-sm btn-outline-success" title="save" onclick="save()" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+            <button id="save_button"  class="btn btn-sm btn-outline-success" title="save" onclick="save()" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
           </th>
         </tr>
       </thead>
@@ -73,7 +73,35 @@
           <button hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px"><span class="bi bi-trash" ></span></button> 
         </div>
       </div>
-
+    {% endif %}
+    {% if user.role in "READER,VALIDATOR" %}
+    <table class="table table-striped table-sm" id="main_table" style=" max-height: 700px; overflow-y: scroll; max-width: 700px;width:100%">
+      <thead>
+        <tr style="border-top: hidden">
+          <th style="color:transparent">:</th>
+          <th colspan="2" style="text-align: end; color:green" id="saved_message"></th>
+        </tr>
+        <tr >
+          <th style="width: 150px">Formulation_Code</th>
+          <th >Formulation_Name</th>
+          <th style="width: 30px"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody_main_table">
+        {% for f in formulation_list %}
+        <tr >
+          <td><!--column0-->
+            <span >{{f.formula_code}}</span >
+         </td>
+          <td><!--column1-->
+            <span >{{f.formula_name}}</span >
+          </td>
+          <td ></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
 
 
 

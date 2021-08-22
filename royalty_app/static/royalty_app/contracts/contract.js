@@ -121,12 +121,11 @@ function add_new_record(){
                 2000)}
         else {
             //define spinner
-            spinner_contract=document.getElementById("spinner_contract")
-            saved_button_contract=document.getElementById(id="saved_button_contract")
-            saved_message_contract=document.getElementById(id="saved_message_contract")
-            spinner_contract.style.display = "Block"
-            saved_button_contract.style.display = "None"
-        
+
+                spinner_on()
+                message_save=document.getElementById("message_save")
+                saved_message_contract=document.getElementById(id="saved_message_contract")
+
             // we prepare the file to be imported in database
             var import_array = []
             for (var i = 0; i < length_dictionnary; i++) {
@@ -192,16 +191,13 @@ function add_new_record(){
                             search_input=search_row.querySelectorAll("input")
                             for (s in search_input){search_input[s].value=""}
 
-                        //message_save=document.getElementById("message_save")
-
+                            
                             color_tr_newlycreated=t.style.backgroundColor
                             t.style.backgroundColor="#b3e3be"
-                            saved_message_contract.style.display = "Block"
-                            spinner_contract.style.display = "None"
-                            
+                            message_save.hidden=false
                             setTimeout(function() {
-                                saved_message_contract.style.display = "None";
-                                saved_button_contract.style.display = "Block";
+                                spinner_off()
+                                message_save.hidden=true;
                                 t.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that the load has been done
                             hide_column()
                             cancel_new_record()

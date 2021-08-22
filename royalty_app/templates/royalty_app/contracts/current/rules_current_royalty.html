@@ -3,29 +3,11 @@
 
 
 
-      <div class=" align-items-center pb-2 mb-3 border-bottom">
-
-          <h1 class="h2">Contract Details</h1>
-          <div style="color:orange">Pending validation!! please ask your Validator to review the request </div>
-          <span style="color:orange">  
-              {% if contract.status == 'DELETE'  %} 
-                type of request: DELETE 
-              {% elif contract.status == 'NEW'%} 
-                type of request: CREATION 
-              {% elif contract.status == 'PROPOSAL'%} 
-                type of request: MODIFICATION   
-                <a href="{% url 'rules_current' contract_id=inital_contract_id %}" >
-                  <i>(click here to see the data currently used )</i>
-              </a>
-            {% endif %}   
-            
-            </span>
-
-      </div>
-
+    <div class=" pb-2 mb-3 border-bottom" style="display: flex" >        
+      <h1 class="h2">Contract Details</h1>
+      <span style="padding-top:16px"> (currently used in the system)<span>
     </div>
-      </div>
-  <!------------------------------------------------------------------------------------->   
+   <!------------------------------------------------------------------------------------->   
   <!---------------------------Basic info on contract -----------------------------------> 
   <!-------------------------------------------------------------------------------------> 
 
@@ -179,33 +161,25 @@
    <!--Rule table-->  
     <table hidden class="table table-striped table-sm" id="rule_table" >
       <thead>
-
         <tr >
-          <th>Formulation</th>
+          <th >Formulation</th>
           <th>country</th>
-          <th>Type</th>
           <th style="width: 100px">Period from</th>
           <th style="width: 100px">Period to</th>
-          <th>Amount</th>
+          <th>Royalty</th>
           <th style="width: 50px; height: 45px;"></th>
         </tr>
       </thead>
-      
       <tbody>
         {% for rule in rule_list %}
         <tr> 
         <td>
-          <span>  {{ rule.formulation.all|join:" ," }}</span>
+          <span>{{rule.formulation.all|join:" ,"}}</span>
         </td>
-
           <td> <!--Country-->
             <span>
               {% if rule.country_incl_excl == "EXCLUDE" %}All{% if rule.country_list != "---" %} except : {{ rule.country_list }}{% endif %}{% else %}{{ rule.country_list }}{% endif %}
             </span>
-          </td>
-          
-          <td><!--Qty or Rate-->
-            <span>{{rule.field_type }}</span>
           </td>
 
           <td><!--Date From-->
@@ -250,7 +224,7 @@
           </td>
 
           <td {% if rule.tranche_type == 'YES' or rule.field_type == 'RATE' %} hidden {% endif  %} style="display:grid; grid-template-columns: auto auto"><!-- Qty amount-->
-            <span>{{rule.qty_value|floatformat:"-3g"}} {{rule.qty_value_currency}}</span>
+            <span>{{rule.qty_value|floatformat:"-3g"}} {{rule.qty_value_currency}} per unit sold</span>
  
           </td>
           

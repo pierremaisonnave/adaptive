@@ -1,5 +1,5 @@
 
-function accruals_change(elm){
+function accruals_change(){
     //spinner activated
 
     spinner_load_page.style.display = "block"
@@ -9,12 +9,15 @@ function accruals_change(elm){
     year=document.getElementById("item_list_year").value
     contract_list=document.getElementById("item_list_contract").value
     contract_list=contract_list.split(",")
+    contract_type_list=document.getElementById("item_list_type_accruals").value
+    contract_type_list=contract_type_list.split(",")
     // We load it via a fetch in the API
     fetch(`/accruals_change`, {
         method: 'POST',
         body: JSON.stringify({
             year : year,
-            contract_list:contract_list      
+            contract_list:contract_list,
+            contract_type_list:contract_type_list     
             }),
             
         })
@@ -52,16 +55,19 @@ function cash_forecast_change(){
     year=document.getElementById("item_list_year_forecast").value
     currency_list=document.getElementById("item_list_currency").value
     CFF_report_id=document.getElementById("list_report").value
+    contract_type_list=document.getElementById("item_list_type_cashflow").value
 
 
     currency_list=currency_list.split(",")
+    contract_type_list=contract_type_list.split(",")
     // We load it via a fetch in the API
     fetch(`/cash_forecast_change`, {
         method: 'POST',
         body: JSON.stringify({
             year : year,
             currency_list:currency_list, 
-            CFF_report_id:CFF_report_id     
+            CFF_report_id:CFF_report_id,
+            contract_type_list:contract_type_list   
             }),
             
         })
@@ -107,18 +113,19 @@ function cash_forecast_change(){
         })
 }
 
-function selectall(elm){
-    var table = document.getElementById("dropdown_contract") 
+function selectall_accruals(elm,dd_id){
+    var table = document.getElementById(`dropdown_${dd_id}`)
     var checked_box_list=table.querySelectorAll('input[type=checkbox]') 
     var select_mode=elm.textContent 
     if (select_mode=="(select all)"){
         elm.textContent="(unselect all)"
         checked_status=true
+        document.getElementById(`item_list_display_${dd_id}`).value="All"
     }else{
         elm.textContent="(select all)"
         checked_status=false
+        document.getElementById(`item_list_display_${dd_id}`).value=""
     }    
-
     imput_list=[]   
     //go throug list and selec or unselect all check box
     for (i = 0; i < checked_box_list.length; ++i) {
@@ -130,21 +137,24 @@ function selectall(elm){
     if (checked_status== false)
         imput_list=[]
     //item_list_display_form_new_hidden.value=imput_list
-    item_list_contract.value=imput_list
+    document.getElementById(`item_list_${dd_id}`).value=imput_list
     accruals_change()
 }
 
 
-function selectall_forecast(elm){
-    var table = document.getElementById("dropdown_currency") 
+function selectall_forecast(elm,dd_id){
+
+    var table = document.getElementById(`dropdown_${dd_id}`) 
     var checked_box_list=table.querySelectorAll('input[type=checkbox]') 
     var select_mode=elm.textContent 
     if (select_mode=="(select all)"){
         elm.textContent="(unselect all)"
         checked_status=true
+        document.getElementById(`item_list_display_${dd_id}`).value="All"
     }else{
         elm.textContent="(select all)"
         checked_status=false
+        document.getElementById(`item_list_display_${dd_id}`).value=""
     }    
 
     imput_list=[]   
@@ -157,8 +167,8 @@ function selectall_forecast(elm){
     //alert(imput_list)
     if (checked_status== false)
         imput_list=[]
-    //item_list_display_form_new_hidden.value=imput_list
-    item_list_currency.value=imput_list
-    item_list_display_currency.value=imput_list
+    
+    document.getElementById(`item_list_${dd_id}`).value=imput_list
+
     cash_forecast_change()
 }

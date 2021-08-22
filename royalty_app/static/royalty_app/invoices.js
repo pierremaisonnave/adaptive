@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
 })
 
 function onchange_contract(elm){
-    
+
     form=document.getElementById("form_new")
     contract_id=elm.value
     periodicity_id=elm.options[elm.selectedIndex].getAttribute("periodicity_id")
@@ -75,10 +75,13 @@ function onchange_contract(elm){
         currency_id=elm.options[elm.selectedIndex].getAttribute("currency")
         document.getElementById("currency_contract_").innerHTML=currency_id
     // comment
-        contract_value=contract_.options[partner_.selectedIndex].text
+
+
+        partner_=document.getElementById("partner_")
         partner_value=partner_.options[partner_.selectedIndex].text
+        period_=document.getElementById("period_")
         period_value=period_.options[period_.selectedIndex].text
-        document.getElementById("comment_").value=contract_value+ "/" + partner_value + " : " +document.getElementById("year_").value+ " " + period_value
+        document.getElementById("comment_").value= partner_value + " : " +document.getElementById("year_").value+ " " + period_value
 
 }
 
@@ -192,13 +195,12 @@ function add_new_record(){
 
 function delete_row(elm){
     var t = $('#invoices_table').DataTable()
-    row=elm.parentElement.parentElement
-    invoice_id=row.children[0].innerHTML
+    tr_to_delete=elm.parentElement.parentElement
+    invoice_id=tr_to_delete.children[0].innerHTML
 
     fetch(`/delete_row_invoice/${invoice_id}`, {
         method: 'POST',})
-     
-    t.row( row ).remove().draw(false);
+    smooth_remove_row(tr_to_delete,t) 
 }
 
 function save_paid_status(elm){

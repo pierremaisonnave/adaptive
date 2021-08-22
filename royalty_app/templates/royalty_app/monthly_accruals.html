@@ -9,7 +9,7 @@
 
   <!------------------------------------------------------------------------------------->   
   <!---------------------------Form for new accruals-------------------------------------> 
-
+  {% if user.role == "WRITER" %} 
     <form   id="form_new"  > 
     {% csrf_token %} 
       <table>
@@ -78,7 +78,7 @@
         </tr>
       </table> 
     </form>
-
+    {% endif %} 
 
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
         <div id="selection_table">
@@ -134,12 +134,20 @@
           <td>{{file.date}}</td>
           <td>{{file.acc_year}}</td>
           <td>{{file.acc_month}}</td>
-          <td><input type="checkbox" {% if file.dashboard %} checked {% endif %} onclick="save_dashboard(this)"></td>
+          {% if user.role == "WRITER" %}
+            <td><input type="checkbox" {% if file.dashboard %} checked {% endif %} onclick="save_dashboard(this)"></td>
+            <td>
+              <button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)">
+                <span class="bi bi-trash"></span>
+              </button>
+            </td>
+
+          {% else %}
           <td>
-            <button class="btn btn-sm btn-outline-danger button_sp" title="delete" name="delete"  onclick="delete_row(this)">
-              <span class="bi bi-trash"></span>
-            </button>
+            <input onclick="return false;" type="checkbox" {% if file.dashboard %} checked {% endif %} >
           </td>
+          <td></td>
+          {% endif %}
         </tr>
       {% endfor %}
       </tbody>

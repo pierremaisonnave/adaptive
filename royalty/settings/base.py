@@ -96,7 +96,7 @@ WSGI_APPLICATION = 'royalty.wsgi.application'
 
 #see https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
 
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -114,6 +114,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+'''
 
 AUTH_USER_MODEL = 'royalty_app.User'
 
@@ -238,5 +239,5 @@ DATABASE_URL_VIEW=os.getenv("DATABASE_URL_VIEW")
 
 #How session are kept:
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # opional, as this will log you out when browser is closed
-SESSION_COOKIE_AGE =  10*60    # log out after x seconds
+SESSION_COOKIE_AGE =  5*60    # log out after x seconds
 SESSION_SAVE_EVERY_REQUEST = True  # Will prrevent from logging you out after x seconds

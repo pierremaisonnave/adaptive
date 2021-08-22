@@ -28,6 +28,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 function add_new_record(){
+    //check we are still connected:
+        fetch('/isauthenticated', {method: 'GET'})
+        .then(response => response.json())
+        .then(feedback => {
+            if (feedback.isauthenticated=="NO"){document.location.reload()}
+        })
     event.preventDefault(); // prevent the page from reloading
     //definition od the elements
     name_=document.getElementById("name_")
@@ -69,12 +75,14 @@ function add_new_record(){
             1000)
     }else{
         //definition of spinner
+        message_save=document.getElementById("message_save")
         message_wait.hidden=false
-        spinner=document.getElementById("spinner")
-        saved_button=document.getElementById(id="saved_button")
-        saved_message=document.getElementById(id="saved_message")
-        spinner.style.display = "Block"
-        saved_button.style.display = "None"
+        spinner_on()
+        //spinner=document.getElementById("spinner")
+        //saved_button=document.getElementById(id="saved_button")
+        //saved_message=document.getElementById(id="saved_message")
+        //spinner.style.display = "Block"
+        //saved_button.style.display = "None"
 
 
         let formData = new FormData();
@@ -94,11 +102,12 @@ function add_new_record(){
             .then(response => response.json())
             .then(result => {
                 var file_id=result.file_id
-                spinner.style.display = "None"
+                //spinner.style.display = "None"
                 
                 if (result.error){
-                    saved_button.style.display = "Block"
+                    //saved_button.style.display = "Block"
                     alert(result.error)
+                    spinner_off()
                 }else{
                     
                     const timeElapsed = Date.now();
@@ -119,11 +128,12 @@ function add_new_record(){
                         initial_gb_color=t.style.backgroundColor
                         t.style.backgroundColor="#b3e3be"
                         message_save.hidden=false
-                        saved_message.style.display = "Block"
+                        //saved_message.style.display = "Block"
                         setTimeout(function() {
                             message_save.hidden=true;
-                            saved_message.style.display = "None"
-                            saved_button.style.display = "Block";
+                            spinner_off()
+                            //saved_message.style.display = "None"
+                            //saved_button.style.display = "Block";
                             t.style.backgroundColor=initial_gb_color},1000)
                     //reset for:
                         message_period.hidden=true 
@@ -143,15 +153,14 @@ function delete_row(elm){
     if (r == true) {
         tr_to_delete=elm.parentElement.parentElement
         file_id=tr_to_delete.children[1].innerHTML
-        t.row( tr_to_delete ).remove().draw(false)
+        smooth_remove_row(tr_to_delete,t)
         fetch(`/delete_row_file/${file_id}`, {
             method: 'POST',})
         .then(response => response.json())
-        .then(result => {
-
-        })
+        .then(result => {})
     }
 }
+
 
 function export_file(){
     selection_table=document.getElementById("selection_table")

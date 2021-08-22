@@ -29,6 +29,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 function add_new_record(){
+    //check we are still connected:
+        fetch('/isauthenticated', {method: 'GET'})
+        .then(response => response.json())
+        .then(feedback => {
+            if (feedback.isauthenticated=="NO"){document.location.reload()}
+        })
     event.preventDefault(); // prevent the page from reloading
     //definition od the elements
     name_=document.getElementById("name_")
@@ -66,7 +72,11 @@ function add_new_record(){
             }} , 
             1000)
     }else{
-        message_wait.hidden=false
+        //definition of spinner
+            message_wait=document.getElementById("message_wait")
+            spinner_on()
+            message_wait.hidden=false
+
         let formData = new FormData();
         formData.append('name', name_value);
         formData.append('year_from', year_from);
@@ -101,8 +111,16 @@ function add_new_record(){
                     //success message
                         initial_gb_color=t.style.backgroundColor
                         t.style.backgroundColor="#b3e3be"
+
+                        message_save=document.getElementById(id="message_save")
+                        message_wait.hidden=true
                         message_save.hidden=false
-                        setTimeout(function() {message_save.hidden=true;t.style.backgroundColor=initial_gb_color},1000)
+
+                        setTimeout(function() {
+                            message_save.hidden=true;
+                            spinner_off();
+                            t.style.backgroundColor=initial_gb_color
+                        },1000)
                     //reset for:
                         document.getElementById("form_new").reset()
                 }
@@ -117,13 +135,11 @@ function delete_row(elm){
     if (r == true) {
         tr_to_delete=elm.parentElement.parentElement
         file_id=tr_to_delete.children[1].innerHTML
-        t.row( tr_to_delete ).remove().draw(false);
+        smooth_remove_row(tr_to_delete,t)
         fetch(`/delete_row_file/${file_id}`, {
             method: 'POST',})
         .then(response => response.json())
-        .then(result => {
-
-        })
+        .then(result => {})
     }
 }
 

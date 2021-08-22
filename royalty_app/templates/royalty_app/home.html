@@ -5,116 +5,208 @@
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom" >
         <h1 class="h2">Dashboard </h1>
       </div>
-      <div style="display:grid; grid-template-columns: 20px auto">
-        <span  hidden class="bi-arrow-right-circle " id="unhide_cash_flow" onclick='unhide_table("cash_flow")'></span>
-        <span  class="bi-arrow-down-circle " id="hide_cash_flow" onclick='hide_table("cash_flow")'></span>
-        <h4 >Cash Flow Forecast ({{consolidation_currency}}) <span class="bi bi-arrow-repeat refresh" title="refresh" onclick="cash_forecast_change()" ></span></h4>
-      </div>
-
-      <div id="cash_flow">
-        <div style="display:grid; grid-template-columns: 300px 150px 150px; ">
-            <div  class="comboTreeWrapper" onchange="cash_forecast_change()" >
-                <div  class="comboTreeInputWrapper" dd_id="currency">
-                  <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="currency"  value="currency_list" id="item_list_display_currency">
-                  <input   type="text" hidden  id="item_list_currency" selection_mode="" value={{currency_list|join:"," }}> 
-                </div>
-                <div  class="comboTreeDropDownContainer" id="dropdown_currency" style="display: none;">
-                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="currency">
-                    <ul  >
-                      <li class="selection_mode" >
-                        <span class="mdi mdi-chevron-down-circle-outline" dd_id="currency"></span>
-                        <ul >
-                          <span class="select_all" id="select_mode_currency" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d" onclick="selectall_forecast(this)">(unselect all)</span>
-                        </ul>
-                      {% for c in currency_list %}
-                        <li   style="display: block;">
-                          <input type="checkbox" style="margin-right:5px;"  dd_id="currency" checked><span >{{c}}</span><span>    </span><span></span>
-                        </li>
-                      {% endfor %}
-                    </ul>
-                </div>
-              </div>
-              <select id="item_list_year_forecast" onchange="cash_forecast_change()" style="margin-left:10px">
-              {% for y in year_list_cash_forecast %}
-                {% if y == current_year %}
-                  <option value={{y}} selected="selected">{{y}}</option>
-                  {% else %}
-                  <option value={{y}}>{{y}}</option>
-                {% endif %}
-              {% endfor %}
-              </select>
-              <select id="list_report" onchange="cash_forecast_change()" style="margin-left:10px">
-              {% for r in CFF_report_list %}
-                {% if r.id == CFF_report_id %}
-                  <option value={{r.id}} selected="selected">{{r.name}}</option>
-                  {% else %}
-                  <option value={{r.id}}>{{r.name}}</option>
-                {% endif %}
-              {% endfor %}
-              </select>
+      <!--Cash Flow-->
+        <div style="display:grid; grid-template-columns: 20px auto">
+          <span  hidden class="bi-arrow-right-circle " id="unhide_cash_flow" onclick='unhide_table("cash_flow")'></span>
+          <span  class="bi-arrow-down-circle " id="hide_cash_flow" onclick='hide_table("cash_flow")'></span>
+          <h4 >Cash Flow Forecast ({{consolidation_currency}}) <span class="bi bi-arrow-repeat refresh" title="refresh" onclick="cash_forecast_change()" ></span></h4>
         </div>
-        <div>Total amount : {{consolidation_currency}}<span id="total_amount">{{total_amount|default_if_none:""}}</span> Mi.</div>
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap" style="width:80%">
-          <div  style=" width: 300px;height: 300px">
-            <canvas id="pie_contract" ></canvas>
-          </div>
-          <div  style=" width: 300px;height: 300px">
-            <canvas id="pie_country" ></canvas>
-          </div>
-          <div  style=" width: 300px;height: 300px">
-            <canvas id="pie_currency" ></canvas>
-          </div>
-        </div>
-        
-        <div  style="width:95%; height: 400px;">
-          <canvas id="myChart2" style="height:300px"></canvas>
-        </div>
-      </div>
 
-      <div style="display:grid; grid-template-columns: 20px auto">
-        <span  hidden class="bi-arrow-right-circle " id="unhide_accruals" onclick='unhide_table("accruals")'></span>
-        <span  class="bi-arrow-down-circle " id="hide_accruals" onclick='hide_table("accruals")'></span>
-        <h4 >Accruals Summary ({{consolidation_currency}}) <span class="bi bi-arrow-repeat refresh" title="refresh" onclick="accruals_change()" ></span></h4>
-      </div>
-
-      <div id="accruals">  
-        <div style="display:grid; grid-template-columns: 300px 150px; ">
-          <div  class="comboTreeWrapper" onchange="accruals_change()" >
-              <div  class="comboTreeInputWrapper" dd_id="contract">
-                <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="contract"  value="Contract_list" id="item_list_display_contract">
-                <input   type="text" hidden  id="item_list_contract" selection_mode="" value={{contract_id_list|join:"," }}> 
-              </div>
-              <div  class="comboTreeDropDownContainer" id="dropdown_contract" style="display: none;">
-                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="contract">
-                  <ul  >
-                    <li class="selection_mode" >
-                      <span class="mdi mdi-chevron-down-circle-outline" dd_id="contract"></span>
-                      <ul >
-                        <span class="select_all" id="select_mode_contract" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d" onclick="selectall(this)">(unselect all)</span>
-                      </ul>
-                    {% for c in contract_list %}
-                      <li   style="display: block;">
-                        <input type="checkbox" style="margin-right:5px;"  dd_id="contract" checked><span hidden>{{c.id}}</span><span> {{c.id}}: </span><span>{{c.contract_name}}</span>
-                      </li>
+        <div id="cash_flow" style="margin-left:10px">
+          <table id="form_new" >
+            <tbody>
+              <tr>
+                <td style="width:70px">Report :</td>
+                <td><!--report-->
+                  <select id="list_report" onchange="cash_forecast_change()" style="width: 100%; margin-left:5px; padding:2px">
+                    {% for r in CFF_report_list %}
+                      {% if r.id == CFF_report_id %}
+                        <option value={{r.id}} selected="selected">{{r.name}}</option>
+                        {% else %}
+                        <option value={{r.id}}>{{r.name}}</option>
+                      {% endif %}
                     {% endfor %}
-                  </ul>
-              </div>
-            </div>
+                  </select>
+                </td>
+                <td style="width:110px;padding-left:10px">Contract Type :</td>
+                <td><!--contract_type_list-->
+                  <div  class="comboTreeWrapper" onchange="cash_forecast_change()" style="margin-left:5px;width:100%;background-color:white"  > 
+                      <div  class="comboTreeInputWrapper" dd_id="type_cashflow" style="width:100%">
+                        <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="type_cashflow"  value="All" id="item_list_display_type_cashflow">
+                        <input   type="text" hidden  id="item_list_type_cashflow" selection_mode="" value={{contract_type_list|join:"," }}> 
+                      </div>
+                      <div  class="comboTreeDropDownContainer" id="dropdown_type_cashflow" style="display: none;">
+                        <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="type_cashflow">
+                          <ul  >
+                            <li class="selection_mode" >
+                              <span class="mdi mdi-chevron-down-circle-outline" dd_id="type_cashflow"></span>
+                              <ul >
+                                <span class="select_all" id="select_mode_type_cashflow" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d" onclick="selectall_forecast(this,'type_cashflow')">(unselect all)</span>
+                              </ul>
+                            {% for c in contract_type_list %}
+                              <li   style="display: block;">
+                                <input type="checkbox" style="margin-right:5px;"  dd_id="type_cashflow" checked><span hidden>{{c}}</span><span></span><span>{{c}}</span>
+                              </li>
+                            {% endfor %}
+                          </ul>
+                      </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td >Year :</td>
+                <td><!--Year-->
+                  <select id="item_list_year_forecast" onchange="cash_forecast_change()" style="width: 100%; margin-left:5px; padding:2px">
+                    {% for y in year_list_cash_forecast %}
+                      {% if y == current_year %}
+                        <option value={{y}} selected="selected">{{y}}</option>
+                        {% else %}
+                        <option value={{y}}>{{y}}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </td>
+                <td style="padding-left:10px" >Currency :</td>
+                <td><!--currency_list-->
+                  <div  class="comboTreeWrapper" onchange="cash_forecast_change()"style="margin-left:5px;width:100%;background-color:white" > 
+                      <div  class="comboTreeInputWrapper" dd_id="currency" style="width:100%">
+                        <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="currency"  value="All" id="item_list_display_currency">
+                        <input   type="text" hidden  id="item_list_currency" selection_mode="" value={{currency_list|join:"," }}> 
+                      </div>
+                      <div  class="comboTreeDropDownContainer" id="dropdown_currency" style="display: none;">
+                        <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="currency">
+                          <ul  >
+                            <li class="selection_mode" >
+                              <span class="mdi mdi-chevron-down-circle-outline" dd_id="currency"></span>
+                              <ul >
+                                <span class="select_all" id="select_mode_currency" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d" onclick="selectall_forecast(this,'currency')">(unselect all)</span>
+                              </ul>
+                            {% for c in currency_list %}
+                              <li   style="display: block;">
+                                <input type="checkbox" style="margin-right:5px;"  dd_id="currency" checked><span hidden>{{c}}</span><span></span><span>{{c}}</span>
+                              </li>
+                            {% endfor %}
+                          </ul>
+                      </div>
+                  </div>
+                </td>
 
-          <select id="item_list_year" onchange="accruals_change()" style="margin-left:10px">
-            {% for y in year_list %}
-              {% if y == current_year %}
-                <option value={{y}} selected="selected">{{y}}</option>
-                {% else %}
-                <option value={{y}}>{{y}}</option>
-              {% endif %}
-            {% endfor %}
-            </select>
+              </tr>
+            </tbody>
+          </table>
+
+          <div >Total amount : {{consolidation_currency}}<span id="total_amount">{{total_amount|default_if_none:""}}</span> Mi.</div>
+          <div style="display:grid; grid-template-columns: 20px auto">
+            <span hidden class="bi-arrow-right-circle " id="unhide_pie_chart" onclick='unhide_class("pie_chart")'></span>
+            <span  class="bi-arrow-down-circle " id="hide_pie_chart" onclick='hide_class("pie_chart")'></span>
+            <span >pie charts</span>
+          </div>
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap" style="width:80%">
+            <div  style=" width: 300px;height: 300px" class="pie_chart">
+              <canvas id="pie_contract" ></canvas>
+            </div>
+            <div  style=" width: 300px;height: 300px" class="pie_chart">
+              <canvas id="pie_country" ></canvas>
+            </div>
+            <div  style=" width: 300px;height: 300px" class="pie_chart">
+              <canvas id="pie_currency" ></canvas>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 20px auto ">
+            <span  hidden class="bi-arrow-right-circle " id="unhide_cash_flow_bar" onclick='unhide_table("cash_flow_bar")'></span>
+            <span  class="bi-arrow-down-circle " id="hide_cash_flow_bar" onclick='hide_table("cash_flow_bar")'></span>
+            <span >bar chart</span>
+          </div>
+
+          <div id="cash_flow_bar" style="width:95%; height: 400px">
+            <canvas id="myChart2" style="height:300px"></canvas>
+          </div>
         </div>
-        <div style="width:95%; height: 400px;">
-          <canvas id="myChart" ></canvas>
+      <!--Accruals-->
+        <div style="display:grid; grid-template-columns: 20px auto">
+          <span  hidden class="bi-arrow-right-circle " id="unhide_accruals" onclick='unhide_table("accruals")'></span>
+          <span  class="bi-arrow-down-circle " id="hide_accruals" onclick='hide_table("accruals")'></span>
+          <h4 >Accruals Summary ({{consolidation_currency}}) <span class="bi bi-arrow-repeat refresh" title="refresh" onclick="accruals_change()" ></span></h4>
         </div>
-      </div>
+
+        <div id="accruals"  style="margin-left:10px">  
+          <table id="form_new">
+            <tbody>   
+              <tr>
+                <td style="width:70px">Contract :</td>
+                <td><!--contract-->
+                  <div  class="comboTreeWrapper" onchange="accruals_change()" style="margin-left:5px;width:100%;background-color:white">
+                    <div  class="comboTreeInputWrapper" dd_id="contract">
+                      <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="contract"  value="All" id="item_list_display_contract">
+                      <input   type="text" hidden  id="item_list_contract" selection_mode="" value={{contract_id_list|join:"," }}> 
+                    </div>
+                    <div  class="comboTreeDropDownContainer" id="dropdown_contract" style="display: none;">
+                      <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="contract">
+                        <ul  >
+                          <li class="selection_mode" >
+                            <span class="mdi mdi-chevron-down-circle-outline" dd_id="contract"></span>
+                            <ul >
+                              <span class="select_all" id="select_mode_contract" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d" onclick="selectall_accruals(this,'contract')">(unselect all)</span>
+                            </ul>
+                          {% for c in contract_list %}
+                            <li   style="display: block;">
+                              <input type="checkbox" style="margin-right:5px;"  dd_id="contract" checked><span hidden>{{c.id}}</span><span> {{c.id}}: </span><span>{{c.contract_name}}</span>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                    </div>
+                  </div>
+                </td>
+                <td style="width:110px;padding-left:10px">Contract Type :</td>
+                <td><!--contract_type_list-->
+                  <div  class="comboTreeWrapper" onchange="accruals_change()" style="margin-left:5px;width:100%;background-color:white"  > 
+                      <div  class="comboTreeInputWrapper" dd_id="type_accruals" style="width:100%">
+                        <input style="background-color:transparent " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="type_accruals"  value="All" id="item_list_display_type_accruals">
+                        <input   type="text" hidden  id="item_list_type_accruals" selection_mode="" value={{contract_type_list|join:"," }}> 
+                      </div>
+                      <div  class="comboTreeDropDownContainer" id="dropdown_type_accruals" style="display: none;">
+                        <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="type_accruals">
+                          <ul  >
+                            <li class="selection_mode" >
+                              <span class="mdi mdi-chevron-down-circle-outline" dd_id="type_accruals"></span>
+                              <ul >
+                                <span class="select_all" id="select_mode_type_accruals" style="font-weight: normal;font-family: arial; font-size: 0.800rem; color:#6c757d" onclick="selectall_accruals(this,'type_accruals')">(unselect all)</span>
+                              </ul>
+                            {% for c in contract_type_list %}
+                              <li   style="display: block;">
+                                <input type="checkbox" style="margin-right:5px;"  dd_id="type_accruals" checked><span hidden >{{c}}</span><span></span><span>{{c}}</span>
+                              </li>
+                            {% endfor %}
+                          </ul>
+                      </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td >Year:</td>
+                <td><!--year-->
+                  <select id="item_list_year" onchange="accruals_change()" style="width: 100%; margin-left:5px; padding:2px">
+                    {% for y in year_list %}
+                      {% if y == current_year %}
+                        <option value={{y}} selected="selected">{{y}}</option>
+                        {% else %}
+                        <option value={{y}}>{{y}}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </td>
+                <td>
+                </td>
+                <td>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="width:95%; height: 400px;">
+            <canvas id="myChart" ></canvas>
+          </div>
+        </div>
 
 
 

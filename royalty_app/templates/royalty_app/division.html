@@ -11,100 +11,136 @@
   <!----------------------------------------------------------------------------->
   <!----------------------------Main table-------------------------------->
   <!----------------------------------------------------------------------------->
+    {% if user.role == "WRITER" %}
+      <table class="table table-striped table-sm" id="main_table" style="max-width: 500px">
+        <thead>
+          <tr style="border-top: hidden">
+            <th style="color:transparent">:</th>
+            <th colspan="3" style="text-align: end; color:green" id="saved_message"></th>
+          </tr>
+          <tr >
+            <th > division_id</th>
+            <th > division_name</th>
+            <th >country</th>
+            <th style="width: 30px">
+              <button id="save_button"  class="btn btn-sm btn-outline-success" title="save" onclick="save()" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+            </th>
+          </tr>
+        </thead>
+        <tbody id="tbody_main_table">
+          {% for d in division_list %}
+          <tr >
+            <td><!--division_id-->
+              <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{d.division_id}}" value="{{d.division_id}}" maxlength="20">
+            </td>
 
-    <table class="table table-striped table-sm" id="main_table" style="max-width: 500px">
-      <thead>
-        <tr style="border-top: hidden">
-          <th style="color:transparent">:</th>
-          <th colspan="3" style="text-align: end; color:green" id="saved_message"></th>
-        </tr>
-        <tr >
-          <th > division_id</th>
-          <th > division_name</th>
-          <th >country</th>
-          <th style="width: 30px">
-            <button   class="btn btn-sm btn-outline-success" title="save" onclick="save()" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
-          </th>
-        </tr>
-      </thead>
-      <tbody id="tbody_main_table">
-        {% for d in division_list %}
-        <tr >
-          <td><!--division_id-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" primary_key="True" onchange="is_unique_key(this)" previous_value="{{d.division_id}}" value="{{d.division_id}}" maxlength="20">
-          </td>
+            <td><!--division_name-->
+              <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{d.division_name}}" type="text" maxlength="50">
+            </td>
 
-          <td><!--division_name-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;"  value="{{d.division_name}}" type="text" maxlength="50">
-          </td>
+            <td ><!--country-->
+              <select style="width:100%;background-color: transparent;border-style: hidden;">
+                {% for c in country_list %}
+                  {% if c == d.division_country %}
+                    <option value={{c.country_id}} selected="selected">{{c.country_id}}</option>
+                  {% else %}
+                    <option value={{c.country_id}} >{{c.country_id}}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+            </td>
+            <td ><!--Button-->
+              <button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
+            </td>
+          </tr>
+          {% endfor %}
+          <tr id="new_tr">
 
-          <td ><!--country-->
-            <select style="width:100%;background-color: transparent;border-style: hidden;">
-              {% for c in country_list %}
-                {% if c == d.division_country %}
-                  <option value={{c.country_id}} selected="selected">{{c.country_id}}</option>
-                {% else %}
-                  <option value={{c.country_id}} >{{c.country_id}}</option>
-                {% endif %}
-              {% endfor %}
-            </select>
-          </td>
-          <td ><!--Button-->
-            <button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
-          </td>
-        </tr>
-        {% endfor %}
-        <tr id="new_tr">
+            <td><!--division_id-->
+              <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" maxlength="20">
+            </td>
 
-          <td><!--division_id-->
-            <input onchange="add_new_row(this) " primary_key="True"  style="width:100%;background-color: transparent;border-style: hidden;" placeholder="new" maxlength="20">
-          </td>
+            <td><!--division_name-->
+              <input style="width:100%;background-color: transparent;border-style: hidden;" maxlength="50">
+            </td>
 
-          <td><!--division_name-->
-            <input style="width:100%;background-color: transparent;border-style: hidden;" maxlength="50">
-          </td>
+            <td ><!--country-->
+              <select  style="width:100%;background-color: transparent;border-style: hidden;">
+                <option disabled selected></option>
+                {% for c in country_list %}
+                  <option value={{c.country_id}}>{{c.country_id}}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td >
+              <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-          <td ><!--country-->
+      <!--dd for new beneficiary--> 
+        <div hidden>
+          <div id="column_0">
+            <input onchange="add_new_row(this)" primary_key="True" style="width:100%;background-color: transparent;border-style: hidden" placeholder="new" maxlength="20"> 
+          </div>
+          <div id="column_1">
+            <input style="width:100%;background-color: transparent;border-style: hidden" maxlength="50"> 
+          </div>
+          <div id="column_2" >
             <select  style="width:100%;background-color: transparent;border-style: hidden;">
               <option disabled selected></option>
-              {% for c in country_list %}
-                <option value={{c.country_id}}>{{c.country_id}}</option>
-              {% endfor %}
+                {% for c in country_list %}
+                  <option value={{c.country_id}}>{{c.country_id}}</option>
+                {% endfor %}
             </select>
-          </td>
-          <td >
-            <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          </div>
 
-     <!--dd for new beneficiary--> 
-      <div hidden>
-        <div id="column_0">
-          <input onchange="add_new_row(this)" primary_key="True" style="width:100%;background-color: transparent;border-style: hidden" placeholder="new" maxlength="20"> 
+          <div id="column_3">
+            <button hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px"><span class="bi bi-trash" ></span></button> 
+          </div>
         </div>
-        <div id="column_1">
-          <input style="width:100%;background-color: transparent;border-style: hidden" maxlength="50"> 
-        </div>
-        <div id="column_2" >
-          <select  style="width:100%;background-color: transparent;border-style: hidden;">
-            <option disabled selected></option>
-              {% for c in country_list %}
-                <option value={{c.country_id}}>{{c.country_id}}</option>
-              {% endfor %}
-          </select>
-        </div>
+    {% endif %}
+    {% if user.role in "VALIDATOR,READER" %}
+      <table class="table table-striped table-sm" id="main_table" style="max-width: 500px">
+        <thead>
+          <tr style="border-top: hidden">
+            <th style="color:transparent">:</th>
+            <th colspan="3" style="text-align: end; color:green" id="saved_message"></th>
+          </tr>
+          <tr >
+            <th > division_id</th>
+            <th > division_name</th>
+            <th >country</th>
+            <th style="width: 30px">
+            </th>
+          </tr>
+        </thead>
+        <tbody id="tbody_main_table">
+          {% for d in division_list %}
+          <tr >
+            <td><!--division_id-->
+              <span>{{d.division_id}}</span>
+           </td>
+            <td><!--division_name-->
+              <span >{{d.division_name}}</span >
+            </td>
+            <td ><!--country-->
+              <span >{{d.division_country}}</span >
+            </td>
+            <td ><!--Button-->
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
 
-        <div id="column_3">
-          <button hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row(this)" style="border:0px"><span class="bi bi-trash" ></span></button> 
-        </div>
-      </div>
 
 
+      {% load static %}
 
-{% load static %}
-<script src="{% static 'royalty_app/division.js'%}"></script>
+      <script src="{% static 'royalty_app/division.js'%}"></script>
 
 <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
 <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>

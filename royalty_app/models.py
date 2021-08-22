@@ -1,6 +1,5 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
 from django_resized import ResizedImageField
 
 class User(AbstractUser):
@@ -8,12 +7,11 @@ class User(AbstractUser):
     profile_picture = ResizedImageField(size=[150, 100],upload_to='profile_picture/',null=True,blank=True)#, default='royalty_app/static/default.png'
     pass
 
-
-
 class Payment_type(models.Model):
     payment_type = models.CharField(max_length=50)
     def __str__(self):
         return f"{self.payment_type} "
+
 class Region(models.Model):
     region = models.CharField(max_length=50)
     def __str__(self):
@@ -42,6 +40,7 @@ class Partner(models.Model):
     status=models.CharField(max_length=20,choices=(('CHANGE','CHANGE'),('PROPOSAL','PROPOSAL'),('NEW','NEW'),('DELETE','DELETE'),('CURRENT','CURRENT')), default='NEW')
     def __str__(self):
         return f"{self.partner_name}"
+
 class Accounting(models.Model):
     contract_type=  models.ForeignKey(Type, related_name="accounting_type",on_delete=models.PROTECT)
     transaction_direction= models.CharField(max_length=3,choices=(('PAY','PAY'),('REC','REC')), default='PAY')
@@ -50,7 +49,6 @@ class Accounting(models.Model):
     market_acc= models.CharField(max_length=20,null=True,blank=True)
     pl_bs= models.CharField(max_length=2,choices=(('PL','PL'),('BS','BS')), default='PL')
     d_c_if_amount_positiv= models.CharField(max_length=1,choices=(('D','D'),('C','C')), default='C')
-
 
 class Brand(models.Model):
     m3_brand_code= models.CharField(max_length=20)
@@ -63,6 +61,7 @@ class Formulation(models.Model):
     formula_name= models.CharField(max_length=200)
     def __str__(self):
         return f"{self.formula_code}"
+
 class Currency(models.Model):
     currency= models.CharField(max_length=10, primary_key=True)
     def __str__(self):
@@ -93,7 +92,6 @@ class Month_table(models.Model):
         return f"{self.month_name}"
 
 class Periodicity_cat(models.Model):
-
     periodicity_cat= models.CharField(max_length=20)
     periodicity= models.ForeignKey(Periodicity, related_name="periodicity_structure",on_delete=models.PROTECT)
     period_month_end= models.ForeignKey(Month_table, related_name="month_periodicity_structure",on_delete=models.PROTECT)
@@ -101,7 +99,6 @@ class Periodicity_cat(models.Model):
         return f"{self.periodicity}:{self.periodicity_cat}"
 
 class Payment_structure(models.Model):
-
     sales_month= models.ForeignKey(Month_table, related_name="month_payment_structure",on_delete=models.PROTECT)
     periodicity_cat= models.ForeignKey(Periodicity_cat, related_name="periodicity_cat_structure",on_delete=models.PROTECT)
 
@@ -180,8 +177,8 @@ class Invoice(models.Model):
     market=models.ForeignKey(Country, related_name="invoice_market",on_delete=models.PROTECT,null=True)
     def __str__(self):
         return f"{self.id}"
-class File(models.Model):
 
+class File(models.Model):
     name= models.CharField(max_length=50,null=True,blank=True)
     date=models.DateTimeField(auto_now=True)
     acc_month= models.ForeignKey(Month_table, related_name="acc_month_file",on_delete=models.PROTECT)
@@ -251,6 +248,7 @@ class Accounting_entry(models.Model):
 
 
 class Detail(models.Model):
+    rule_type=models.CharField(max_length=20,null=True,blank=True)
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
     division= models.CharField(max_length=10,null=True,blank=True)
     division_country_id= models.CharField(max_length=10,null=True,blank=True)
@@ -275,7 +273,6 @@ class Detail(models.Model):
     consolidation_currency= models.CharField(max_length=10,null=True,blank=True)
     contract=models.ForeignKey(Contract, on_delete=models.PROTECT)
     contract_type=models.ForeignKey(Type, on_delete=models.PROTECT)
-    rule_type=models.CharField(max_length=20,null=True,blank=True)
     contract_name= models.CharField(max_length=100,null=True,blank=True)
     partner=models.ForeignKey(Partner, on_delete=models.PROTECT)
     ico_3rd= models.CharField(max_length=3,null=True,blank=True)
@@ -284,7 +281,6 @@ class Detail(models.Model):
     brand_name= models.CharField(max_length=100,null=True,blank=True)
     m3_brand_code= models.CharField(max_length=100,null=True,blank=True)
     period= models.CharField(max_length=100,null=True,blank=True)
-    entry_type= models.CharField(max_length=100,null=True,blank=True)
     invoice_paid= models.CharField(max_length=10,null=True,blank=True)
     invoice_detail= models.CharField(max_length=100,null=True,blank=True)
     payment_date= models.DateField(default="1900-01-01",null=True,blank=True)
@@ -293,7 +289,7 @@ class Detail(models.Model):
 class Cash_flow(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
     division= models.CharField(max_length=10,null=True,blank=True)
-    entry_type= models.CharField(max_length=20,null=True,blank=True)
+    rule_type= models.CharField(max_length=20,null=True,blank=True)
     invoice_paid= models.CharField(max_length=10,null=True,blank=True)
     transaction_direction= models.CharField(max_length=10,null=True,blank=True)
     contract_currency= models.CharField(max_length=10,null=True,blank=True)

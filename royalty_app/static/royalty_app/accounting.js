@@ -27,7 +27,11 @@ function save(self){
         } 
     }
         import_string="["+import_array+"]"
-
+        // set waiting message:
+            saved_message=document.getElementById(id="saved_message")
+            //save_button=document.getElementById(id="save_button")
+            spinner_on()
+            //save_button.style.display="none"
         // We load it via a fetch in the API
         fetch(`/save_accounting`, {
             method: 'POST',
@@ -40,13 +44,11 @@ function save(self){
                     location.reload();
                 }else{
                 //message
-                    
-                    spinner_load_page.style.display="none"
-                    saved_message=document.getElementById(id="saved_message")
-                    saved_message.style.display="block"
+                    saved_message.innerHTML="Saved"
                     setTimeout(function() { 
-                        saved_message.style.display="none"
-                        self.style.display="block"
+                        saved_message.innerHTML="",
+                        //save_button.style.display="block"
+                        spinner_off()
                         },
                     1000)
                 }

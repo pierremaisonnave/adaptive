@@ -93,9 +93,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function delete_row(partner_id) {
     // Here we grab the values from the form
-    spinner=document.getElementById(`spinner_top`)
-    spinner.style.display="block"
-
+    //spinner=document.getElementById(`spinner_top`)
+    //spinner.style.display="block"
+    spinner_on()
     //First, we send the request to the database 
     fetch(`/delete_row_partner/${partner_id}`, {
             method: 'POST',})
@@ -163,14 +163,12 @@ function delete_row(partner_id) {
                         ]
                         t.row(row_to_modify).data(td_list_html).draw(false)
                     hide_column()
-                    spinner.style.display="none"
+                    spinner_off()
+                    //spinner.style.display="none"
                 }) 
             }
         })
 }               
-
-
-
 
 function cancel_row_partner(partner_id){
     spinner=document.getElementById("spinner_top")
@@ -259,7 +257,6 @@ function cancel_row_partner(partner_id){
         spinner.style.display="none"  
     }); 
 }
-
 
 function change_row(partner_id){
     spinner=document.getElementById("spinner_top")
@@ -359,8 +356,6 @@ function change_row(partner_id){
        
 }
 
-
-
 function restate_color_button(partner_id,status){
     if (status=="CHANGE" || status=="DELETE"){
         //document.getElementById(`change_${partner_id}`).hidden=true
@@ -427,12 +422,8 @@ function add_new_record(){
         }
         else {
             //define spinner
-            spinner=document.getElementById("spinner")
-            saved_button=document.getElementById(id="saved_button")
-            saved_message=document.getElementById(id="saved_message")
-            spinner.style.display = "Block"
-            saved_button.style.display = "None"
-            // We load it via a fetch in the API
+                message_save=document.getElementById(id="message_save")
+                spinner_on()
             fetch('/new_partner', {
                 method: 'POST',
                 body: JSON.stringify({
@@ -506,12 +497,11 @@ function add_new_record(){
                         color_tr_newlycreated=tr_newlycreated.style.backgroundColor
                         tr_newlycreated.style.backgroundColor="#b3e3be"
 
-                        spinner.style.display = "None"
-                        saved_message.style.display = "Block";
+                        //spinner.style.display = "None"
+                        message_save.hidden = false;
                         setTimeout(function() { 
-
-                            saved_message.style.display = "None";
-                            saved_button.style.display = "Block";
+                            message_save.hidden = true;
+                            spinner_off();
                             tr_newlycreated.style.backgroundColor=color_tr_newlycreated 
                             }, 1000) // we show a text explaining that thje load has been done
                         hide_column()
@@ -569,6 +559,8 @@ function hide_column(){
 
 function approve(partner_id,status){
     var t = $('#partners_table').DataTable()
+    var tr_to_delete=document.getElementById(`partner_${partner_id}`) 
+
     if ( status=="DELETE"){
         
         fetch(`/delete_partner/${partner_id}`, {
@@ -576,7 +568,7 @@ function approve(partner_id,status){
         .then(response => response.json())
         .then(result => {
             if (!!result.error) {alert(result.error);return
-            }else{smooth_remove_row(partner_id)}
+            }else{smooth_remove_row(tr_to_delete,t)}
         })
     }
     if ( status=="NEW"){
@@ -586,7 +578,7 @@ function approve(partner_id,status){
         .then(response => response.json())
         .then(result => {
             if (!!result.error) {alert(result.error);return
-            }else{smooth_remove_row(partner_id)}
+            }else{smooth_remove_row(tr_to_delete,t)}
         })
     }
     if ( status=="CHANGE"){
@@ -596,20 +588,21 @@ function approve(partner_id,status){
         .then(response => response.json())
         .then(result => {
             if (!!result.error) {alert(result.error);return
-            }else{smooth_remove_row(partner_id)}
+            }else{smooth_remove_row(tr_to_delete,t)}
         })
     }
 }
 
 function reject(partner_id,status){
-    
+    var t = $('#partners_table').DataTable()
+    var tr_to_delete=document.getElementById(`partner_${partner_id}`) 
     if ( status=="NEW"){
         fetch(`/delete_partner/${partner_id}`, {
             method: 'POST',})
         .then(response => response.json())
         .then(result => {
             if (!!result.error) {alert(result.error);return
-            }else{smooth_remove_row(partner_id)}
+            }else{smooth_remove_row(tr_to_delete,t)}
         })
     }
     if ( status=="DELETE"){
@@ -619,7 +612,7 @@ function reject(partner_id,status){
         .then(response => response.json())
         .then(result => {
             if (!!result.error) {alert(result.error);return}
-            else{smooth_remove_row(partner_id)}
+            else{smooth_remove_row(tr_to_delete,t)}
         })
     }
     if ( status=="CHANGE"){
@@ -629,24 +622,7 @@ function reject(partner_id,status){
         .then(response => response.json())
         .then(result => {
             if (!!result.error) {alert(result.error);return
-            }else{smooth_remove_row(partner_id)}
+            }else{smooth_remove_row(tr_to_delete,t)}
         })
     }
-}
-
-function smooth_remove_row(partner_id){
-    var t = $('#partners_table').DataTable()
-    tr_to_delete=document.getElementById(`partner_${partner_id}`) 
-
-    $(`#partner_${partner_id}`)
-        .children('td, th')
-        .animate({
-        padding: 0
-    })
-        .wrapInner('<div />')
-        .children()
-        .slideUp(function () {
-            t.row( tr_to_delete ).remove().draw(false);
-        
-    });
 }

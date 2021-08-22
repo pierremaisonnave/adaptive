@@ -11,7 +11,7 @@
   <!----------------------------------------------------------------------------->
   <!----------------------------Main table-------------------------------->
   <!----------------------------------------------------------------------------->
-
+  {% if user.role == "WRITER" %}
     <table class="table table-striped table-sm" id="main_table" style=" max-width: 500px">
       <thead>
         <tr style="border-top: hidden">
@@ -23,7 +23,7 @@
           <th >Code</th>
           <th >Name </th>
           <th style="width: 30px">
-            <button   class="btn btn-sm btn-outline-success" title="save" onclick="save()" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
+            <button  id="save_button" class="btn btn-sm btn-outline-success" title="save" onclick="save()" style="border:0px" ><span class="bi bi-save2-fill"></span></button>
           </th>
         </tr>
       </thead>
@@ -85,7 +85,41 @@
         </div>
       </div>
 
+    {% endif %}
+    {% if user.role in "READER,VALIDATOR" %}
+    <table class="table table-striped table-sm" id="main_table" style=" max-width: 500px">
+      <thead>
+        <tr style="border-top: hidden">
+          <th style="color:transparent">:</th>
+          <th colspan="3" style="text-align: end; color:green" id="saved_message"></th>
+        </tr>
+        <tr >
+          <th style="width: 50px">id</th>
+          <th >Code</th>
+          <th >Name </th>
+          <th style="width: 30px"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody_main_table">
+        {% for b in brand_list %}
+        <tr >
+          <td><!--column0-->
+            <input disabled style="width:100%;background-color: transparent;border-style: hidden;"  previous_value="{{b.id}}" value="{{b.id}}">
+          </td>
 
+          <td><!--column1-->
+            <span>{{b.m3_brand_code}}</span>
+          </td>
+
+          <td><!--column2-->
+            <span>{{b.brand_name}}</span>
+          </td>
+          <td></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
 
 
 {% load static %}

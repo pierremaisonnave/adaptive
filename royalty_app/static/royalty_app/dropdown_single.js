@@ -23,14 +23,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (classname=="item_single_select" || classnameparent=="item_single_select"){
                 if (classnameparent=="item_single_select"){e=element.parentElement}else{e=element}
                 var dd_id = e.getAttribute("dd_id")
-
-                text_box=document.getElementById(`displayed_item_name_${dd_id}`)
-                hidden_item_code=document.getElementById(`hidden_item_code_${dd_id}`)
-
-                text_box.value= e.childNodes[3].textContent // in the textbook input ( visible) we display the item name
-                hidden_item_code.value=e.childNodes[1].textContent // in the textbook input ( invisible) we display the item code
-                hidde_all_dropdows()
-                
+                //if dd_id is = user, then it means that the dropdown is the one on the top right, for which there are no input 
+                if (dd_id!="user"){
+                    text_box=document.getElementById(`displayed_item_name_${dd_id}`)
+                    hidden_item_code=document.getElementById(`hidden_item_code_${dd_id}`)
+                    text_box.value= e.childNodes[3].textContent // in the textbook input ( visible) we display the item name
+                    hidden_item_code.value=e.childNodes[1].textContent // in the textbook input ( invisible) we display the item code
+                } 
+                hidde_all_dropdows() 
             }
             if (element.parentElement==null ){return} // if we click on an object without parent, we stop
         }
