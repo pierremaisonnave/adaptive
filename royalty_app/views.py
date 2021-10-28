@@ -2582,18 +2582,17 @@ def new_report(request):
             t5['roy']=t5['amount']*t5['percentage']/100
             t5=t5[['rule_id','amount','roy','mini_rate','year']]
             #t6 - average rate
-            
-            t5=t5.fillna("")
-            print("T5")
+            t5['year']=t5['year'].fillna(0)
 
+            print("T5")
             t6=t5.groupby(['rule_id','year'], as_index=False).agg({"roy": "sum","amount":"sum","mini_rate":"max"})
             t6['average_rate']=np.where(t6['amount']==0,
                                 t6['mini_rate'],
                                 t6['roy']/t6['amount']*100
                                 ) 
-            print('t6')
-
             #-----------------link tranche average rate to general Rule -----------------
+
+            print("t6")
 
             df_rule_calc=pd.merge(df_rule,t6, how="left",left_on=['rule_id','year'], right_on=['rule_id','year'] )
             df_rule_calc['sales_rate']=np.where(pd.notna(df_rule_calc['average_rate']),df_rule_calc['average_rate'],df_rule_calc['rate_value'])
