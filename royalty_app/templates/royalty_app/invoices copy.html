@@ -38,7 +38,7 @@
               <td >
                 <div style="width: 100%"> 
                   <select id="partner_" disabled="true" style="width:100%; padding:2px">
-                    <option  value="" disabled selected></option>
+                    <option  value="" disabled selected>select partner</option>
                     {% for cp in contract_partner_list %}
                       <option id="" value={{cp.partner.id}} contract_of_cp_id={{cp.contract.id}}>{{cp.partner.partner_name}}</option>
                     {% endfor %}
@@ -49,36 +49,29 @@
           <tr>
             <!--Amount-->  
               <td>Amount :</td> 
-              <td style="display:grid;grid-template-columns: auto auto;position:relative; left:5px ">
-                <div>
-                  <span  id="transaction_direction_" style=" position: absolute; margin-left: 10px; margin-top: 2px; color:grey"></span> 
-                  <input  id="amount_" disabled="true" class="number-separator" style=" padding-left: 37px;width: 100%;"   type="text">
-                </div>
-                <select id="currency_" disabled="true" style="margin-left: 2px;">
-                  <option  value="" selected></option>
-                  {% for c in currency_list %}
-                    <option  value={{c.currency}}>{{c.currency}}</option>
-                  {% endfor %}
-                </select>
+              <td >
+                <span  id="transaction_direction_" style=" position: absolute; margin-left: 10px; margin-top: 2px; color:grey"></span> 
+                <span style="position: absolute; margin-left: 37px; margin-top: 2px; color:grey" id="currency_contract_"></span>
+                <input  id="amount_" disabled="true" class="number-separator" style=" padding-left: 60px;width: 100%; margin-left:5px;" placeholder="Amount"  type="text">
               </td>
             <!--Comment-->
-              <td style="padding-left:10px">comment :</td> 
+              <td style="padding-left:10px">Comment :</td> 
               <td colspan="3">
-                <input disabled="true" type="text"  id="comment_" name="partner_bank_account"  maxlength="50"style="width: 100%;">
+                <input disabled="true" type="text"  id="comment_" name="partner_bank_account" placeholder="comment" maxlength="50"style="width: 100%;">
               </td>
           </tr>
           <tr > <!--Row 3-->
             <!--Year-->
               <td>Year :</td> 
               <td>
-                <input id="year_" disabled="true" style="width: 100%; margin-left:5px;"  type="number" >
+                <input id="year_" disabled="true" style="width: 100%; margin-left:5px;"  type="number" placeholder="Year">
               </td>
             <!--Period-->
               <td style="padding-left:10px">Period :</td> 
               <td>
                 <div  style="width: 100%;">
                   <select id="period_" disabled="true" style="width:100%; padding:2px">
-                    <option value="" disabled selected></option>
+                    <option value="" disabled selected>select period</option>
                   {% for pc in periodicity_cat_list %}
                     <option value={{pc.id}} periodicity_of_ps_id={{pc.periodicity.id}}>{{pc.periodicity_cat}}</option>
                   {% endfor %}
@@ -92,7 +85,7 @@
               <td>
                 <div  style="width: 100%; margin-left:5px">
                   <select id="market_" disabled="true" style="width:100%; padding:2px">
-                    <option value="" disabled selected></option>
+                    <option value="" disabled selected>select country</option>
                   {% for c in country_list %}
                     <option value={{c.country_id}}>{{c.country_id}}</option>
                   {% endfor %}
@@ -217,7 +210,7 @@
           <td>
             <div style="display:grid;grid-template-columns: 30px 30px auto" >
               <span style="color:grey">{{invoice.contract.transaction_direction}}:</span>
-              <span style="color:grey">{{invoice.currency}}</span>
+              <span style="color:grey">{{invoice.contract.contract_currency.currency}}</span>
               <span>{{invoice.amount|floatformat:"-3g"}}</span>
             </div>
           </td>
@@ -249,6 +242,7 @@
     <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
     <script src="{% static 'royalty_app/invoices.js'%}"></script>
     <script src="{% static 'royalty_app/easy-number-separator.js'%}"></script>
+    <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
 
 
 

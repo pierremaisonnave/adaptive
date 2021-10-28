@@ -30,14 +30,7 @@
   </div> 
   <div id="column_selection" style=" display:none" >
     <table class="table table-striped table-sm" id="beneficiary_table" >
-      <thead>
-        <tr >
-          <th  > </th>
-          <th ></th>
-        </tr>
-      </thead>
       <tbody>
-
         <tr >
           <td ><input type="checkbox" checked value=1 onclick="column_visibility(this,1)"></td>
           <td >Partner Code</td>
@@ -53,15 +46,13 @@
           <td >Bank account</td>
           <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6)"></td>
           <td >Payment type</td>
-
         </tr>
-        
       </tbody>
     </table>
   </div> 
 
 
-    <div class="table-responsive">
+    <div class="table-responsive" >
       <table class="table table-striped table-sm " id="partners_table" style="width: 100%;">
         <thead>
           <tr class="search_box_class">
@@ -82,10 +73,9 @@
             <th id="partner_country" style="padding-left: 8px;">Country</th>
             <th style="padding-left: 8px;">Bank account</th>
             <th style="padding-left: 8px;">Payment type</th>
-            <th >Request type</th>
+            <th style="width: 100px;">Request type</th>
           </tr>
         </thead>
-
         <tbody id="tbody_partner">
           {% for partner in partner_list %}
             <tr id="partner_{{partner.id}}" partner_id={{partner.id}}> 
@@ -121,11 +111,11 @@
                 <span >{{partner.partner_payment_type}}</span>
 
                 <td>
-                  <div style="width:100px ;float: right;" >
+                  <div style="width:100px ;margin-left:8px;" >
                       <div  class="comboTreeInputWrapper" dd_id="{{partner.id}}" >
                         <button class="comboTreeInputBox" style="width:100px; margin:2px;background-color:transparent" dd_id="{{partner.id}}">{{partner.status}}</button>
                       </div>
-                      <div  class="comboTreeDropDownContainer " id="dropdown_{{partner.id}}" style="display: none;border-radius: 0.35rem;overflow: hidden; margin-top:5px ;right:0px; min-width: 160px;padding:5px">
+                      <div  class="comboTreeDropDownContainer " id="dropdown_{{partner.id}}" style="display: none;border-radius: 0.35rem;overflow: hidden; margin-top:5px ;right:12px; min-width: 160px;padding:5px">
           
                         <li style="display: block; padding-left:0px; margin:2px"    >
                           <button   class="approve_button" onclick='approve({{partner.id}},"{{partner.status}}")'>Approve</button>

@@ -154,10 +154,1406 @@
           </select>
         </td>
       </tr>
-
     </table> 
-
   </form>
+     
+  <!----------------------------------------------------------------------------->
+  <!----------------------------------Rule table for royalty--------------------->
+  <!----------------------------------------------------------------------------->
+  <div style="display:grid; grid-template-columns: 20px auto">
+    <span class="bi-arrow-right-circle " id="unhide_rule_table" onclick='unhide_table("rule_table")'></span>
+    <span hidden class="bi-arrow-down-circle " id="hide_rule_table" onclick='hide_table("rule_table")'></span>
+    <h5 >Rules</h5>
+  </div>
+
+  <span hidden  id="unique_row_number">{{rule_list|length}}</span>
+ 
+  <div id="rule_table" hidden>
+       <!------------------------SALES------------------------------------->  
+
+        <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
+          <span hidden class="bi-arrow-right-circle " id="unhide_SALES_table" onclick='unhide_table("SALES_table")'></span>
+          <span  class="bi-arrow-down-circle " id="hide_SALES_table" onclick='hide_table("SALES_table")'></span>
+          <span >SALES</span>
+        </div>
+
+        
+        <table  style="min-width:1190px;margin-left:10px" class="table table-striped table-sm" id="SALES_table" >
+          <thead>
+            <tr >
+              <th style="width:15vw; min-width:150px">Formulation</th>
+              <th style="width:15vw; min-width:150px">country</th>
+              <th style="width: 100px">Period from</th>
+              <th style="width: 100px">Period to</th>
+              <th style="height: 45px;"></th>
+            </tr>
+          </thead>   
+          <tbody>
+            {% for rule in rule_list %}
+              {% if rule.rule_type == "SALES" %}
+                <tr> 
+                  <td > <!--Formulation  -->
+                    <div onclick="import_form_list(this)" class="comboTreeWrapper" >
+                        <div  class="comboTreeInputWrapper" dd_id="form_SALES{{forloop.counter0}}">
+                          <input  value='{{ rule.formulation.all|join:"," }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_SALES{{forloop.counter0}}" id="item_list_display_form_SALES{{forloop.counter0}}">
+                          <input   value='{{ rule.formulation.all|join:"," }}'  type="text" hidden  id="item_list_form_SALES{{forloop.counter0}}" selection_mode=""> 
+                        </div>
+                      </div>
+                  </td>
+
+                  <td> <!--Country-->
+                    <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
+                      <div  class="comboTreeInputWrapper" dd_id="ctry_SALES{{forloop.counter0}}">
+                        <input
+                        {% if rule.country_incl_excl == "EXCLUDE" %}
+                          {% if rule.country_list != "---" %}
+                            value='All except : {{ rule.country_list}}'
+                          {% else %}
+                            value='All'
+                          {% endif %}
+                        {% else %}
+                          value='{{ rule.country_list }}'
+                        {% endif %} 
+                        style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_SALES{{forloop.counter0}}" id="item_list_display_ctry_SALES{{forloop.counter0}}">
+                        <input  
+                          {% if rule.country_list == "---" %}
+                            value=''
+                          {% else %} 
+                            value='{{rule.country_list}}' 
+                          {% endif %}
+                          type="text" hidden  id="item_list_ctry_SALES{{forloop.counter0}}" selection_mode=""> 
+                      </div>
+                    </div>
+                  </td>
+                  
+                  <td><!--Date From-->
+                    <input style="background-color:transparent; border-style: None; "  type="date" value={{rule.period_from|date:"Y-m-d"}}>
+                  </td>
+
+                  <td><!--Date To-->
+                    <input style="background-color:transparent; border-style: None "  type="date" value={{rule.period_to|date:"Y-m-d"}}>
+                  </td>
+
+                  <td ><!-- Delete Button-->
+                    <button  class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+                  </td>
+                </tr>  
+              {% endif %}    
+            {% endfor %}
+            <tr> <!--empty New row-->
+              <td onchange="add_new_SALES(this)"> <!--Formulation-->
+                <div  onclick="import_form_list(this)" class="comboTreeWrapper" >
+                    <div  class="comboTreeInputWrapper" dd_id="form_SALES{{rule_list|length}}">
+                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_SALES{{rule_list|length}}" id="item_list_display_form_SALES{{rule_list|length}}">
+                      <input   type="text" hidden  id="item_list_form_SALES{{rule_list|length}}" selection_mode=""> 
+                    </div>
+                  </div>
+              </td>
+
+              <td> <!--Country-->
+                <div onclick="import_country_list(this)" class="comboTreeWrapper ">
+                  <div  class="comboTreeInputWrapper" dd_id="ctry_SALES{{rule_list|length}}">
+                    <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_SALES{{rule_list|length}}" id="item_list_display_ctry_SALES{{rule_list|length}}">
+                    <input  type="text" hidden  id="item_list_ctry_SALES{{rule_list|length}}" selection_mode=""> 
+                  </div>
+                </div>
+              </td>
+
+              <td><!--Date From-->
+                <input style="background-color:transparent; border-style: None "  type="date" value="1900-01-01">
+              </td>
+
+              <td><!--Date To-->
+                <input style="background-color:transparent; border-style: None "  type="date" value="2100-01-01">
+              </td>
+
+              <td  ><!-- Delete Button-->
+                <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- new Rule: when the user change the value of the last row (formulation cell), we automatically enter a new row-->
+        <table hidden>
+          <tbody id="hidden_row_SALES"> 
+            <tr>
+              <td onchange="add_new_SALES(this)" ><!-- Formula -->
+                <div  class="comboTreeWrapper">
+                    <div  class="comboTreeInputWrapper" dd_id="form_new_SALES">
+                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_new_SALES" id="item_list_display_form_new_SALES">
+                      <input   type="text" hidden  id="item_list_form_new_SALES" selection_mode=""> 
+                    </div>
+                    <div  class="comboTreeDropDownContainer" id="dropdown_form_new_SALES" style="display: none;">
+                      <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_new_SALES">
+                        <ul  >
+                          <li class="selection_mode" >
+                            <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_new_SALES"></span>
+                            <ul hidden>
+                              <input type="checkbox" id="select_mode_form_new_SALES"  style="margin-right:5px;" dd_id="form_new_SALES" value="Select all exept:">Select all exept
+                            </ul>
+                          {% for formulation in formulation_list %}
+                            <li   style="display: block;">
+                              <input type="checkbox" style="margin-right:5px;"  dd_id="form_new_SALES" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                    </div>
+                  </div>
+              </td>
+              <td><!-- Country -->
+                <div  class="comboTreeWrapper ">
+                  <div  class="comboTreeInputWrapper" dd_id="ctry_new_SALES">
+                    <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_new_SALES" id="item_list_display_ctry_new_SALES">
+                    <input   type="text" hidden  id="item_list_ctry_new_SALES" selection_mode=""> 
+                  </div>
+                  <div  class="comboTreeDropDownContainer" id="dropdown_ctry_new_SALES" style="display: none;">
+                    <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_new_SALES">
+                      <ul  >
+                        <li class="selection_mode" >
+                          <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_new_SALES"></span>
+                          <ul >
+                              <li  >
+                                <input type="checkbox" id="select_mode_ctry_new_SALES"  style="margin-right:5px;" dd_id="ctry_new_SALES" value="Select all exept:">Select all exept
+                              </li>
+                          </ul>
+                        </li>
+                        {% for region in region_list %}
+                          <li>
+                            <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_new_SALES" group_id={{region.id}} ></span>
+                            <span class="group" dd_id="ctry_new_SALES">{{region.region}}</span>
+                            <ul style="display: block;" id='ctry_new_SALES_{{region.id}}'>
+                              {% for country in country_list %}
+                                {% if country.country_region == region %}
+                                <li   style="display: block;">
+                                  <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_new_SALES" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>
+                                </li>
+                                {% endif  %}
+                              {% endfor %}
+                            </ul>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                  </div>
+                </div>
+              </td>
+              <td><!-- from -->
+                <input style="background-color:transparent; border-style: None " type="date" value="1900-01-01">
+              </td>
+              <td><!-- To -->
+                <input style="background-color:transparent; border-style: None " type="date" value="2100-01-01">
+              </td>
+              <td >
+                <button hidden   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
+              </tr>
+            <tr>
+          </tbody>
+        </table>
+      <!------------------------COGS------------------------------------->  
+        <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
+          <span hidden class="bi-arrow-right-circle " id="unhide_COGS_table" onclick='unhide_table("COGS_table")'></span>
+          <span  class="bi-arrow-down-circle " id="hide_COGS_table" onclick='hide_table("COGS_table")'></span>
+          <span >COGS</span>
+        </div>
+        <table  style="min-width:1190px;margin-left:10px"  class="table table-striped table-sm" id="COGS_table" >
+          <thead>
+            <tr >
+              <th style="width:15vw; min-width:150px">Formulation</th>
+              <th style="width:15vw; min-width:150px">country</th>
+              <th style="width: 100px">Period from</th>
+              <th style="width: 100px">Period to</th>
+              <th style="width: 140px">COGS per unit</th>
+              <th style=" height: 45px;"></th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            {% for rule in rule_list %}
+              {% if rule.rule_type == "COGS" %}
+                <tr> 
+                  <td > <!--Formulation  -->
+                    <div onclick="import_form_list(this)" class="comboTreeWrapper" >
+                        <div  class="comboTreeInputWrapper" dd_id="form_COGS{{forloop.counter0}}">
+                          <input  value='{{ rule.formulation.all|join:"," }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_COGS{{forloop.counter0}}" id="item_list_display_form_COGS{{forloop.counter0}}">
+                          <input   value='{{ rule.formulation.all|join:"," }}'  type="text" hidden  id="item_list_form_COGS{{forloop.counter0}}" selection_mode=""> 
+                        </div>
+                      </div>
+                  </td>
+                  <td> <!--Country-->
+                    <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
+                      <div  class="comboTreeInputWrapper" dd_id="ctry_COGS{{forloop.counter0}}">
+                        <input
+                        {% if rule.country_incl_excl == "EXCLUDE" %}
+                          {% if rule.country_list != "---" %}
+                            value='All except : {{ rule.country_list}}'
+                          {% else %}
+                            value='All'
+                          {% endif %}
+                        {% else %}
+                          value='{{ rule.country_list }}'
+                        {% endif %} 
+                        style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_COGS{{forloop.counter0}}" id="item_list_display_ctry_COGS{{forloop.counter0}}">
+                        <input  
+                          {% if rule.country_list == "---" %}
+                            value=''
+                          {% else %} 
+                            value='{{rule.country_list}}' 
+                          {% endif %}
+                          type="text" hidden  id="item_list_ctry_COGS{{forloop.counter0}}" selection_mode=""> 
+                      </div>
+                    </div>
+                  </td>
+                  <td><!--Date From-->
+                    <input style="background-color:transparent; border-style: None; "  type="date" value={{rule.period_from|date:"Y-m-d"}}>
+                  </td>
+                  <td><!--Date To-->
+                    <input style="background-color:transparent; border-style: None "  type="date" value={{rule.period_to|date:"Y-m-d"}}>
+                  </td>
+                  <td style="display:flex"><!-- Qty amount-->
+                    <input class="number-separator" style="max-width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text" value={{rule.qty_value|floatformat:"-3g"}}>
+                    <input  style="width:60px ;background-color: transparent;border-style: None" onclick="import_qty_value_currency(this)" value={{rule.qty_value_currency}}  >
+                  </td>
+                  <td ><!-- Delete Button-->
+                    <button  class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+                  </td>
+                </tr> 
+              {% endif %}    
+            {% endfor %}
+            <tr> <!--empty New row-->
+              <td onchange="add_new_COGS(this)"> <!--Formulation-->
+                <div  onclick="import_form_list(this)" class="comboTreeWrapper" >
+                    <div  class="comboTreeInputWrapper" dd_id="form_COGS{{rule_list|length}}">
+                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_COGS{{rule_list|length}}" id="item_list_display_form_COGS{{rule_list|length}}">
+                      <input   type="text" hidden  id="item_list_form_COGS{{rule_list|length}}" selection_mode=""> 
+                    </div>
+                  </div>
+              </td>
+              <td> <!--Country-->
+                <div onclick="import_country_list(this)" class="comboTreeWrapper ">
+                  <div  class="comboTreeInputWrapper" dd_id="ctry_COGS{{rule_list|length}}">
+                    <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_COGS{{rule_list|length}}" id="item_list_display_ctry_COGS{{rule_list|length}}">
+                    <input  type="text" hidden  id="item_list_ctry_COGS{{rule_list|length}}" selection_mode=""> 
+                  </div>
+                </div>
+              </td>
+              <td><!--Date From-->
+                <input style="background-color:transparent; border-style: None "  type="date" value="1900-01-01">
+              </td>
+              <td><!--Date To-->
+                <input style="background-color:transparent; border-style: None "  type="date" value="2100-01-01">
+              </td>
+              <td style="display:flex"><!-- Qty amount-->
+                <input class="number-separator" style="max-width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text">
+                <select style=" background-color:transparent; border:None ;width:60px">
+                  {% for curr in currency_list %}
+                    {% if contract.contract_currency == curr %}
+                      <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                    {% else %}
+                      <option value={{curr.currency}}>{{curr.currency}}</option>          
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </td>
+              <td ><!-- Delete Button-->
+                <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+        <!-- new Rule: when the user change the value of the last row (formulation cell), we automatically enter a new row-->
+        <table hidden>
+          <tbody id="hidden_row_COGS"> 
+            <tr>
+              <td onchange="add_new_COGS(this)" >
+                <div  class="comboTreeWrapper">
+                    <div  class="comboTreeInputWrapper" dd_id="form_new_COGS">
+                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_new_COGS" id="item_list_display_form_new_COGS">
+                      <input   type="text" hidden  id="item_list_form_new_COGS" selection_mode=""> 
+                    </div>
+                    <div  class="comboTreeDropDownContainer" id="dropdown_form_new_COGS" style="display: none;">
+                      <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_new_COGS">
+                        <ul  >
+                          <li class="selection_mode" >
+                            <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_new_COGS"></span>
+                            <ul hidden>
+                              <input type="checkbox" id="select_mode_form_new_COGS"  style="margin-right:5px;" dd_id="form_new_COGS" value="Select all exept:">Select all exept
+                            </ul>
+                          {% for formulation in formulation_list %}
+                            <li   style="display: block;">
+                              <input type="checkbox" style="margin-right:5px;"  dd_id="form_new_COGS" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                    </div>
+                  </div>
+              </td>
+              <td>
+                <div  class="comboTreeWrapper ">
+                  <div  class="comboTreeInputWrapper" dd_id="ctry_new_COGS">
+                    <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_new_COGS" id="item_list_display_ctry_new_COGS">
+                    <input   type="text" hidden  id="item_list_ctry_new_COGS" selection_mode=""> 
+                  </div>
+                  <div  class="comboTreeDropDownContainer" id="dropdown_ctry_new_COGS" style="display: none;">
+                    <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_new_COGS">
+                      <ul  >
+                        <li class="selection_mode" >
+                          <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_new_COGS"></span>
+                          <ul >
+                              <li  >
+                                <input type="checkbox" id="select_mode_ctry_new_COGS"  style="margin-right:5px;" dd_id="ctry_new_COGS" value="Select all exept:">Select all exept
+                              </li>
+                          </ul>
+                        </li>
+                        {% for region in region_list %}
+                          <li>
+                            <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_new_COGS" group_id={{region.id}} ></span>
+                            <span class="group" dd_id="ctry_new_COGS">{{region.region}}</span>
+                            <ul style="display: block;" id='ctry_new_COGS_{{region.id}}'>
+                              {% for country in country_list %}
+                                {% if country.country_region == region %}
+                                <li   style="display: block;">
+                                  <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_new_COGS" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>
+                                </li>
+                                {% endif  %}
+                              {% endfor %}
+                            </ul>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <input style="background-color:transparent; border-style: None " type="date" value="1900-01-01">
+              </td>
+              <td>
+                <input style="background-color:transparent; border-style: None " type="date" value="2100-01-01">
+              </td>
+              <td   style="display:flex"><!--Qty-->
+                <input class="number-separator" style="width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text">
+                <select style=" background-color:transparent; border:None ;width:60px">
+                  {% for curr in currency_list %}
+                    {% if contract.contract_currency == curr %}
+                      <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                    {% else %}
+                      <option value={{curr.currency}}>{{curr.currency}}</option>          
+                    {% endif %}
+                  {% endfor %}
+                </select>
+
+              </td>
+              <td >
+                <button hidden   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
+              </tr>
+            <tr>
+          </tbody>
+        </table>
+      <!------------------------ROYALTY------------------------------------->  
+        <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
+          <span hidden class="bi-arrow-right-circle " id="unhide_ROYALTY_table" onclick='unhide_table("ROYALTY_table")'></span>
+          <span  class="bi-arrow-down-circle " id="hide_ROYALTY_table" onclick='hide_table("ROYALTY_table")'></span>
+          <span >ROYALTY</span>
+        </div>
+        <table  style="min-width:1190px;margin-left:10px" class="table table-striped table-sm" id="ROYALTY_table" >
+          <thead>
+            <tr >
+              <th style="width:15vw; min-width:150px">Formulation</th>
+              <th style="width:15vw; min-width:150px">country</th>
+              <th style="width: 100px">Period from</th>
+              <th style="width: 100px">Period to</th>
+              <th style="width: 80px; min-width: 80px ">Type</th>
+              <th style="width: 70px ">Tranche</th>
+              <th style="width: 140px">Royalty</th>
+              <th style="height: 45px;"></th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            {% for rule in rule_list %}
+              {% if rule.rule_type == "ROYALTY" %}
+                <tr> 
+                  <td > <!--Formulation  -->
+                    <div onclick="import_form_list(this)" class="comboTreeWrapper" >
+                        <div  class="comboTreeInputWrapper" dd_id="form_ROYALTY{{forloop.counter0}}">
+                          <input  value='{{ rule.formulation.all|join:"," }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_ROYALTY{{forloop.counter0}}" id="item_list_display_form_ROYALTY{{forloop.counter0}}">
+                          <input   value='{{ rule.formulation.all|join:"," }}'  type="text" hidden  id="item_list_form_ROYALTY{{forloop.counter0}}" selection_mode=""> 
+                        </div>
+                      </div>
+                  </td>
+
+                  <td> <!--Country-->
+                    <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
+                      <div  class="comboTreeInputWrapper" dd_id="ctry_ROYALTY{{forloop.counter0}}">
+                        <input
+                        {% if rule.country_incl_excl == "EXCLUDE" %}
+                          {% if rule.country_list != "---" %}
+                            value='All except : {{ rule.country_list}}'
+                          {% else %}
+                            value='All'
+                          {% endif %}
+                        {% else %}
+                          value='{{ rule.country_list }}'
+                        {% endif %} 
+                        style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_ROYALTY{{forloop.counter0}}" id="item_list_display_ctry_ROYALTY{{forloop.counter0}}">
+                        <input  
+                          {% if rule.country_list == "---" %}
+                            value=''
+                          {% else %} 
+                            value='{{rule.country_list}}' 
+                          {% endif %}
+                          type="text" hidden  id="item_list_ctry_ROYALTY{{forloop.counter0}}" selection_mode=""> 
+                      </div>
+                    </div>
+                  </td>
+
+                  <td><!--Date From-->
+                    <input style="background-color:transparent; border-style: None; "  type="date" value={{rule.period_from|date:"Y-m-d"}}>
+                  </td>
+
+                  <td><!--Date To-->
+                    <input style="background-color:transparent; border-style: None "  type="date" value={{rule.period_to|date:"Y-m-d"}}>
+                  </td>
+                  <td><!--Qty or Rate-->
+                    <select class="fname"  onchange="tranche_field_ROYALTY(this)">
+                          <option value="RATE" {% if rule.field_type == 'RATE' %}selected{% endif  %}>RATE</option>
+                          <option value="QTY" {% if rule.field_type == 'QTY' %}selected{% endif  %}>QTY</option>
+                    </select>
+                  </td>
+                  <td><!--YES/NO Tranche-->
+                    <select class="fname"  onchange="tranche_field_ROYALTY(this)">
+                          <option value="NO" {% if rule.tranche_type == 'NO' %}selected{% endif  %}>NO</option>
+                          <option value="YES" {% if rule.tranche_type == 'YES' %}selected{% endif  %}>YES</option>
+                    </select>
+                  </td>
+
+                  <td {% if rule.tranche_type == 'YES' or rule.field_type == 'QTY' %}hidden {% endif  %}><!-- Rate percentage-->
+                    <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number" value={{rule.rate_value|floatformat:2}}>
+                  </td>
+
+                  <td {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}hidden {% endif  %}><!--table for tranches-->
+          
+                    <table class="table table-striped " style="width: 380px;background-color:white">
+                      <thead>
+                        <tr>
+                          <th>from</th>
+                          <th style="width:120px">to</th>
+                          <th style="width:80px">rate</th>
+                          <th>
+                            <select style=" background-color:transparent; border:None ;width:60px">
+                              {% for curr in currency_list %}
+                                {% if rule.tranche_currency == curr %}
+                                  <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                                {% else %}
+                                  <option value={{curr.currency}}>{{curr.currency}}</option>          
+                                {% endif %}
+                              {% endfor %}
+                            </select>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for tranche in tranche_list %}
+                          {% if tranche.rule == rule %}
+                          <tr>
+                            <td>{{tranche.from_amount|floatformat:"-3g"}}</td>
+                            <td {% if tranche.to_amount == 0 %}onchange="add_row_tranche_rate(this)"{% endif %}>
+                              <input value='{% if tranche.to_amount == 0 %}{% else %}{{tranche.to_amount|floatformat:"-3g"}}{% endif %}' onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="infinity"  type="text">
+                            </td>
+                            <td>
+                              <input value={{tranche.percentage}} style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                            </td>
+                            <td>
+                              <button  {% if tranche.to_amount == 0 %}hidden{% endif %} class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
+                          </tr>
+                          {% endif %}
+                        {% endfor %}
+
+                        {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}
+                        <tr>
+                          <td>0</td>
+                          <td onchange="add_row_tranche_rate(this)">
+                            <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="infinity"   type="text">
+                          </td>
+                          <td>
+                            <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                          </td>
+                          <td >
+                            <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+                          </td>
+                        </tr>
+                        {% endif %}
+                      <tbody>
+                    </table>
+                  </td>
+
+                  <td {% if rule.tranche_type == 'YES' or rule.field_type == 'RATE' %} hidden {% endif  %} style="display:flex"><!-- Qty amount-->
+                    
+                    <input class="number-separator" style="max-width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text" value={{rule.qty_value|floatformat:"-3g"}}>
+                    <input  style="width:60px ;background-color: transparent;border-style: None" onclick="import_qty_value_currency(this)" value={{rule.qty_value_currency}}  >
+                  </td>
+                  
+                  <td {% if rule.tranche_type == 'NO' or rule.field_type == 'RATE' %}hidden {% endif  %}><!-- Tranche for qty : not available-->
+                    <span>functionality not activated</span>
+                  </td>
+
+                  <td ><!-- Delete Button-->
+                    <button  class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+                  </td>
+                </tr> 
+              {% endif %}         
+            {% endfor %}
+            <tr> <!--empty New row-->
+              <td onchange="add_new_ROYALTY(this)"> <!--Formulation-->
+                <div  onclick="import_form_list(this)" class="comboTreeWrapper" >
+                    <div  class="comboTreeInputWrapper" dd_id="form_ROYALTY{{rule_list|length}}">
+                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_ROYALTY{{rule_list|length}}" id="item_list_display_form_ROYALTY{{rule_list|length}}">
+                      <input   type="text" hidden  id="item_list_form_ROYALTY{{rule_list|length}}" selection_mode=""> 
+                    </div>
+                  </div>
+              </td>
+
+              <td> <!--Country-->
+                <div onclick="import_country_list(this)" class="comboTreeWrapper ">
+                  <div  class="comboTreeInputWrapper" dd_id="ctry_ROYALTY{{rule_list|length}}">
+                    <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_ROYALTY{{rule_list|length}}" id="item_list_display_ctry_ROYALTY{{rule_list|length}}">
+                    <input  type="text" hidden  id="item_list_ctry_ROYALTY{{rule_list|length}}" selection_mode=""> 
+                  </div>
+                </div>
+              </td>
+
+              <td><!--Date From-->
+                <input style="background-color:transparent; border-style: None "  type="date" value="1900-01-01">
+              </td>
+
+              <td><!--Date To-->
+                <input style="background-color:transparent; border-style: None "  type="date" value="2100-01-01">
+              </td> 
+              <td><!--Qty or Rate-->
+                <select class="fname"  onchange="tranche_field_ROYALTY(this)">
+                      <option value="RATE" selected="selected">RATE</option>
+                      <option value="QTY" >QTY</option>
+                </select>
+              </td>
+              <td><!--YES/NO Tranche-->
+                <select class="fname"  onchange="tranche_field_ROYALTY(this)">
+                      <option value="NO" selected="selected">NO</option>
+                      <option value="YES" >YES</option>
+                </select>
+              </td>
+
+              <td ><!-- Rate percentage-->
+                <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+              </td>
+
+              <td hidden><!--table for tranches-->
+                <table class="table table-striped " style="width: 380px;background-color:white">
+                  <thead>
+                    <tr>
+                      <th>from</th>
+                      <th style="width:120px">to</th>
+                      <th style="width:80px">rate</th>
+                      <th>
+                        <select style=" background-color:transparent; border:None ;width:60px">
+                          {% for curr in currency_list %}
+                            {% if contract.contract_currency == curr %}
+                              <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                            {% else %}
+                              <option value={{curr.currency}}>{{curr.currency}}</option>          
+                            {% endif %}
+                          {% endfor %}
+                        </select>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>0</td>
+                      <td onchange="add_row_tranche_rate(this)">
+                        <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="sales"   type="text">
+                      </td>
+                      <td>
+                        <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                      </td>
+                      <td >
+                        <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+                      </td>
+                    </tr>
+                  <tbody>
+                </table>
+              </td>
+
+              <td hidden  style="display:flex"><!-- Qty amount-->
+                <input class="number-separator" style="max-width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text">
+                <select style=" background-color:transparent; border:None ;width:60px">
+                  {% for curr in currency_list %}
+                    {% if contract.contract_currency == curr %}
+                      <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                    {% else %}
+                      <option value={{curr.currency}}>{{curr.currency}}</option>          
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </td>
+              
+              <td hidden><!-- Tranche for qty : not available-->
+                <span>functionality not activated</span>
+              </td>
+
+              <td ><!-- Delete Button-->
+                <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+        <!-- new Rule: when the user change the value of the last row (formulation cell), we automatically enter a new row-->
+        <table hidden>
+          <tbody id="hidden_row_ROYALTY"> 
+            <tr>
+              <td onchange="add_new_ROYALTY(this)" >
+                <div  class="comboTreeWrapper">
+                    <div  class="comboTreeInputWrapper" dd_id="form_new_ROYALTY">
+                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_new_ROYALTY" id="item_list_display_form_new_ROYALTY">
+                      <input   type="text" hidden  id="item_list_form_new_ROYALTY" selection_mode=""> 
+                    </div>
+                    <div  class="comboTreeDropDownContainer" id="dropdown_form_new_ROYALTY" style="display: none;">
+                      <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_new_ROYALTY">
+                        <ul  >
+                          <li class="selection_mode" >
+                            <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_new_ROYALTY"></span>
+                            <ul hidden>
+                              <input type="checkbox" id="select_mode_form_new_ROYALTY"  style="margin-right:5px;" dd_id="form_new_ROYALTY" value="Select all exept:">Select all exept
+                            </ul>
+                          {% for formulation in formulation_list %}
+                            <li   style="display: block;">
+                              <input type="checkbox" style="margin-right:5px;"  dd_id="form_new_ROYALTY" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                    </div>
+                  </div>
+              </td>
+              <td>
+                <div  class="comboTreeWrapper ">
+                  <div  class="comboTreeInputWrapper" dd_id="ctry_new_ROYALTY">
+                    <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_new_ROYALTY" id="item_list_display_ctry_new_ROYALTY">
+                    <input   type="text" hidden  id="item_list_ctry_new_ROYALTY" selection_mode=""> 
+                  </div>
+                  <div  class="comboTreeDropDownContainer" id="dropdown_ctry_new_ROYALTY" style="display: none;">
+                    <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_new_ROYALTY">
+                      <ul  >
+                        <li class="selection_mode" >
+                          <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_new_ROYALTY"></span>
+                          <ul >
+                              <li  >
+                                <input type="checkbox" id="select_mode_ctry_new_ROYALTY"  style="margin-right:5px;" dd_id="ctry_new_ROYALTY" value="Select all exept:">Select all exept
+                              </li>
+                          </ul>
+                        </li>
+                        {% for region in region_list %}
+                          <li>
+                            <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_new_ROYALTY" group_id={{region.id}} ></span>
+                            <span class="group" dd_id="ctry_new_ROYALTY">{{region.region}}</span>
+                            <ul style="display: block;" id='ctry_new_ROYALTY_{{region.id}}'>
+                              {% for country in country_list %}
+                                {% if country.country_region == region %}
+                                <li   style="display: block;">
+                                  <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_new_ROYALTY" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>
+                                </li>
+                                {% endif  %}
+                              {% endfor %}
+                            </ul>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <input style="background-color:transparent; border-style: None " type="date" value="1900-01-01">
+              </td>
+              <td>
+                <input style="background-color:transparent; border-style: None " type="date" value="2100-01-01">
+              </td>
+              <td>
+                <select class="fname"  onchange="tranche_field_ROYALTY(this)">
+                      <option value="RATE" selected="selected">RATE</option>
+                      <option value="QTY" >QTY</option>
+                </select>
+              </td>
+              <td>
+                <select class="fname"  onchange="tranche_field_ROYALTY(this)">
+                      <option value="NO" selected="selected">NO</option>
+                      <option value="YES" >YES</option>
+                </select>
+              </td>
+
+              <td>
+                <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+              </td>
+              <td hidden><!--Tranche or Rate-->
+                <table class="table table-striped " style="width: 380px;background-color:white">
+                  <thead>
+                    <tr>
+                      <th>from</th>
+                      <th style="width:120px">to </th>
+                      <th style="width:80px" >rate</th>
+                      <th>
+                        <select style=" background-color:transparent; border:None ;width:60px">
+                          {% for curr in currency_list %}
+                            {% if contract.contract_currency == curr %}
+                              <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                            {% else %}
+                              <option value={{curr.currency}}>{{curr.currency}}</option>          
+                            {% endif %}
+                          {% endfor %}
+                        </select>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>0</td>
+                      <td onchange="add_row_tranche_rate(this)">
+                        <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="sales"   type="text">
+                      </td>
+                      <td>
+                        <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                      </td>
+                      <td >
+                        <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
+                      </tr>
+                  <tbody>
+                </table>
+              </td>
+              <td  hidden style="display:flex"><!--Qty-->
+                <input class="number-separator" style="width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text">
+                <select style=" background-color:transparent; border:None ;width:60px">
+                  {% for curr in currency_list %}
+                    {% if contract.contract_currency == curr %}
+                      <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                    {% else %}
+                      <option value={{curr.currency}}>{{curr.currency}}</option>          
+                    {% endif %}
+                  {% endfor %}
+                </select>
+
+              </td>
+              <td  hidden><!--tranche Qty-->
+                <span>functionality not activated</span> 
+              </td>
+              <td >
+                <button hidden   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
+              </tr>
+            <tr>
+          </tbody>
+        </table>
+
+        <!--new tranche: when the user enter a value in the "to value" of the tranche, a new row is created--> 
+        <table hidden>
+          <tbody id="hidden_tranche_rate_row">
+            <tr>
+              <td>0</td>
+              <td onchange="add_row_tranche_rate(this)" >
+                <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="infinity"  type="text">
+              </td>
+              <td>
+                <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+              </td>
+              <td>
+                <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
+              </tr>
+          <tbody>
+        </table>
+      <!------------------------MARGIN------------------------------------->  
+        <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
+          <span hidden class="bi-arrow-right-circle " id="unhide_MARGIN_table" onclick='unhide_table("MARGIN_table")'></span>
+          <span  class="bi-arrow-down-circle " id="hide_MARGIN_table" onclick='hide_table("MARGIN_table")'></span>
+          <span >MARGIN</span>
+        </div>
+        <table  style="min-width:1190px;margin-left:10px" class="table table-striped table-sm" id="MARGIN_table" >
+          
+          <thead>
+            <tr >
+              <th style="width:15vw; min-width:150px">Formulation</th>
+              <th style="width:15vw; min-width:150px">country</th>
+              <th style="width: 100px">Period from</th>
+              <th style="width: 100px">Period to</th>
+              <th style="width: 140px">Tranche</th>
+              <th >Margin</th>
+              <th style=" height: 45px;"></th>
+            </tr>
+          </thead>
+          
+          <tbody>
+            {% for rule in rule_list %}
+              {% if rule.rule_type == "MARGIN" %}
+                <tr> 
+                  <td > <!--Formulation  -->
+                    <div onclick="import_form_list(this)" class="comboTreeWrapper" >
+                        <div  class="comboTreeInputWrapper" dd_id="form_MARGIN{{forloop.counter0}}">
+                          <input  value='{{ rule.formulation.all|join:"," }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_MARGIN{{forloop.counter0}}" id="item_list_display_form_MARGIN{{forloop.counter0}}">
+                          <input   value='{{ rule.formulation.all|join:"," }}'  type="text" hidden  id="item_list_form_MARGIN{{forloop.counter0}}" selection_mode=""> 
+                        </div>
+                      </div>
+                  </td>
+
+                  <td> <!--Country-->
+                    <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
+                      <div  class="comboTreeInputWrapper" dd_id="ctry_MARGIN{{forloop.counter0}}">
+                        <input
+                        {% if rule.country_incl_excl == "EXCLUDE" %}
+                          {% if rule.country_list != "---" %}
+                            value='All except : {{ rule.country_list}}'
+                          {% else %}
+                            value='All'
+                          {% endif %}
+                        {% else %}
+                          value='{{ rule.country_list }}'
+                        {% endif %} 
+                        style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_MARGIN{{forloop.counter0}}" id="item_list_display_ctry_MARGIN{{forloop.counter0}}">
+                        <input 
+                          {% if rule.country_list == "---" %}
+                            value=''
+                          {% else %} 
+                            value='{{rule.country_list}}' 
+                          {% endif %}
+                          type="text" hidden  id="item_list_ctry_MARGIN{{forloop.counter0}}" selection_mode=""> 
+                      </div>
+                    </div>
+                  </td>
+                  
+                  <td><!--Date From-->
+                    <input style="background-color:transparent; border-style: None; "  type="date" value={{rule.period_from|date:"Y-m-d"}}>
+                  </td>
+
+                  <td><!--Date To-->
+                    <input style="background-color:transparent; border-style: None "  type="date" value={{rule.period_to|date:"Y-m-d"}}>
+                  </td>
+
+                  <td><!--YES/NO Tranche-->
+                    <select class="fname"  onchange="tranche_field_MARGIN(this)">
+                          <option value="NO" {% if rule.tranche_type == 'NO' %}selected{% endif  %}>NO</option>
+                          <option value="YES" {% if rule.tranche_type == 'YES' %}selected{% endif  %}>YES</option>
+                    </select>
+                  </td>
+
+                  <td {% if rule.tranche_type == 'YES' or rule.field_type == 'QTY' %}hidden {% endif  %}><!-- Rate percentage-->
+                    <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number" value={{rule.rate_value|floatformat:2}}>
+                  </td>
+
+                  <td {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}hidden {% endif  %}><!--table for tranches-->
+          
+                    <table class="table table-striped " style="width: 380px;background-color:white">
+                      <thead>
+                        <tr>
+                          <th>from</th>
+                          <th style="width:120px">to</th>
+                          <th style="width:80px">rate</th>
+                          <th>
+                            <select style=" background-color:transparent; border:None ;width:60px">
+                              {% for curr in currency_list %}
+                                {% if rule.tranche_currency == curr %}
+                                  <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                                {% else %}
+                                  <option value={{curr.currency}}>{{curr.currency}}</option>          
+                                {% endif %}
+                              {% endfor %}
+                            </select>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for tranche in tranche_list %}
+                          {% if tranche.rule == rule %}
+                          <tr>
+                            <td>{{tranche.from_amount|floatformat:"-3g"}}</td>
+                            <td {% if tranche.to_amount == 0 %}onchange="add_row_tranche_rate(this)"{% endif %}>
+                              <input value='{% if tranche.to_amount == 0 %}{% else %}{{tranche.to_amount|floatformat:"-3g"}}{% endif %}' onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="infinity"  type="text">
+                            </td>
+                            <td>
+                              <input value={{tranche.percentage}} style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                            </td>
+                            <td>
+                              <button  {% if tranche.to_amount == 0 %}hidden{% endif %} class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
+                          </tr>
+                          {% endif %}
+                        {% endfor %}
+
+                        {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}
+                        <tr>
+                          <td>0</td>
+                          <td onchange="add_row_tranche_rate(this)">
+                            <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100px;background-color: transparent;border-style: None;" placeholder="infinity"   type="text">
+                          </td>
+                          <td>
+                            <input style="width:100px;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                          </td>
+                          <td >
+                            <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+                          </td>
+                        </tr>
+                        {% endif %}
+                      <tbody>
+                    </table>
+                  </td>
+
+                  <td ><!-- Delete Button-->
+                    <button  class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+                  </td>
+                </tr> 
+              {% endif %}       
+            {% endfor %}
+            <tr> <!--empty New row-->
+              <td onchange="add_new_MARGIN(this)"> <!--Formulation-->
+                <div  onclick="import_form_list(this)" class="comboTreeWrapper" >
+                    <div  class="comboTreeInputWrapper" dd_id="form_MARGIN{{rule_list|length}}">
+                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_MARGIN{{rule_list|length}}" id="item_list_display_form_MARGIN{{rule_list|length}}">
+                      <input   type="text" hidden  id="item_list_form_MARGIN{{rule_list|length}}" selection_mode=""> 
+                    </div>
+                  </div>
+              </td>
+
+              <td> <!--Country-->
+                <div onclick="import_country_list(this)" class="comboTreeWrapper ">
+                  <div  class="comboTreeInputWrapper" dd_id="ctry_MARGIN{{rule_list|length}}">
+                    <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_MARGIN{{rule_list|length}}" id="item_list_display_ctry_MARGIN{{rule_list|length}}">
+                    <input  type="text" hidden  id="item_list_ctry_MARGIN{{rule_list|length}}" selection_mode=""> 
+                  </div>
+                </div>
+              </td>
+
+              <td><!--Date From-->
+                <input style="background-color:transparent; border-style: None "  type="date" value="1900-01-01">
+              </td>
+
+              <td><!--Date To-->
+                <input style="background-color:transparent; border-style: None "  type="date" value="2100-01-01">
+              </td>
+
+              <td><!--YES/NO Tranche-->
+                <select class="fname"  onchange="tranche_field_MARGIN(this)">
+                      <option value="NO" selected="selected">NO</option>
+                      <option value="YES" >YES</option>
+                </select>
+              </td>
+
+              <td ><!-- Rate percentage-->
+                <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+              </td>
+
+              <td hidden><!--table for tranches-->
+                <table class="table table-striped " style="background-color:white">
+                  <thead>
+                    <tr>
+                      <th>from</th>
+                      <th style="width:120px">to</th>
+                      <th style="width:80px">rate</th>
+                      <th>
+                        <select style=" background-color:transparent; border:None ;width:60px">
+                          {% for curr in currency_list %}
+                            {% if contract.contract_currency == curr %}
+                              <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                            {% else %}
+                              <option value={{curr.currency}}>{{curr.currency}}</option>          
+                            {% endif %}
+                          {% endfor %}
+                        </select>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>0</td>
+                      <td onchange="add_row_tranche_rate(this)">
+                        <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100px;background-color: transparent;border-style: None;" placeholder="sales"   type="text">
+                      </td>
+                      <td>
+                        <input style="width:100px;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                      </td>
+                      <td >
+                        <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
+                      </td>
+                    </tr>
+                  <tbody>
+                </table>
+              </td>
+
+              <td ><!-- Delete Button-->
+                <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+        <!-- new Rule: when the user change the value of the last row (formulation cell), we automatically enter a new row-->
+          <table hidden>
+            <tbody id="hidden_row_MARGIN"> 
+              <tr>
+                <td onchange="add_new_MARGIN(this)" >
+                  <div  class="comboTreeWrapper">
+                      <div  class="comboTreeInputWrapper" dd_id="form_new_MARGIN">
+                        <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_new_MARGIN" id="item_list_display_form_new_MARGIN">
+                        <input   type="text" hidden  id="item_list_form_new_MARGIN" selection_mode=""> 
+                      </div>
+                      <div  class="comboTreeDropDownContainer" id="dropdown_form_new_MARGIN" style="display: none;">
+                        <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_new_MARGIN">
+                          <ul  >
+                            <li class="selection_mode" >
+                              <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_new_MARGIN"></span>
+                              <ul hidden>
+                                <input type="checkbox" id="select_mode_form_new_MARGIN"  style="margin-right:5px;" dd_id="form_new_MARGIN" value="Select all exept:">Select all exept
+                              </ul>
+                            {% for formulation in formulation_list %}
+                              <li   style="display: block;">
+                                <input type="checkbox" style="margin-right:5px;"  dd_id="form_new_MARGIN" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
+                              </li>
+                            {% endfor %}
+                          </ul>
+                      </div>
+                    </div>
+                </td>
+                <td>
+                  <div  class="comboTreeWrapper ">
+                    <div  class="comboTreeInputWrapper" dd_id="ctry_new_MARGIN">
+                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_new_MARGIN" id="item_list_display_ctry_new_MARGIN">
+                      <input   type="text" hidden  id="item_list_ctry_new_MARGIN" selection_mode=""> 
+                    </div>
+                    <div  class="comboTreeDropDownContainer" id="dropdown_ctry_new_MARGIN" style="display: none;">
+                      <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_new_MARGIN">
+                        <ul  >
+                          <li class="selection_mode" >
+                            <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_new_MARGIN"></span>
+                            <ul >
+                                <li  >
+                                  <input type="checkbox" id="select_mode_ctry_new_MARGIN"  style="margin-right:5px;" dd_id="ctry_new_MARGIN" value="Select all exept:">Select all exept
+                                </li>
+                            </ul>
+                          </li>
+                          {% for region in region_list %}
+                            <li>
+                              <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_new_MARGIN" group_id={{region.id}} ></span>
+                              <span class="group" dd_id="ctry_new_MARGIN">{{region.region}}</span>
+                              <ul style="display: block;" id='ctry_new_MARGIN_{{region.id}}'>
+                                {% for country in country_list %}
+                                  {% if country.country_region == region %}
+                                  <li   style="display: block;">
+                                    <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_new_MARGIN" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>
+                                  </li>
+                                  {% endif  %}
+                                {% endfor %}
+                              </ul>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <input style="background-color:transparent; border-style: None " type="date" value="1900-01-01">
+                </td>
+                <td>
+                  <input style="background-color:transparent; border-style: None " type="date" value="2100-01-01">
+                </td>
+                <td>
+                  <select class="fname"  onchange="tranche_field_MARGIN(this)">
+                        <option value="NO" selected="selected">NO</option>
+                        <option value="YES" >YES</option>
+                  </select>
+                </td>
+
+                <td>
+                  <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                </td>
+                <td hidden><!--Tranche or Rate-->
+                  <table class="table table-striped " style="background-color:white">
+                    <thead>
+                      <tr>
+                        <th>from</th>
+                        <th style="width:120px">to </th>
+                        <th style="width:80px">rate</th>
+                        <th>
+                          <select style=" background-color:transparent; border:None ;width:60px">
+                            {% for curr in currency_list %}
+                              {% if contract.contract_currency == curr %}
+                                <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                              {% else %}
+                                <option value={{curr.currency}}>{{curr.currency}}</option>          
+                              {% endif %}
+                            {% endfor %}
+                          </select>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>0</td>
+                        <td onchange="add_row_tranche_rate(this)">
+                          <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100px;background-color: transparent;border-style: None;" placeholder="sales"   type="text">
+                        </td>
+                        <td>
+                          <input style="width:100px;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                        </td>
+                        <td >
+                          <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px" ><span class="bi bi-trash"></span></button></td>
+                        </tr>
+                    <tbody>
+                  </table>
+                </td>
+                <td >
+                  <button hidden   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
+                </tr>
+              <tr>
+            </tbody>
+          </table>
+
+        <!--new tranche: when the user enter a value in the "to value" of the tranche, a new row is created--> 
+          <table hidden>
+            <tbody id="hidden_tranche_rate_row">
+              <tr>
+                <td>0</td>
+                <td onchange="add_row_tranche_rate(this)" >
+                  <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100px;background-color: transparent;border-style: None;" placeholder="infinity"  type="text">
+                </td>
+                <td>
+                  <input style="width:100px;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
+                </td>
+                <td>
+                  <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
+                </tr>
+            <tbody>
+          </table>
+ 
+  </div>
+    <!------------------------ctry and formulation------------------------------> 
+      <!--when user click on country or formulation table, we import the element ---->
+        <!--import formlation list-->
+        <div id="import_form_list">
+          <div  class="comboTreeDropDownContainer" id="dropdown_form_dynamic" style="display: None;">
+            <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_dynamic">
+              <ul  >
+                <li class="selection_mode" >
+                  <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_dynamic"></span>
+                  <ul hidden>
+                    <input type="checkbox" id="select_mode_form_dynamic"  style="margin-right:5px;" dd_id="form_dynamic" value="Select all exept:">Select all exept
+                  </ul>
+                {% for formulation in formulation_list %}
+                  <li   style="display: block;">
+                    <input type="checkbox" style="margin-right:5px;"  dd_id="form_dynamic" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+          </div>
+        </div>
+  
+      <!--import country list-->
+      <div id="import_country_list"> 
+        <div  class="comboTreeDropDownContainer" id="dropdown_ctry_dynamic" style="display: None;">
+          <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_dynamic">
+          <ul  >
+            <li class="selection_mode" >
+              <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_dynamic"></span>
+              <ul >
+                  <li >
+                    <input {% if rule.country_incl_excl == "EXCLUDE" %}checked{% endif %} type="checkbox" id="select_mode_ctry_dynamic"  style="margin-right:5px;" dd_id="ctry_dynamic" value="Select all exept:">Select all exept
+                  </li>
+              </ul>
+            </li>
+            {% for region in region_list %}
+              <li>
+                <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_dynamic" group_id={{region.id}} ></span>
+                <span class="group" dd_id="ctry_dynamic">{{region.region}}</span>
+                <ul style="display: block;" id='ctry_dynamic_{{region.id}}'>
+                  {% for country in country_list %}
+                    {% if country.country_region == region %}
+                    <li   style="display: block;">
+                        <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_dynamic" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>                            
+                    </li>
+                    {% endif  %}
+                  {% endfor %}
+                </ul>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <!--import currency list-->
+      <div id="import_currency_list" style="display: None"> 
+        <select style=" background-color:transparent; border:None ;width:60px">
+          {% for curr in currency_list %}
+              <option value={{curr.currency}}>{{curr.currency}}</option>          
+          {% endfor %}
+        </select>
+      </div>
+    
+  <!----------------------------------------------------------------------------->
+  <!----------------------------------Milestone payment-------------------------->
+  <!----------------------------------------------------------------------------->
+
+  <div style="display:grid; grid-template-columns: 20px auto">
+    <span class="bi-arrow-right-circle " id="unhide_milestone_table" onclick='unhide_table("milestone_table")'></span>
+    <span hidden class="bi-arrow-down-circle " id="hide_milestone_table" onclick='hide_table("milestone_table")'></span>
+    <h5 >Milestones</h5>
+  </div>
+  <table  hidden class="table table-striped table-sm" id="milestone_table" style="max-width: 1000px;margin-left:10px">
+    <thead>
+      <tr >
+        <th>Name</th>
+        <th>Amount</th>
+        <th>Currency</th>
+        <th>Booked</th>
+        <th>Market</th>
+        <th>Booking date</th>
+        <th>Payment date</th>
+        <th style=" height: 45px;"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for milestone in milestone_list %}
+        <tr >
+          <td style="min-width:100px"><!--Name-->
+            <input value="{{milestone.name}}" style="width:100%;background-color: transparent;border-style: None;" placeholder="Name" type="text">
+          </td>
+          <td style="min-width:100px"><!--Amount-->
+            <input value={{milestone.amount|floatformat:"-3g"}} class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="amount" type="text">
+          </td>
+          <td><!--Currency-->
+            <select style=" background-color:transparent; border:None ;width:60px">
+              {% for curr in currency_list %}
+                {% if milestone.currency == curr %}
+                  <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
+                {% else %}
+                  <option value={{curr.currency}}>{{curr.currency}}</option>          
+                {% endif %}
+              {% endfor %}
+            </select>
+          </td>
+          <td ><!--booked-->
+            <select style=" background-color:transparent; border:None ;width:60px" onchange="booked_milestone(this)">
+                {% if milestone.booked == "YES" %}
+                  <option value="YES" selected="selected">YES</option>
+                  <option value="NO">NO</option>
+                {% else %}
+                  <option value="YES" >YES</option>
+                  <option value="NO" selected="selected">NO</option>         
+                {% endif %}
+            </select>
+          </td>
+          <td  style="width:80px"><!--Market-->
+            <select {% if milestone.booked == "NO" %} hidden {% endif %} style=" background-color:transparent; border:None ;width:100%">
+              {% for market in country_list %}
+                {% if milestone.market == market %}
+                  <option value={{market.country_id}} selected="selected">{{market.country_id}}</option>
+                {% else %}
+                  <option value={{market.country_id}}>{{market.country_id}}</option>          
+                {% endif %}
+              {% endfor %}
+            </select>
+          </td>
+          <td style="width:140px"><!--Booking date-->
+            <input {% if milestone.booked == "NO" %} hidden {% endif %} style="background-color:transparent; border-style: None;width:130px "  type="date" value={{milestone.booking_date|date:"Y-m-d"}}>
+          </td>
+          <td style="width:140px"><!--Payment date-->
+            <input {% if milestone.booked == "NO" %} hidden {% endif %} style="background-color:transparent; border-style: None;width:130px "  type="date" value={{milestone.payment_date|date:"Y-m-d"}}>
+          </td>
+          <td ><!--Button-->
+            <button   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_milestone(this,{{contract.id}})" style="border:0px" ><span class="bi bi-trash"></span></button>
+          </td>
+        </tr>
+      {% endfor %}
+      <tr id="new_milestone_tr">
+        <td style="min-width:100px" onchange="add_new_milestone(this)"><!--Name-->
+          <input style="width:100%;background-color: transparent;border-style: None;" placeholder="name" type="text">
+        <td style="min-width:100px"><!--amount-->
+          <input class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="amount" type="text">
+        </td>
+        <td><!--Currency-->
+          <select style=" background-color:transparent; border:None ;width:60px">
+            <option value="" disabled selected></option>
+            {% for curr in currency_list %}
+                <option value={{curr.currency}}>{{curr.currency}}</option>          
+            {% endfor %}
+          </select>
+        </td>
+        <td><!--Booked-->
+          <select style=" background-color:transparent; border:None ;width:60px"  onchange="booked_milestone(this)">
+              <option value="" disabled selected></option>
+              <option value="YES" >YES</option>
+              <option value="NO">NO</option>        
+          </select>
+        </td>
+        <td style="width:80px"><!--Market-->
+          <select hidden style=" background-color:transparent; border:None ;width:100%">
+            <option value="" disabled selected></option>
+            {% for market in country_list %}
+              <option value={{market.country_id}}>{{market.country_id}}</option>          
+            {% endfor %}
+          </select>
+        </td>
+        <td style="width:140px"><!--Booking date-->
+          <input hidden style="background-color:transparent; border-style: None;width:130px"  type="date">
+        </td>
+        <td style="width:140px"><!--Payment date-->
+          <input hidden style="background-color:transparent; border-style: None;width:130px"  type="date" >
+        </td>
+        <td >
+          <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_milestone(this,{{contract.id}})" style="border:0px" ><span class="bi bi-trash"></span></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!--table for new milesrtone--> 
+  <div>
+    <table  hidden >
+      <tbody id="hidden_row_milestone">
+        <tr >
+          <td onchange="add_new_milestone(this)" style="min-width:100px"><!--Name-->
+            <input  style="width:100%;background-color: transparent;border-style: None;" placeholder="name" type="text">
+          <td style="min-width:100px"><!--amount-->
+            <input  class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="amount" type="text">
+          </td>
+          <td><!--Currency-->
+            <select style=" background-color:transparent; border:None ;width:60px">
+              <option value="" disabled selected></option>
+              {% for curr in currency_list %}
+                  <option value={{curr.currency}}>{{curr.currency}}</option>          
+              {% endfor %}
+            </select>
+          </td>
+          <td><!--Booked-->
+            <select style=" background-color:transparent; border:None ;width:60px"  onchange="booked_milestone(this)">
+                <option value="" disabled selected></option>
+                <option value="YES" >YES</option>
+                <option value="NO">NO</option>        
+            </select>
+          </td>
+          <td style="width:80px"><!--Market-->
+            <select hidden style=" background-color:transparent; border:None ;width:100%">
+              <option value="" disabled selected></option>
+              {% for market in country_list %}
+                <option value={{market.country_id}}>{{market.country_id}}</option>          
+              {% endfor %}
+            </select>
+          </td>
+          <td style="width:140px"> <!--Booking date-->
+            <input hidden style="background-color:transparent; border-style: None;width:130px"  type="date">
+          </td>
+          <td style="width:140px"><!--Payment date-->
+            <input hidden style="background-color:transparent; border-style: None;width:130px"  type="date" >
+          </td>
+          <td >
+            <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_milestone(this,{{contract.id}})" style="border:0px" ><span class="bi bi-trash"></span></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+</div>
 
   <!----------------------------------------------------------------------------->
   <!----------------------------Contract saved in PDF---------------------------->
@@ -279,1241 +1675,7 @@
           <button hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_beneficiary(this)" style="border:0px;float:right"><span class="bi bi-trash" ></span></button> 
         </div>
       </div>
-     
-  <!----------------------------------------------------------------------------->
-  <!----------------------------------Rule table for royalty--------------------->
-  <!----------------------------------------------------------------------------->
-    <div style="display:grid; grid-template-columns: 20px auto">
-      <span class="bi-arrow-right-circle " id="unhide_rule_table" onclick='unhide_table("rule_table")'></span>
-      <span hidden class="bi-arrow-down-circle " id="hide_rule_table" onclick='hide_table("rule_table")'></span>
-      <h5 >Rules</h5>
-    </div>
 
-    <span hidden  id="unique_row_number">{{rule_list|length}}</span>
-   
-    <div id="rule_table" hidden>
-         <!------------------------SALES------------------------------------->  
-
-          <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
-            <span hidden class="bi-arrow-right-circle " id="unhide_SALES_table" onclick='unhide_table("SALES_table")'></span>
-            <span  class="bi-arrow-down-circle " id="hide_SALES_table" onclick='hide_table("SALES_table")'></span>
-            <span >SALES</span>
-          </div>
-
-          
-          <table  style="min-width:1190px;margin-left:10px" class="table table-striped table-sm" id="SALES_table" >
-            <thead>
-              <tr >
-                <th style="width:15vw; min-width:150px">Formulation</th>
-                <th style="width:15vw; min-width:150px">country</th>
-                <th style="width: 100px">Period from</th>
-                <th style="width: 100px">Period to</th>
-                <th style="height: 45px;"></th>
-              </tr>
-            </thead>   
-            <tbody>
-              {% for rule in rule_list %}
-                {% if rule.rule_type == "SALES" %}
-                  <tr> 
-                    <td > <!--Formulation  -->
-                      <div onclick="import_form_list(this)" class="comboTreeWrapper" >
-                          <div  class="comboTreeInputWrapper" dd_id="form_SALES{{forloop.counter0}}">
-                            <input  value='{{ rule.formulation.all|join:"," }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_SALES{{forloop.counter0}}" id="item_list_display_form_SALES{{forloop.counter0}}">
-                            <input   value='{{ rule.formulation.all|join:"," }}'  type="text" hidden  id="item_list_form_SALES{{forloop.counter0}}" selection_mode=""> 
-                          </div>
-                        </div>
-                    </td>
-
-                    <td> <!--Country-->
-                      <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
-                        <div  class="comboTreeInputWrapper" dd_id="ctry_SALES{{forloop.counter0}}">
-                          <input
-                          {% if rule.country_incl_excl == "EXCLUDE" %}
-                            {% if rule.country_list != "---" %}
-                              value='All except : {{ rule.country_list}}'
-                            {% else %}
-                              value='All'
-                            {% endif %}
-                          {% else %}
-                            value='{{ rule.country_list }}'
-                          {% endif %} 
-                          style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_SALES{{forloop.counter0}}" id="item_list_display_ctry_SALES{{forloop.counter0}}">
-                          <input  
-                            {% if rule.country_list == "---" %}
-                              value=''
-                            {% else %} 
-                              value='{{rule.country_list}}' 
-                            {% endif %}
-                            type="text" hidden  id="item_list_ctry_SALES{{forloop.counter0}}" selection_mode=""> 
-                        </div>
-                      </div>
-                    </td>
-                    
-                    <td><!--Date From-->
-                      <input style="background-color:transparent; border-style: None; "  type="date" value={{rule.period_from|date:"Y-m-d"}}>
-                    </td>
-
-                    <td><!--Date To-->
-                      <input style="background-color:transparent; border-style: None "  type="date" value={{rule.period_to|date:"Y-m-d"}}>
-                    </td>
-
-                    <td ><!-- Delete Button-->
-                      <button  class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                    </td>
-                  </tr>  
-                {% endif %}    
-              {% endfor %}
-              <tr> <!--empty New row-->
-                <td onchange="add_new_SALES(this)"> <!--Formulation-->
-                  <div  onclick="import_form_list(this)" class="comboTreeWrapper" >
-                      <div  class="comboTreeInputWrapper" dd_id="form_SALES{{rule_list|length}}">
-                        <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_SALES{{rule_list|length}}" id="item_list_display_form_SALES{{rule_list|length}}">
-                        <input   type="text" hidden  id="item_list_form_SALES{{rule_list|length}}" selection_mode=""> 
-                      </div>
-                    </div>
-                </td>
-
-                <td> <!--Country-->
-                  <div onclick="import_country_list(this)" class="comboTreeWrapper ">
-                    <div  class="comboTreeInputWrapper" dd_id="ctry_SALES{{rule_list|length}}">
-                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_SALES{{rule_list|length}}" id="item_list_display_ctry_SALES{{rule_list|length}}">
-                      <input  type="text" hidden  id="item_list_ctry_SALES{{rule_list|length}}" selection_mode=""> 
-                    </div>
-                  </div>
-                </td>
-
-                <td><!--Date From-->
-                  <input style="background-color:transparent; border-style: None "  type="date" value="1900-01-01">
-                </td>
-
-                <td><!--Date To-->
-                  <input style="background-color:transparent; border-style: None "  type="date" value="2100-01-01">
-                </td>
-
-                <td  ><!-- Delete Button-->
-                  <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          <!-- new Rule: when the user change the value of the last row (formulation cell), we automatically enter a new row-->
-          <table hidden>
-            <tbody id="hidden_row_SALES"> 
-              <tr>
-                <td onchange="add_new_SALES(this)" ><!-- Formula -->
-                  <div  class="comboTreeWrapper">
-                      <div  class="comboTreeInputWrapper" dd_id="form_new_SALES">
-                        <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_new_SALES" id="item_list_display_form_new_SALES">
-                        <input   type="text" hidden  id="item_list_form_new_SALES" selection_mode=""> 
-                      </div>
-                      <div  class="comboTreeDropDownContainer" id="dropdown_form_new_SALES" style="display: none;">
-                        <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_new_SALES">
-                          <ul  >
-                            <li class="selection_mode" >
-                              <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_new_SALES"></span>
-                              <ul hidden>
-                                <input type="checkbox" id="select_mode_form_new_SALES"  style="margin-right:5px;" dd_id="form_new_SALES" value="Select all exept:">Select all exept
-                              </ul>
-                            {% for formulation in formulation_list %}
-                              <li   style="display: block;">
-                                <input type="checkbox" style="margin-right:5px;"  dd_id="form_new_SALES" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
-                              </li>
-                            {% endfor %}
-                          </ul>
-                      </div>
-                    </div>
-                </td>
-                <td><!-- Country -->
-                  <div  class="comboTreeWrapper ">
-                    <div  class="comboTreeInputWrapper" dd_id="ctry_new_SALES">
-                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_new_SALES" id="item_list_display_ctry_new_SALES">
-                      <input   type="text" hidden  id="item_list_ctry_new_SALES" selection_mode=""> 
-                    </div>
-                    <div  class="comboTreeDropDownContainer" id="dropdown_ctry_new_SALES" style="display: none;">
-                      <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_new_SALES">
-                        <ul  >
-                          <li class="selection_mode" >
-                            <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_new_SALES"></span>
-                            <ul >
-                                <li  >
-                                  <input type="checkbox" id="select_mode_ctry_new_SALES"  style="margin-right:5px;" dd_id="ctry_new_SALES" value="Select all exept:">Select all exept
-                                </li>
-                            </ul>
-                          </li>
-                          {% for region in region_list %}
-                            <li>
-                              <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_new_SALES" group_id={{region.id}} ></span>
-                              <span class="group" dd_id="ctry_new_SALES">{{region.region}}</span>
-                              <ul style="display: block;" id='ctry_new_SALES_{{region.id}}'>
-                                {% for country in country_list %}
-                                  {% if country.country_region == region %}
-                                  <li   style="display: block;">
-                                    <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_new_SALES" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>
-                                  </li>
-                                  {% endif  %}
-                                {% endfor %}
-                              </ul>
-                            </li>
-                          {% endfor %}
-                        </ul>
-                    </div>
-                  </div>
-                </td>
-                <td><!-- from -->
-                  <input style="background-color:transparent; border-style: None " type="date" value="1900-01-01">
-                </td>
-                <td><!-- To -->
-                  <input style="background-color:transparent; border-style: None " type="date" value="2100-01-01">
-                </td>
-                <td >
-                  <button hidden   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
-                </tr>
-              <tr>
-            </tbody>
-          </table>
-        <!------------------------COGS------------------------------------->  
-          <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
-            <span hidden class="bi-arrow-right-circle " id="unhide_COGS_table" onclick='unhide_table("COGS_table")'></span>
-            <span  class="bi-arrow-down-circle " id="hide_COGS_table" onclick='hide_table("COGS_table")'></span>
-            <span >COGS</span>
-          </div>
-          <table  style="min-width:1190px;margin-left:10px"  class="table table-striped table-sm" id="COGS_table" >
-            <thead>
-              <tr >
-                <th style="width:15vw; min-width:150px">Formulation</th>
-                <th style="width:15vw; min-width:150px">country</th>
-                <th style="width: 100px">Period from</th>
-                <th style="width: 100px">Period to</th>
-                <th style="width: 140px">COGS per unit</th>
-                <th style=" height: 45px;"></th>
-              </tr>
-            </thead>
-            
-            <tbody>
-              {% for rule in rule_list %}
-                {% if rule.rule_type == "COGS" %}
-                  <tr> 
-                    <td > <!--Formulation  -->
-                      <div onclick="import_form_list(this)" class="comboTreeWrapper" >
-                          <div  class="comboTreeInputWrapper" dd_id="form_COGS{{forloop.counter0}}">
-                            <input  value='{{ rule.formulation.all|join:"," }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_COGS{{forloop.counter0}}" id="item_list_display_form_COGS{{forloop.counter0}}">
-                            <input   value='{{ rule.formulation.all|join:"," }}'  type="text" hidden  id="item_list_form_COGS{{forloop.counter0}}" selection_mode=""> 
-                          </div>
-                        </div>
-                    </td>
-                    <td> <!--Country-->
-                      <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
-                        <div  class="comboTreeInputWrapper" dd_id="ctry_COGS{{forloop.counter0}}">
-                          <input
-                          {% if rule.country_incl_excl == "EXCLUDE" %}
-                            {% if rule.country_list != "---" %}
-                              value='All except : {{ rule.country_list}}'
-                            {% else %}
-                              value='All'
-                            {% endif %}
-                          {% else %}
-                            value='{{ rule.country_list }}'
-                          {% endif %} 
-                          style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_COGS{{forloop.counter0}}" id="item_list_display_ctry_COGS{{forloop.counter0}}">
-                          <input  
-                            {% if rule.country_list == "---" %}
-                              value=''
-                            {% else %} 
-                              value='{{rule.country_list}}' 
-                            {% endif %}
-                            type="text" hidden  id="item_list_ctry_COGS{{forloop.counter0}}" selection_mode=""> 
-                        </div>
-                      </div>
-                    </td>
-                    <td><!--Date From-->
-                      <input style="background-color:transparent; border-style: None; "  type="date" value={{rule.period_from|date:"Y-m-d"}}>
-                    </td>
-                    <td><!--Date To-->
-                      <input style="background-color:transparent; border-style: None "  type="date" value={{rule.period_to|date:"Y-m-d"}}>
-                    </td>
-                    <td style="display:flex"><!-- Qty amount-->
-                      <input class="number-separator" style="max-width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text" value={{rule.qty_value|floatformat:"-3g"}}>
-                      <input  style="width:60px ;background-color: transparent;border-style: None" onclick="import_qty_value_currency(this)" value={{rule.qty_value_currency}}  >
-                    </td>
-                    <td ><!-- Delete Button-->
-                      <button  class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                    </td>
-                  </tr> 
-                {% endif %}    
-              {% endfor %}
-              <tr> <!--empty New row-->
-                <td onchange="add_new_COGS(this)"> <!--Formulation-->
-                  <div  onclick="import_form_list(this)" class="comboTreeWrapper" >
-                      <div  class="comboTreeInputWrapper" dd_id="form_COGS{{rule_list|length}}">
-                        <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_COGS{{rule_list|length}}" id="item_list_display_form_COGS{{rule_list|length}}">
-                        <input   type="text" hidden  id="item_list_form_COGS{{rule_list|length}}" selection_mode=""> 
-                      </div>
-                    </div>
-                </td>
-                <td> <!--Country-->
-                  <div onclick="import_country_list(this)" class="comboTreeWrapper ">
-                    <div  class="comboTreeInputWrapper" dd_id="ctry_COGS{{rule_list|length}}">
-                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_COGS{{rule_list|length}}" id="item_list_display_ctry_COGS{{rule_list|length}}">
-                      <input  type="text" hidden  id="item_list_ctry_COGS{{rule_list|length}}" selection_mode=""> 
-                    </div>
-                  </div>
-                </td>
-                <td><!--Date From-->
-                  <input style="background-color:transparent; border-style: None "  type="date" value="1900-01-01">
-                </td>
-                <td><!--Date To-->
-                  <input style="background-color:transparent; border-style: None "  type="date" value="2100-01-01">
-                </td>
-                <td style="display:flex"><!-- Qty amount-->
-                  <input class="number-separator" style="max-width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text">
-                  <select style=" background-color:transparent; border:None ;width:60px">
-                    {% for curr in currency_list %}
-                      {% if contract.contract_currency == curr %}
-                        <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                      {% else %}
-                        <option value={{curr.currency}}>{{curr.currency}}</option>          
-                      {% endif %}
-                    {% endfor %}
-                  </select>
-                </td>
-                <td ><!-- Delete Button-->
-                  <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                </td>
-              </tr>
-            </tbody>
-
-          </table>
-
-          <!-- new Rule: when the user change the value of the last row (formulation cell), we automatically enter a new row-->
-          <table hidden>
-            <tbody id="hidden_row_COGS"> 
-              <tr>
-                <td onchange="add_new_COGS(this)" >
-                  <div  class="comboTreeWrapper">
-                      <div  class="comboTreeInputWrapper" dd_id="form_new_COGS">
-                        <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_new_COGS" id="item_list_display_form_new_COGS">
-                        <input   type="text" hidden  id="item_list_form_new_COGS" selection_mode=""> 
-                      </div>
-                      <div  class="comboTreeDropDownContainer" id="dropdown_form_new_COGS" style="display: none;">
-                        <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_new_COGS">
-                          <ul  >
-                            <li class="selection_mode" >
-                              <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_new_COGS"></span>
-                              <ul hidden>
-                                <input type="checkbox" id="select_mode_form_new_COGS"  style="margin-right:5px;" dd_id="form_new_COGS" value="Select all exept:">Select all exept
-                              </ul>
-                            {% for formulation in formulation_list %}
-                              <li   style="display: block;">
-                                <input type="checkbox" style="margin-right:5px;"  dd_id="form_new_COGS" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
-                              </li>
-                            {% endfor %}
-                          </ul>
-                      </div>
-                    </div>
-                </td>
-                <td>
-                  <div  class="comboTreeWrapper ">
-                    <div  class="comboTreeInputWrapper" dd_id="ctry_new_COGS">
-                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_new_COGS" id="item_list_display_ctry_new_COGS">
-                      <input   type="text" hidden  id="item_list_ctry_new_COGS" selection_mode=""> 
-                    </div>
-                    <div  class="comboTreeDropDownContainer" id="dropdown_ctry_new_COGS" style="display: none;">
-                      <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_new_COGS">
-                        <ul  >
-                          <li class="selection_mode" >
-                            <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_new_COGS"></span>
-                            <ul >
-                                <li  >
-                                  <input type="checkbox" id="select_mode_ctry_new_COGS"  style="margin-right:5px;" dd_id="ctry_new_COGS" value="Select all exept:">Select all exept
-                                </li>
-                            </ul>
-                          </li>
-                          {% for region in region_list %}
-                            <li>
-                              <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_new_COGS" group_id={{region.id}} ></span>
-                              <span class="group" dd_id="ctry_new_COGS">{{region.region}}</span>
-                              <ul style="display: block;" id='ctry_new_COGS_{{region.id}}'>
-                                {% for country in country_list %}
-                                  {% if country.country_region == region %}
-                                  <li   style="display: block;">
-                                    <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_new_COGS" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>
-                                  </li>
-                                  {% endif  %}
-                                {% endfor %}
-                              </ul>
-                            </li>
-                          {% endfor %}
-                        </ul>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <input style="background-color:transparent; border-style: None " type="date" value="1900-01-01">
-                </td>
-                <td>
-                  <input style="background-color:transparent; border-style: None " type="date" value="2100-01-01">
-                </td>
-                <td   style="display:flex"><!--Qty-->
-                  <input class="number-separator" style="width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text">
-                  <select style=" background-color:transparent; border:None ;width:60px">
-                    {% for curr in currency_list %}
-                      {% if contract.contract_currency == curr %}
-                        <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                      {% else %}
-                        <option value={{curr.currency}}>{{curr.currency}}</option>          
-                      {% endif %}
-                    {% endfor %}
-                  </select>
-
-                </td>
-                <td >
-                  <button hidden   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
-                </tr>
-              <tr>
-            </tbody>
-          </table>
-        <!------------------------ROYALTY------------------------------------->  
-          <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
-            <span hidden class="bi-arrow-right-circle " id="unhide_ROYALTY_table" onclick='unhide_table("ROYALTY_table")'></span>
-            <span  class="bi-arrow-down-circle " id="hide_ROYALTY_table" onclick='hide_table("ROYALTY_table")'></span>
-            <span >ROYALTY</span>
-          </div>
-          <table  style="min-width:1190px;margin-left:10px" class="table table-striped table-sm" id="ROYALTY_table" >
-            <thead>
-              <tr >
-                <th style="width:15vw; min-width:150px">Formulation</th>
-                <th style="width:15vw; min-width:150px">country</th>
-                <th style="width: 100px">Period from</th>
-                <th style="width: 100px">Period to</th>
-                <th style="width: 80px; min-width: 80px ">Type</th>
-                <th style="width: 70px ">Tranche</th>
-                <th style="width: 140px">Royalty</th>
-                <th style="height: 45px;"></th>
-              </tr>
-            </thead>
-            
-            <tbody>
-              {% for rule in rule_list %}
-                {% if rule.rule_type == "ROYALTY" %}
-                  <tr> 
-                    <td > <!--Formulation  -->
-                      <div onclick="import_form_list(this)" class="comboTreeWrapper" >
-                          <div  class="comboTreeInputWrapper" dd_id="form_ROYALTY{{forloop.counter0}}">
-                            <input  value='{{ rule.formulation.all|join:"," }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_ROYALTY{{forloop.counter0}}" id="item_list_display_form_ROYALTY{{forloop.counter0}}">
-                            <input   value='{{ rule.formulation.all|join:"," }}'  type="text" hidden  id="item_list_form_ROYALTY{{forloop.counter0}}" selection_mode=""> 
-                          </div>
-                        </div>
-                    </td>
-
-                    <td> <!--Country-->
-                      <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
-                        <div  class="comboTreeInputWrapper" dd_id="ctry_ROYALTY{{forloop.counter0}}">
-                          <input
-                          {% if rule.country_incl_excl == "EXCLUDE" %}
-                            {% if rule.country_list != "---" %}
-                              value='All except : {{ rule.country_list}}'
-                            {% else %}
-                              value='All'
-                            {% endif %}
-                          {% else %}
-                            value='{{ rule.country_list }}'
-                          {% endif %} 
-                          style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_ROYALTY{{forloop.counter0}}" id="item_list_display_ctry_ROYALTY{{forloop.counter0}}">
-                          <input  
-                            {% if rule.country_list == "---" %}
-                              value=''
-                            {% else %} 
-                              value='{{rule.country_list}}' 
-                            {% endif %}
-                            type="text" hidden  id="item_list_ctry_ROYALTY{{forloop.counter0}}" selection_mode=""> 
-                        </div>
-                      </div>
-                    </td>
-
-                    <td><!--Date From-->
-                      <input style="background-color:transparent; border-style: None; "  type="date" value={{rule.period_from|date:"Y-m-d"}}>
-                    </td>
-
-                    <td><!--Date To-->
-                      <input style="background-color:transparent; border-style: None "  type="date" value={{rule.period_to|date:"Y-m-d"}}>
-                    </td>
-                    <td><!--Qty or Rate-->
-                      <select class="fname"  onchange="tranche_field_ROYALTY(this)">
-                            <option value="RATE" {% if rule.field_type == 'RATE' %}selected{% endif  %}>RATE</option>
-                            <option value="QTY" {% if rule.field_type == 'QTY' %}selected{% endif  %}>QTY</option>
-                      </select>
-                    </td>
-                    <td><!--YES/NO Tranche-->
-                      <select class="fname"  onchange="tranche_field_ROYALTY(this)">
-                            <option value="NO" {% if rule.tranche_type == 'NO' %}selected{% endif  %}>NO</option>
-                            <option value="YES" {% if rule.tranche_type == 'YES' %}selected{% endif  %}>YES</option>
-                      </select>
-                    </td>
-
-                    <td {% if rule.tranche_type == 'YES' or rule.field_type == 'QTY' %}hidden {% endif  %}><!-- Rate percentage-->
-                      <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number" value={{rule.rate_value|floatformat:2}}>
-                    </td>
-
-                    <td {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}hidden {% endif  %}><!--table for tranches-->
-            
-                      <table class="table table-striped " style="width: 380px;background-color:white">
-                        <thead>
-                          <tr>
-                            <th>from</th>
-                            <th style="width:120px">to</th>
-                            <th style="width:80px">rate</th>
-                            <th>
-                              <select style=" background-color:transparent; border:None ;width:60px">
-                                {% for curr in currency_list %}
-                                  {% if rule.tranche_currency == curr %}
-                                    <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                                  {% else %}
-                                    <option value={{curr.currency}}>{{curr.currency}}</option>          
-                                  {% endif %}
-                                {% endfor %}
-                              </select>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for tranche in tranche_list %}
-                            {% if tranche.rule == rule %}
-                            <tr>
-                              <td>{{tranche.from_amount|floatformat:"-3g"}}</td>
-                              <td {% if tranche.to_amount == 0 %}onchange="add_row_tranche_rate(this)"{% endif %}>
-                                <input value='{% if tranche.to_amount == 0 %}{% else %}{{tranche.to_amount|floatformat:"-3g"}}{% endif %}' onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="infinity"  type="text">
-                              </td>
-                              <td>
-                                <input value={{tranche.percentage}} style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                              </td>
-                              <td>
-                                <button  {% if tranche.to_amount == 0 %}hidden{% endif %} class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
-                            </tr>
-                            {% endif %}
-                          {% endfor %}
-
-                          {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}
-                          <tr>
-                            <td>0</td>
-                            <td onchange="add_row_tranche_rate(this)">
-                              <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="infinity"   type="text">
-                            </td>
-                            <td>
-                              <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                            </td>
-                            <td >
-                              <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                            </td>
-                          </tr>
-                          {% endif %}
-                        <tbody>
-                      </table>
-                    </td>
-
-                    <td {% if rule.tranche_type == 'YES' or rule.field_type == 'RATE' %} hidden {% endif  %} style="display:flex"><!-- Qty amount-->
-                      
-                      <input class="number-separator" style="max-width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text" value={{rule.qty_value|floatformat:"-3g"}}>
-                      <input  style="width:60px ;background-color: transparent;border-style: None" onclick="import_qty_value_currency(this)" value={{rule.qty_value_currency}}  >
-                    </td>
-                    
-                    <td {% if rule.tranche_type == 'NO' or rule.field_type == 'RATE' %}hidden {% endif  %}><!-- Tranche for qty : not available-->
-                      <span>functionality not activated</span>
-                    </td>
-
-                    <td ><!-- Delete Button-->
-                      <button  class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                    </td>
-                  </tr> 
-                {% endif %}         
-              {% endfor %}
-              <tr> <!--empty New row-->
-                <td onchange="add_new_ROYALTY(this)"> <!--Formulation-->
-                  <div  onclick="import_form_list(this)" class="comboTreeWrapper" >
-                      <div  class="comboTreeInputWrapper" dd_id="form_ROYALTY{{rule_list|length}}">
-                        <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_ROYALTY{{rule_list|length}}" id="item_list_display_form_ROYALTY{{rule_list|length}}">
-                        <input   type="text" hidden  id="item_list_form_ROYALTY{{rule_list|length}}" selection_mode=""> 
-                      </div>
-                    </div>
-                </td>
-
-                <td> <!--Country-->
-                  <div onclick="import_country_list(this)" class="comboTreeWrapper ">
-                    <div  class="comboTreeInputWrapper" dd_id="ctry_ROYALTY{{rule_list|length}}">
-                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_ROYALTY{{rule_list|length}}" id="item_list_display_ctry_ROYALTY{{rule_list|length}}">
-                      <input  type="text" hidden  id="item_list_ctry_ROYALTY{{rule_list|length}}" selection_mode=""> 
-                    </div>
-                  </div>
-                </td>
-
-                <td><!--Date From-->
-                  <input style="background-color:transparent; border-style: None "  type="date" value="1900-01-01">
-                </td>
-
-                <td><!--Date To-->
-                  <input style="background-color:transparent; border-style: None "  type="date" value="2100-01-01">
-                </td> 
-                <td><!--Qty or Rate-->
-                  <select class="fname"  onchange="tranche_field_ROYALTY(this)">
-                        <option value="RATE" selected="selected">RATE</option>
-                        <option value="QTY" >QTY</option>
-                  </select>
-                </td>
-                <td><!--YES/NO Tranche-->
-                  <select class="fname"  onchange="tranche_field_ROYALTY(this)">
-                        <option value="NO" selected="selected">NO</option>
-                        <option value="YES" >YES</option>
-                  </select>
-                </td>
-
-                <td ><!-- Rate percentage-->
-                  <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                </td>
-
-                <td hidden><!--table for tranches-->
-                  <table class="table table-striped " style="width: 380px;background-color:white">
-                    <thead>
-                      <tr>
-                        <th>from</th>
-                        <th style="width:120px">to</th>
-                        <th style="width:80px">rate</th>
-                        <th>
-                          <select style=" background-color:transparent; border:None ;width:60px">
-                            {% for curr in currency_list %}
-                              {% if contract.contract_currency == curr %}
-                                <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                              {% else %}
-                                <option value={{curr.currency}}>{{curr.currency}}</option>          
-                              {% endif %}
-                            {% endfor %}
-                          </select>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>0</td>
-                        <td onchange="add_row_tranche_rate(this)">
-                          <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="sales"   type="text">
-                        </td>
-                        <td>
-                          <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                        </td>
-                        <td >
-                          <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                        </td>
-                      </tr>
-                    <tbody>
-                  </table>
-                </td>
-
-                <td hidden  style="display:flex"><!-- Qty amount-->
-                  <input class="number-separator" style="max-width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text">
-                  <select style=" background-color:transparent; border:None ;width:60px">
-                    {% for curr in currency_list %}
-                      {% if contract.contract_currency == curr %}
-                        <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                      {% else %}
-                        <option value={{curr.currency}}>{{curr.currency}}</option>          
-                      {% endif %}
-                    {% endfor %}
-                  </select>
-                </td>
-                
-                <td hidden><!-- Tranche for qty : not available-->
-                  <span>functionality not activated</span>
-                </td>
-
-                <td ><!-- Delete Button-->
-                  <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                </td>
-              </tr>
-            </tbody>
-
-          </table>
-
-          <!-- new Rule: when the user change the value of the last row (formulation cell), we automatically enter a new row-->
-          <table hidden>
-            <tbody id="hidden_row_ROYALTY"> 
-              <tr>
-                <td onchange="add_new_ROYALTY(this)" >
-                  <div  class="comboTreeWrapper">
-                      <div  class="comboTreeInputWrapper" dd_id="form_new_ROYALTY">
-                        <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_new_ROYALTY" id="item_list_display_form_new_ROYALTY">
-                        <input   type="text" hidden  id="item_list_form_new_ROYALTY" selection_mode=""> 
-                      </div>
-                      <div  class="comboTreeDropDownContainer" id="dropdown_form_new_ROYALTY" style="display: none;">
-                        <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_new_ROYALTY">
-                          <ul  >
-                            <li class="selection_mode" >
-                              <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_new_ROYALTY"></span>
-                              <ul hidden>
-                                <input type="checkbox" id="select_mode_form_new_ROYALTY"  style="margin-right:5px;" dd_id="form_new_ROYALTY" value="Select all exept:">Select all exept
-                              </ul>
-                            {% for formulation in formulation_list %}
-                              <li   style="display: block;">
-                                <input type="checkbox" style="margin-right:5px;"  dd_id="form_new_ROYALTY" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
-                              </li>
-                            {% endfor %}
-                          </ul>
-                      </div>
-                    </div>
-                </td>
-                <td>
-                  <div  class="comboTreeWrapper ">
-                    <div  class="comboTreeInputWrapper" dd_id="ctry_new_ROYALTY">
-                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_new_ROYALTY" id="item_list_display_ctry_new_ROYALTY">
-                      <input   type="text" hidden  id="item_list_ctry_new_ROYALTY" selection_mode=""> 
-                    </div>
-                    <div  class="comboTreeDropDownContainer" id="dropdown_ctry_new_ROYALTY" style="display: none;">
-                      <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_new_ROYALTY">
-                        <ul  >
-                          <li class="selection_mode" >
-                            <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_new_ROYALTY"></span>
-                            <ul >
-                                <li  >
-                                  <input type="checkbox" id="select_mode_ctry_new_ROYALTY"  style="margin-right:5px;" dd_id="ctry_new_ROYALTY" value="Select all exept:">Select all exept
-                                </li>
-                            </ul>
-                          </li>
-                          {% for region in region_list %}
-                            <li>
-                              <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_new_ROYALTY" group_id={{region.id}} ></span>
-                              <span class="group" dd_id="ctry_new_ROYALTY">{{region.region}}</span>
-                              <ul style="display: block;" id='ctry_new_ROYALTY_{{region.id}}'>
-                                {% for country in country_list %}
-                                  {% if country.country_region == region %}
-                                  <li   style="display: block;">
-                                    <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_new_ROYALTY" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>
-                                  </li>
-                                  {% endif  %}
-                                {% endfor %}
-                              </ul>
-                            </li>
-                          {% endfor %}
-                        </ul>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <input style="background-color:transparent; border-style: None " type="date" value="1900-01-01">
-                </td>
-                <td>
-                  <input style="background-color:transparent; border-style: None " type="date" value="2100-01-01">
-                </td>
-                <td>
-                  <select class="fname"  onchange="tranche_field_ROYALTY(this)">
-                        <option value="RATE" selected="selected">RATE</option>
-                        <option value="QTY" >QTY</option>
-                  </select>
-                </td>
-                <td>
-                  <select class="fname"  onchange="tranche_field_ROYALTY(this)">
-                        <option value="NO" selected="selected">NO</option>
-                        <option value="YES" >YES</option>
-                  </select>
-                </td>
-
-                <td>
-                  <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                </td>
-                <td hidden><!--Tranche or Rate-->
-                  <table class="table table-striped " style="width: 380px;background-color:white">
-                    <thead>
-                      <tr>
-                        <th>from</th>
-                        <th style="width:120px">to </th>
-                        <th style="width:80px" >rate</th>
-                        <th>
-                          <select style=" background-color:transparent; border:None ;width:60px">
-                            {% for curr in currency_list %}
-                              {% if contract.contract_currency == curr %}
-                                <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                              {% else %}
-                                <option value={{curr.currency}}>{{curr.currency}}</option>          
-                              {% endif %}
-                            {% endfor %}
-                          </select>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>0</td>
-                        <td onchange="add_row_tranche_rate(this)">
-                          <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="sales"   type="text">
-                        </td>
-                        <td>
-                          <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                        </td>
-                        <td >
-                          <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
-                        </tr>
-                    <tbody>
-                  </table>
-                </td>
-                <td  hidden style="display:flex"><!--Qty-->
-                  <input class="number-separator" style="width:80px;background-color: transparent;border-style: None;" placeholder="price/unit"  type="text">
-                  <select style=" background-color:transparent; border:None ;width:60px">
-                    {% for curr in currency_list %}
-                      {% if contract.contract_currency == curr %}
-                        <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                      {% else %}
-                        <option value={{curr.currency}}>{{curr.currency}}</option>          
-                      {% endif %}
-                    {% endfor %}
-                  </select>
-
-                </td>
-                <td  hidden><!--tranche Qty-->
-                  <span>functionality not activated</span> 
-                </td>
-                <td >
-                  <button hidden   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
-                </tr>
-              <tr>
-            </tbody>
-          </table>
-
-          <!--new tranche: when the user enter a value in the "to value" of the tranche, a new row is created--> 
-          <table hidden>
-            <tbody id="hidden_tranche_rate_row">
-              <tr>
-                <td>0</td>
-                <td onchange="add_row_tranche_rate(this)" >
-                  <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="infinity"  type="text">
-                </td>
-                <td>
-                  <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                </td>
-                <td>
-                  <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
-                </tr>
-            <tbody>
-          </table>
-        <!------------------------MARGIN------------------------------------->  
-          <div style="margin-left:10px; display:grid; grid-template-columns: 20px auto">
-            <span hidden class="bi-arrow-right-circle " id="unhide_MARGIN_table" onclick='unhide_table("MARGIN_table")'></span>
-            <span  class="bi-arrow-down-circle " id="hide_MARGIN_table" onclick='hide_table("MARGIN_table")'></span>
-            <span >MARGIN</span>
-          </div>
-          <table  style="min-width:1190px;margin-left:10px" class="table table-striped table-sm" id="MARGIN_table" >
-            
-            <thead>
-              <tr >
-                <th style="width:15vw; min-width:150px">Formulation</th>
-                <th style="width:15vw; min-width:150px">country</th>
-                <th style="width: 100px">Period from</th>
-                <th style="width: 100px">Period to</th>
-                <th style="width: 140px">Tranche</th>
-                <th >Margin</th>
-                <th style=" height: 45px;"></th>
-              </tr>
-            </thead>
-            
-            <tbody>
-              {% for rule in rule_list %}
-                {% if rule.rule_type == "MARGIN" %}
-                  <tr> 
-                    <td > <!--Formulation  -->
-                      <div onclick="import_form_list(this)" class="comboTreeWrapper" >
-                          <div  class="comboTreeInputWrapper" dd_id="form_MARGIN{{forloop.counter0}}">
-                            <input  value='{{ rule.formulation.all|join:"," }}' style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_MARGIN{{forloop.counter0}}" id="item_list_display_form_MARGIN{{forloop.counter0}}">
-                            <input   value='{{ rule.formulation.all|join:"," }}'  type="text" hidden  id="item_list_form_MARGIN{{forloop.counter0}}" selection_mode=""> 
-                          </div>
-                        </div>
-                    </td>
-
-                    <td> <!--Country-->
-                      <div  onclick="import_country_list(this)" class="comboTreeWrapper ">
-                        <div  class="comboTreeInputWrapper" dd_id="ctry_MARGIN{{forloop.counter0}}">
-                          <input
-                          {% if rule.country_incl_excl == "EXCLUDE" %}
-                            {% if rule.country_list != "---" %}
-                              value='All except : {{ rule.country_list}}'
-                            {% else %}
-                              value='All'
-                            {% endif %}
-                          {% else %}
-                            value='{{ rule.country_list }}'
-                          {% endif %} 
-                          style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_MARGIN{{forloop.counter0}}" id="item_list_display_ctry_MARGIN{{forloop.counter0}}">
-                          <input 
-                            {% if rule.country_list == "---" %}
-                              value=''
-                            {% else %} 
-                              value='{{rule.country_list}}' 
-                            {% endif %}
-                            type="text" hidden  id="item_list_ctry_MARGIN{{forloop.counter0}}" selection_mode=""> 
-                        </div>
-                      </div>
-                    </td>
-                    
-                    <td><!--Date From-->
-                      <input style="background-color:transparent; border-style: None; "  type="date" value={{rule.period_from|date:"Y-m-d"}}>
-                    </td>
-
-                    <td><!--Date To-->
-                      <input style="background-color:transparent; border-style: None "  type="date" value={{rule.period_to|date:"Y-m-d"}}>
-                    </td>
-
-                    <td><!--YES/NO Tranche-->
-                      <select class="fname"  onchange="tranche_field_MARGIN(this)">
-                            <option value="NO" {% if rule.tranche_type == 'NO' %}selected{% endif  %}>NO</option>
-                            <option value="YES" {% if rule.tranche_type == 'YES' %}selected{% endif  %}>YES</option>
-                      </select>
-                    </td>
-
-                    <td {% if rule.tranche_type == 'YES' or rule.field_type == 'QTY' %}hidden {% endif  %}><!-- Rate percentage-->
-                      <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number" value={{rule.rate_value|floatformat:2}}>
-                    </td>
-
-                    <td {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}hidden {% endif  %}><!--table for tranches-->
-            
-                      <table class="table table-striped " style="width: 380px;background-color:white">
-                        <thead>
-                          <tr>
-                            <th>from</th>
-                            <th style="width:120px">to</th>
-                            <th style="width:80px">rate</th>
-                            <th>
-                              <select style=" background-color:transparent; border:None ;width:60px">
-                                {% for curr in currency_list %}
-                                  {% if rule.tranche_currency == curr %}
-                                    <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                                  {% else %}
-                                    <option value={{curr.currency}}>{{curr.currency}}</option>          
-                                  {% endif %}
-                                {% endfor %}
-                              </select>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {% for tranche in tranche_list %}
-                            {% if tranche.rule == rule %}
-                            <tr>
-                              <td>{{tranche.from_amount|floatformat:"-3g"}}</td>
-                              <td {% if tranche.to_amount == 0 %}onchange="add_row_tranche_rate(this)"{% endif %}>
-                                <input value='{% if tranche.to_amount == 0 %}{% else %}{{tranche.to_amount|floatformat:"-3g"}}{% endif %}' onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100%;background-color: transparent;border-style: None;" placeholder="infinity"  type="text">
-                              </td>
-                              <td>
-                                <input value={{tranche.percentage}} style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                              </td>
-                              <td>
-                                <button  {% if tranche.to_amount == 0 %}hidden{% endif %} class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
-                            </tr>
-                            {% endif %}
-                          {% endfor %}
-
-                          {% if rule.tranche_type == 'NO' or rule.field_type == 'QTY' %}
-                          <tr>
-                            <td>0</td>
-                            <td onchange="add_row_tranche_rate(this)">
-                              <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100px;background-color: transparent;border-style: None;" placeholder="infinity"   type="text">
-                            </td>
-                            <td>
-                              <input style="width:100px;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                            </td>
-                            <td >
-                              <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                            </td>
-                          </tr>
-                          {% endif %}
-                        <tbody>
-                      </table>
-                    </td>
-
-                    <td ><!-- Delete Button-->
-                      <button  class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                    </td>
-                  </tr> 
-                {% endif %}       
-              {% endfor %}
-              <tr> <!--empty New row-->
-                <td onchange="add_new_MARGIN(this)"> <!--Formulation-->
-                  <div  onclick="import_form_list(this)" class="comboTreeWrapper" >
-                      <div  class="comboTreeInputWrapper" dd_id="form_MARGIN{{rule_list|length}}">
-                        <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_MARGIN{{rule_list|length}}" id="item_list_display_form_MARGIN{{rule_list|length}}">
-                        <input   type="text" hidden  id="item_list_form_MARGIN{{rule_list|length}}" selection_mode=""> 
-                      </div>
-                    </div>
-                </td>
-
-                <td> <!--Country-->
-                  <div onclick="import_country_list(this)" class="comboTreeWrapper ">
-                    <div  class="comboTreeInputWrapper" dd_id="ctry_MARGIN{{rule_list|length}}">
-                      <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_MARGIN{{rule_list|length}}" id="item_list_display_ctry_MARGIN{{rule_list|length}}">
-                      <input  type="text" hidden  id="item_list_ctry_MARGIN{{rule_list|length}}" selection_mode=""> 
-                    </div>
-                  </div>
-                </td>
-
-                <td><!--Date From-->
-                  <input style="background-color:transparent; border-style: None "  type="date" value="1900-01-01">
-                </td>
-
-                <td><!--Date To-->
-                  <input style="background-color:transparent; border-style: None "  type="date" value="2100-01-01">
-                </td>
-
-                <td><!--YES/NO Tranche-->
-                  <select class="fname"  onchange="tranche_field_MARGIN(this)">
-                        <option value="NO" selected="selected">NO</option>
-                        <option value="YES" >YES</option>
-                  </select>
-                </td>
-
-                <td ><!-- Rate percentage-->
-                  <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                </td>
-
-                <td hidden><!--table for tranches-->
-                  <table class="table table-striped " style="background-color:white">
-                    <thead>
-                      <tr>
-                        <th>from</th>
-                        <th style="width:120px">to</th>
-                        <th style="width:80px">rate</th>
-                        <th>
-                          <select style=" background-color:transparent; border:None ;width:60px">
-                            {% for curr in currency_list %}
-                              {% if contract.contract_currency == curr %}
-                                <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                              {% else %}
-                                <option value={{curr.currency}}>{{curr.currency}}</option>          
-                              {% endif %}
-                            {% endfor %}
-                          </select>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>0</td>
-                        <td onchange="add_row_tranche_rate(this)">
-                          <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100px;background-color: transparent;border-style: None;" placeholder="sales"   type="text">
-                        </td>
-                        <td>
-                          <input style="width:100px;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                        </td>
-                        <td >
-                          <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px" ><span class="bi bi-trash"></span></button>
-                        </td>
-                      </tr>
-                    <tbody>
-                  </table>
-                </td>
-
-                <td ><!-- Delete Button-->
-                  <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button>
-                </td>
-              </tr>
-            </tbody>
-
-          </table>
-
-          <!-- new Rule: when the user change the value of the last row (formulation cell), we automatically enter a new row-->
-            <table hidden>
-              <tbody id="hidden_row_MARGIN"> 
-                <tr>
-                  <td onchange="add_new_MARGIN(this)" >
-                    <div  class="comboTreeWrapper">
-                        <div  class="comboTreeInputWrapper" dd_id="form_new_MARGIN">
-                          <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="form_new_MARGIN" id="item_list_display_form_new_MARGIN">
-                          <input   type="text" hidden  id="item_list_form_new_MARGIN" selection_mode=""> 
-                        </div>
-                        <div  class="comboTreeDropDownContainer" id="dropdown_form_new_MARGIN" style="display: none;">
-                          <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_new_MARGIN">
-                            <ul  >
-                              <li class="selection_mode" >
-                                <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_new_MARGIN"></span>
-                                <ul hidden>
-                                  <input type="checkbox" id="select_mode_form_new_MARGIN"  style="margin-right:5px;" dd_id="form_new_MARGIN" value="Select all exept:">Select all exept
-                                </ul>
-                              {% for formulation in formulation_list %}
-                                <li   style="display: block;">
-                                  <input type="checkbox" style="margin-right:5px;"  dd_id="form_new_MARGIN" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
-                                </li>
-                              {% endfor %}
-                            </ul>
-                        </div>
-                      </div>
-                  </td>
-                  <td>
-                    <div  class="comboTreeWrapper ">
-                      <div  class="comboTreeInputWrapper" dd_id="ctry_new_MARGIN">
-                        <input style="background-color:transparent; border-style: None " type="text"  class="justAnInputBox comboTreeInputBox" placeholder="Select" readonly dd_id="ctry_new_MARGIN" id="item_list_display_ctry_new_MARGIN">
-                        <input   type="text" hidden  id="item_list_ctry_new_MARGIN" selection_mode=""> 
-                      </div>
-                      <div  class="comboTreeDropDownContainer" id="dropdown_ctry_new_MARGIN" style="display: none;">
-                        <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_new_MARGIN">
-                          <ul  >
-                            <li class="selection_mode" >
-                              <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_new_MARGIN"></span>
-                              <ul >
-                                  <li  >
-                                    <input type="checkbox" id="select_mode_ctry_new_MARGIN"  style="margin-right:5px;" dd_id="ctry_new_MARGIN" value="Select all exept:">Select all exept
-                                  </li>
-                              </ul>
-                            </li>
-                            {% for region in region_list %}
-                              <li>
-                                <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_new_MARGIN" group_id={{region.id}} ></span>
-                                <span class="group" dd_id="ctry_new_MARGIN">{{region.region}}</span>
-                                <ul style="display: block;" id='ctry_new_MARGIN_{{region.id}}'>
-                                  {% for country in country_list %}
-                                    {% if country.country_region == region %}
-                                    <li   style="display: block;">
-                                      <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_new_MARGIN" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>
-                                    </li>
-                                    {% endif  %}
-                                  {% endfor %}
-                                </ul>
-                              </li>
-                            {% endfor %}
-                          </ul>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td>
-                    <input style="background-color:transparent; border-style: None " type="date" value="1900-01-01">
-                  </td>
-                  <td>
-                    <input style="background-color:transparent; border-style: None " type="date" value="2100-01-01">
-                  </td>
-                  <td>
-                    <select class="fname"  onchange="tranche_field_MARGIN(this)">
-                          <option value="NO" selected="selected">NO</option>
-                          <option value="YES" >YES</option>
-                    </select>
-                  </td>
-
-                  <td>
-                    <input style="width:100%;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                  </td>
-                  <td hidden><!--Tranche or Rate-->
-                    <table class="table table-striped " style="background-color:white">
-                      <thead>
-                        <tr>
-                          <th>from</th>
-                          <th style="width:120px">to </th>
-                          <th style="width:80px">rate</th>
-                          <th>
-                            <select style=" background-color:transparent; border:None ;width:60px">
-                              {% for curr in currency_list %}
-                                {% if contract.contract_currency == curr %}
-                                  <option value={{curr.currency}} selected="selected">{{curr.currency}}</option>
-                                {% else %}
-                                  <option value={{curr.currency}}>{{curr.currency}}</option>          
-                                {% endif %}
-                              {% endfor %}
-                            </select>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>0</td>
-                          <td onchange="add_row_tranche_rate(this)">
-                            <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100px;background-color: transparent;border-style: None;" placeholder="sales"   type="text">
-                          </td>
-                          <td>
-                            <input style="width:100px;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                          </td>
-                          <td >
-                            <button   hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px" ><span class="bi bi-trash"></span></button></td>
-                          </tr>
-                      <tbody>
-                    </table>
-                  </td>
-                  <td >
-                    <button hidden   class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_rule(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
-                  </tr>
-                <tr>
-              </tbody>
-            </table>
-
-          <!--new tranche: when the user enter a value in the "to value" of the tranche, a new row is created--> 
-            <table hidden>
-              <tbody id="hidden_tranche_rate_row">
-                <tr>
-                  <td>0</td>
-                  <td onchange="add_row_tranche_rate(this)" >
-                    <input onchange="new_to_value_tranche_rate(this)" class="number-separator" style="width:100px;background-color: transparent;border-style: None;" placeholder="infinity"  type="text">
-                  </td>
-                  <td>
-                    <input style="width:100px;background-color: transparent;border-style: None;" placeholder="percentage" onchange="convert_percentage(this)" type="number">
-                  </td>
-                  <td>
-                    <button  hidden class="btn btn-sm btn-outline-danger" title="delete" onclick="delete_row_tranche_rate(this)" style="border:0px;float:right" ><span class="bi bi-trash"></span></button></td>
-                  </tr>
-              <tbody>
-            </table>
-   
-    </div>
-      <!------------------------ctry and formulation------------------------------> 
-        <!--when user click on country or formulation table, we import the element ---->
-          <!--import formlation list-->
-          <div id="import_form_list">
-            <div  class="comboTreeDropDownContainer" id="dropdown_form_dynamic" style="display: None;">
-              <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="form_dynamic">
-                <ul  >
-                  <li class="selection_mode" >
-                    <span class="mdi mdi-chevron-down-circle-outline" dd_id="form_dynamic"></span>
-                    <ul hidden>
-                      <input type="checkbox" id="select_mode_form_dynamic"  style="margin-right:5px;" dd_id="form_dynamic" value="Select all exept:">Select all exept
-                    </ul>
-                  {% for formulation in formulation_list %}
-                    <li   style="display: block;">
-                      <input type="checkbox" style="margin-right:5px;"  dd_id="form_dynamic" ><span>{{formulation.formula_code}}</span><span> : </span><span>{{formulation.formula_name}}</span>
-                    </li>
-                  {% endfor %}
-                </ul>
-            </div>
-          </div>
-    
-        <!--import country list-->
-        <div id="import_country_list"> 
-          <div  class="comboTreeDropDownContainer" id="dropdown_ctry_dynamic" style="display: None;">
-            <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="ctry_dynamic">
-            <ul  >
-              <li class="selection_mode" >
-                <span class="mdi mdi-chevron-down-circle-outline" dd_id="ctry_dynamic"></span>
-                <ul >
-                    <li >
-                      <input {% if rule.country_incl_excl == "EXCLUDE" %}checked{% endif %} type="checkbox" id="select_mode_ctry_dynamic"  style="margin-right:5px;" dd_id="ctry_dynamic" value="Select all exept:">Select all exept
-                    </li>
-                </ul>
-              </li>
-              {% for region in region_list %}
-                <li>
-                  <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="ctry_dynamic" group_id={{region.id}} ></span>
-                  <span class="group" dd_id="ctry_dynamic">{{region.region}}</span>
-                  <ul style="display: block;" id='ctry_dynamic_{{region.id}}'>
-                    {% for country in country_list %}
-                      {% if country.country_region == region %}
-                      <li   style="display: block;">
-                          <input type="checkbox" style="margin-right:5px;"  dd_id="ctry_dynamic" ><span>{{country.country_id}}</span><span> : </span><span>{{country.country}}</span>                            
-                      </li>
-                      {% endif  %}
-                    {% endfor %}
-                  </ul>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-        <!--import currency list-->
-        <div id="import_currency_list" style="display: None"> 
-          <select style=" background-color:transparent; border:None ;width:60px">
-            {% for curr in currency_list %}
-                <option value={{curr.currency}}>{{curr.currency}}</option>          
-            {% endfor %}
-          </select>
-        </div>
-      
 
   <!----------------------------------------------------------------------------->
   <!----------------------------------Mini_guar---------------------------------->
@@ -1528,46 +1690,33 @@
   <div id="mini_guar" hidden >
     <div style=" display:grid;grid-template-columns: 320px 50px auto;margin-bottom:10px;margin-left:10px; width: 578px;">
       <span>A minimum amount has to be paid/rec every year:</span>
-
       <select   id="mini_gar_status" onchange="hide_unhide_mini(this)">
         {% if "YES" == contract.mini_gar_status  %}
           <option value="YES" selected="selected">YES</option>
         {% else%}
           <option value="YES" >YES</option>
         {% endif %}
-
         {% if "NO" == contract.mini_gar_status  %}
-        <option value="NO" selected="selected">NO</option>
+          <option value="NO" selected="selected">NO</option>
         {% else%}
-        <option value="NO" >NO</option>
+          <option value="NO" >NO</option>
         {% endif %}
       </select>
-
     </div>  
 
-    <table style="margin-left:10px" class="table table-striped table-sm"  style="max-width: 500px  " id="mini_table" {% if 'NO' == contract.mini_gar_status  %} hidden {% endif %} id="head_table" >
+    <table style="margin-left:10px;max-width: 500px" class="table table-striped table-sm"  id="mini_table" {% if 'NO' == contract.mini_gar_status  %} hidden {% endif %} id="head_table" >
       <thead>
- 
         <tr  >
-          <th >
-            <span>Amount</span>
-          </th>
-          <th>
-            <span>Country to allocate</span>
-          </th>
-          <th >
-            <span>From</span>
-          </th>
-          <th >
-            <span>To</span>
-          </th>
-
+          <th ><span>Amount</span></th>
+          <th><span>Country to allocate</span></th>
+          <th ><span>From</span></th>
+          <th ><span>To</span></th>
         </tr>
       </thead>
       <tbody >
         <tr >
           <td ><!--Amount-->
-            <input type="text" class="fname number-separator"  id="minimum_guar_amount"  value='{{contract.minimum_guar_amount|default_if_none:""|floatformat:"-3g"}}' style="width: 100px;">
+            <input type="text" class="fname number-separator"  id="minimum_guar_amount"  value='{{contract.minimum_guar_amount|default_if_none:""|floatformat:"-3g"}}' style="width: 100%;">
           </td>
           <td ><!--Country-->
             <span hidden=true  id="span_minimum_guar_remaining_allocation_country">searched_value:{{contract.minimum_guar_remaining_allocation_country.country_id}} </span>
@@ -1594,11 +1743,11 @@
             </select>
           </td>
           <td><!--Date From-->
-            <input style="background-color:transparent; border-style: None "  type="number" id="mini_gar_from" value="{{ contract.mini_gar_from }}"  >
+            <input style="background-color:transparent; border-style: None;width: 100% "  type="number" id="mini_gar_from" value="{{ contract.mini_gar_from }}"  >
           </td>
 
           <td><!--Date To-->
-            <input style="background-color:transparent; border-style: None "  type="number" id="mini_gar_to" value="{{ contract.mini_gar_to }}" >
+            <input style="background-color:transparent; border-style: None;width: 100% "  type="number" id="mini_gar_to" value="{{ contract.mini_gar_to }}" >
           </td>
           <td></td>
         </tr>

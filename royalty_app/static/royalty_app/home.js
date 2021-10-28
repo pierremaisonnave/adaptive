@@ -2,15 +2,16 @@
 function accruals_change(){
     //spinner activated
 
-    spinner_load_page.style.display = "block"
+    spinner_on()
 
     myChart.reset()
     //make sure we are not missing any field
     year=document.getElementById("item_list_year").value
     contract_list=document.getElementById("item_list_contract").value
-    contract_list=contract_list.split(",")
+    contract_list=contract_list.split(", ")
     contract_type_list=document.getElementById("item_list_type_accruals").value
-    contract_type_list=contract_type_list.split(",")
+    contract_type_list=contract_type_list.split(", ")
+
     // We load it via a fetch in the API
     fetch(`/accruals_change`, {
         method: 'POST',
@@ -38,14 +39,14 @@ function accruals_change(){
                     myChart.data.datasets[0].data[i]=data_accruals[i]
                 }
                 myChart.update();
-                spinner_load_page.style.display = "none"
+                spinner_off()
             }
         })
 }
 function cash_forecast_change(){
     //spinner activated
 
-    spinner_load_page.style.display = "block"
+    spinner_on()
 
     myChart2.reset()
     pie_contract.reset()
@@ -54,22 +55,23 @@ function cash_forecast_change(){
     //make sure we are not missing any field
     year=document.getElementById("item_list_year_forecast").value
     currency_list=document.getElementById("item_list_currency").value
-    CFF_report_id=document.getElementById("list_report").value
+    contract_list=document.getElementById("item_list_CFF_contract").value
+    contract_list=contract_list.split(", ")
     contract_type_list=document.getElementById("item_list_type_cashflow").value
 
 
-    currency_list=currency_list.split(",")
-    contract_type_list=contract_type_list.split(",")
+    currency_list=currency_list.split(", ")
+    contract_type_list=contract_type_list.split(", ")
+
     // We load it via a fetch in the API
     fetch(`/cash_forecast_change`, {
         method: 'POST',
         body: JSON.stringify({
             year : year,
             currency_list:currency_list, 
-            CFF_report_id:CFF_report_id,
-            contract_type_list:contract_type_list   
+            contract_type_list:contract_type_list,
+            CFF_contract_id_list:contract_list   
             }),
-            
         })
         .then(response => response.json())
         .then(result => {
@@ -77,10 +79,11 @@ function cash_forecast_change(){
                 alert(result.error);
                 location.reload();
             }else{
+                
                 //update bar chart
                 data_cash_forecast_last_year=result.data_cash_forecast_last_year
                 data_cash_forecast=result.data_cash_forecast
-
+  
                 for (var i = 0; i < 12; i++) {
                     myChart2.data.datasets[1].data[i]=data_cash_forecast_last_year[i]
                     myChart2.data.datasets[0].data[i]=data_cash_forecast[i]
@@ -108,67 +111,47 @@ function cash_forecast_change(){
                 //total amount:
                 document.getElementById("total_amount").innerHTML=result.total_amount
                 //spinner desactivated
-                spinner_load_page.style.display = "none"
+                spinner_off()
             }
         })
 }
 
-function selectall_accruals(elm,dd_id){
-    var table = document.getElementById(`dropdown_${dd_id}`)
-    var checked_box_list=table.querySelectorAll('input[type=checkbox]') 
+function selectall(elm,report_change){
+    comboTreeWrapper=get_comboTreeWrapper_list(elm)
+    var checked_box_list=comboTreeWrapper.querySelectorAll('input[type=checkbox]') 
     var select_mode=elm.textContent 
+    var select_all_box= comboTreeWrapper.querySelector(".justAnInputBox")
+    var comboTreeHiddenBox=comboTreeWrapper.querySelector(".comboTreeHiddenBox")
+    select_all_box.style.color=null
+
     if (select_mode=="(select all)"){
         elm.textContent="(unselect all)"
         checked_status=true
-        document.getElementById(`item_list_display_${dd_id}`).value="All"
+        select_all_box.innerHTML="All"
     }else{
         elm.textContent="(select all)"
         checked_status=false
-        document.getElementById(`item_list_display_${dd_id}`).value=""
+        select_all_box.innerHTML="Select"
+        select_all_box.style.color="grey"
     }    
-    imput_list=[]   
+    item_code_list=[]   
     //go throug list and selec or unselect all check box
     for (i = 0; i < checked_box_list.length; ++i) {
         checked_box_list[i].checked=checked_status
-        span_element=checked_box_list[i].parentElement.children[1]
-        imput_list.push(span_element.innerHTML)
+        item_code_list.push(checked_box_list[i].getAttribute("item_code"))
         }
   
     if (checked_status== false)
-        imput_list=[]
+        item_code_list=[]
+        
     //item_list_display_form_new_hidden.value=imput_list
-    document.getElementById(`item_list_${dd_id}`).value=imput_list
-    accruals_change()
+    comboTreeHiddenBox.value=item_code_list.join(', ')
+
+    if (report_change== "accruals_change"){
+        accruals_change()
+    }else if (report_change== "cash_forecast_change"){
+        cash_forecast_change()
+    }
+
 }
 
-
-function selectall_forecast(elm,dd_id){
-
-    var table = document.getElementById(`dropdown_${dd_id}`) 
-    var checked_box_list=table.querySelectorAll('input[type=checkbox]') 
-    var select_mode=elm.textContent 
-    if (select_mode=="(select all)"){
-        elm.textContent="(unselect all)"
-        checked_status=true
-        document.getElementById(`item_list_display_${dd_id}`).value="All"
-    }else{
-        elm.textContent="(select all)"
-        checked_status=false
-        document.getElementById(`item_list_display_${dd_id}`).value=""
-    }    
-
-    imput_list=[]   
-    //go throug list and selec or unselect all check box
-    for (i = 0; i < checked_box_list.length; ++i) {
-        checked_box_list[i].checked=checked_status
-        span_element=checked_box_list[i].parentElement.children[1]
-        imput_list.push(span_element.innerHTML)
-        }
-    //alert(imput_list)
-    if (checked_status== false)
-        imput_list=[]
-    
-    document.getElementById(`item_list_${dd_id}`).value=imput_list
-
-    cash_forecast_change()
-}

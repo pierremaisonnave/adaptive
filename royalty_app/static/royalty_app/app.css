@@ -14,25 +14,27 @@ body {
 
  #topbar {
   border-bottom: 1px rgba(0, 0, 0, .1) solid;
+  width:100%;
+  position: fixed
  }
 .sidebar {
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 100; /* Behind the navbar */
+  z-index: 1000; /* Behind the navbar */
   padding: 0;
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
 }
 
 .sidebar-sticky {
-  position: -webkit-sticky;
+  /*position: -webkit-sticky;*/
   position: sticky;
   margin-top: 56px; /* Height of navbar */
   /*height: calc(100vh - 48px);*/
   padding-top: .5rem;
-  overflow-x: hidden;
-  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+  /*overflow-x: hidden;
+  overflow-y: auto;  Scrollable contents if viewport is shorter than content. */
 }
 #nav-top>li>a{
   color: #333;
@@ -190,6 +192,7 @@ select.fname{
   background-color: rgba(0,0,0,.05)
 }
 
+
 .approve_button:hover{
   background-color: #e6f1e6;
 }
@@ -212,5 +215,20 @@ select.fname{
 .previous_value_button {
   width:100%;
   background-color:transparent
+}
+
+.dd_dashboard_style{
+  margin-left:5px;
+  width:100%;
+  background-color:white;
+  border: 0.5px solid rgb(118, 118, 118);
+  padding:0px 5px
+}
+.select_all_box{
+ cursor: pointer;
+ font-weight: normal;
+ font-family: arial; 
+ font-size: 0.800rem; 
+ color:#6c757d"
 }
 

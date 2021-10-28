@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'royalty.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-#postgres://atzrmjyxcymhtd:c73ec4bb9461274ff04a5fad3951cb0da2b0fcd13c60936d86b5d1cb69905b71@ec2-54-83-82-187.compute-1.amazonaws.com:5432/db309563b7l4j5
+
 
 #see https://www.enterprisedb.com/postgres-tutorials/how-use-postgresql-django
 
@@ -100,10 +100,10 @@ WSGI_APPLICATION = 'royalty.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('POSTGRES_NAME'),#'db309563b7l4j5',
-        'USER': os.getenv('POSTGRES_USER'),#'atzrmjyxcymhtd',
-        'PASSWORD': os.getenv('POSTGRES_PWD'),#'c73ec4bb9461274ff04a5fad3951cb0da2b0fcd13c60936d86b5d1cb69905b71',
-        'HOST': os.getenv('POSTGRES_HOST'),#'ec2-54-83-82-187.compute-1.amazonaws.com',
+        'NAME': os.getenv('POSTGRES_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PWD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
         'PORT': '5432',
     }
 }
@@ -214,11 +214,11 @@ EMAIL_PAGE_DOMAIN = 'http://localhost:8000/'
 
 # For Django Email Backend
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST =   'smtp.office365.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_ID') 
-DEFAULT_FROM_EMAIL= os.getenv('EMAIL_FROM') 
+EMAIL_HOST_USER = EMAIL_FROM_ADDRESS
+DEFAULT_FROM_EMAIL= EMAIL_FROM_ADDRESS 
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PW')
 
 
@@ -239,5 +239,5 @@ DATABASE_URL_VIEW=os.getenv("DATABASE_URL_VIEW")
 
 #How session are kept:
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # opional, as this will log you out when browser is closed
-SESSION_COOKIE_AGE =  5*60    # log out after x seconds
+SESSION_COOKIE_AGE =  10*60    # log out after x seconds
 SESSION_SAVE_EVERY_REQUEST = True  # Will prrevent from logging you out after x seconds

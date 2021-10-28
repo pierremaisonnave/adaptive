@@ -11,17 +11,17 @@
         <span>you are already logged in, click <a  href="{% url 'logout' %}"  > here</a> to log out</span>
     {% else %}
 
-    <div   id="logon_frame_l1">
-       <div id="logon_red-band"></div>
-       <div id="logon_grey-band"></div>
+    <div   id="logon_frame_l1" class="logon_frame_l1">
+       <div class="logon_red-band"></div>
+       <div class="logon_grey-band"></div>
        <div style="text-align: right"><img src="{% static 'photo/logo_me.png' %}" style="width: 120px;margin: 10px 30px 0px 0px " ></div>
-       <b id="logon_top-message">Register for free to SwissRoy</b>
-       <div id="logon_frame_l2">
-         <div id="logon_frame_l3">
+       <b class="logon_top-message">Register for free to SwissRoy</b>
+       <div class="logon_frame_l2">
+         <div class="logon_frame_l3">
            <b>Enter your user information and click on Register.</b>
   
            <form action="{% url 'register' %}" redirect="{% url 'home' %}" method="post" id="form_login">
-             <div id="logon_frame_l4"> 
+             <div class="logon_frame_l4"> 
                {% csrf_token %}
                <div style="margin:30px auto 30px auto; max-width: 400px;">
                 <div>
@@ -54,7 +54,7 @@
                </div>
              </div> 
              <div class="form-group">
-               <input class="btn btn-primary form-control "type="button" value="Register" onclick="isauthenticated(this.form)">
+               <input class="btn btn-primary form-control "type="button" value="Register" onclick="isauthenticated_form(this.form)">
              </div>
              <input type="hidden" name="next" value="{{ request.GET.next }}"/>
        

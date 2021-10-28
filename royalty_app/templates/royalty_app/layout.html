@@ -44,20 +44,8 @@
     {% if user.is_authenticated %}
       <nav class="navbar navbar-dark sticky-top bg-light flex-md-nowrap p-0 " id="topbar" style="width:100%;position: fixed">
         <a href="https://www.pierre-maisonnave-consulting.ch/" id="your_logo"> <img src="{% static 'photo/pmconsulting.png' %}" style="width: 150px;margin: 10px " ></a> 
-        <div id="central_spinner" style="display: None;">
-          <span style="  position: relative;top: 15px;right :7px; font-size: smaller;color:green">saving</span>
-          <div class="sk-chase" >
-            
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-            <div class="sk-chase-dot"></div>
-          </div>
-        </div>
         <ul class="navbar-nav px-3"  style="display: grid; grid-template-columns:auto auto auto" id="nav-top"> 
-          <div style="background-color: #f8f9fa! ;" id="user_menu"  >
+          <div style="background-color: #f8f9fa! ;" id="user_menu" class="comboTreeWrapper" >
               <div id="user_photo_on_layout" class="comboTreeInputWrapper" dd_id="user" style="display: grid; grid-template-columns:auto  auto; margin: 10px ">
                 <div class="comboTreeInputBox  bi bi-gear" dd_id="user" style="margin:7px; font-size: 1.2rem " > </div>
                 <div class=" justAnInputBox comboTreeInputBox   " style="margin:10px " id="displayed_item_name_user" dd_id="user" >{{ user.first_name }} </div>
@@ -125,7 +113,7 @@
                 </li>
             
                 <li class="nav-item">
-                  <a class="nav-link item_in_sidebar"  id="item_in_sidebar_2"  {% if user.role == "WRITER"%}   href="{% url 'partners' %}"  {%else%} href="{% url 'partners_current' %}" {%endif%}   title="Partners" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
+                  <a class="nav-link item_in_sidebar"  id="item_in_sidebar_2"    href="{% url 'partners' %}"   title="Partners" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-people"></span>
                     <span class="item_name">Partners</span>
                   </a>
@@ -160,7 +148,7 @@
                 <li class="nav-item">
                   <a class="nav-link item_in_sidebar" id="item_in_sidebar_8"  href="{% url 'monthly_accruals' %}" title="Monthly Accruals" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-journals"></span>
-                    <span class="item_name">Monthly Accruals</span>
+                    <span class="item_name">Accruals</span>
                     
                   </a>
                 </li>
@@ -168,36 +156,46 @@
                   <a class="nav-link item_in_sidebar" id="item_in_sidebar_9" href="{% url 'cash_flow_forecast' %}" title="Cash Flow Forecast" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-graph-up"></span>
                     
-                    <span class="item_name">Cash Flow Forecast </span>
+                    <span class="item_name">Cash Flow</span>
                   </a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link item_in_sidebar" id="item_in_sidebar_10" href="{% url 'partner_report' %}" title="Partner payment report" style="display: grid; grid-template-columns:20px  auto"onclick="spinner()">
                     <span class="bi bi-cash"></span>
-                    
-                    <span class="item_name">Partner payment report</span>
+                    <span class="item_name">Partner report</span>
                   </a>
+                </li>
+                <li class="nav-item" hidden>
+                  <span id="time_count_down"></span>
+                </li>
+                <li class="nav-item" hidden>
+                  <span >is user logged in: </span>
+                  <span id="isuserlogged"></span>
+                </li>
+                <li class="nav-item" hidden>
+                  <span >is a connection page :</span>
+                  <span id="isconnectionpage"></span>
                 </li>
               </ul>
             </div>
           </nav>
         </div> 
       </div>
-      <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 main_authentificated" style="visibility: hidden;margin-top:50px" >
+      <main role="main" class="col-md-9  col-lg-10 pt-3 px-4 main_authentificated" style="visibility: hidden;margin-top:49px;min-width:950px;" >
       <input hidden type="checkbox" id="is_logged_out" value="false">
     {% else %} 
         
-      <main  style="position:relative;background-image: url({% static 'photo/capturer.png' %}) ; background-repeat: yes-repeat;height:1200px;background-attachment: fixed; " >
+      <main  style="position:fixed;top:0px;right:0px;left:0px;background-image: url({% static 'photo/capturer.png' %}) ; background-repeat: yes-repeat;height:1200px;background-attachment: fixed; " >
       <input hidden type="checkbox" id="is_logged_out" value="true">
     {% endif %}  
     {% block content %}{% endblock %}  
     </main>
-        <!--{% if user.is_authenticated %}
-
-        
-         {% endif %}-->
       <div id="spinner_load_page" >
           <img src="{% static 'photo/logo_me.png' %}" style="width: 180px;margin: 10px; position:relative; top:100px; right:30px " >
+          <div style="width: 100%; text-align:center;height:0px;position:relative; top:100px; right:10px">
+            <span id="spinner_completion" ></span>
+
+          </div>
           <div class="sk-chase-big" >
             <div class="sk-chase-dot-big"></div>
             <div class="sk-chase-dot-big"></div>
@@ -215,9 +213,30 @@
       <button class="cookie-btn" >ACCEPT</button>
     </div>  
 
+    <!-- Warning when it's almost time out -->
+    <div  id="time_out_warning" >
+      <div class="logon_red-band" ></div>
+      <div class="logon_grey-band"></div>
+      <div style="text-align: right"><img src="{% static 'photo/logo_me.png' %}" style="width: 120px;margin: 10px 30px 0px 0px " ></div>
+      <b class="logon_top-message" >You will be disconnected soon </b>
+      <div class="logon_frame_l2">
+        <div class="logon_frame_l3" >
+          <form method="post">
+            <div class="form-group">
+              <input type="button" class="btn btn-primary form-control " value="click to stay logged in" onclick="stay_connected()">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+
+
     <!-- Placed at the end of the document so the pages load faster -->
    
     <script src="{% static 'royalty_app/layout.js'%}"></script> 
+    <script src="{% static 'royalty_app/dropdown.js'%}"></script> 
     <script type="text/javascript" src="{% static 'royalty_app/jquery.min.js'%}"></script>     
     <script type="text/javascript" src="{% static 'royalty_app/jquery.dataTables.min.js'%}"></script> 
     <script src='https://www.google.com/recaptcha/api.js?render={{recaptcha_site_key}}'></script>

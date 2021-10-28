@@ -73,7 +73,9 @@ function onchange_contract(elm){
         })
     // currency
         currency_id=elm.options[elm.selectedIndex].getAttribute("currency")
-        document.getElementById("currency_contract_").innerHTML=currency_id
+        currency_list=document.getElementById("currency_")
+        currency_list.value=currency_id
+        //document.getElementById("currency_contract_").innerHTML=currency_id
     // comment
 
 
@@ -86,7 +88,7 @@ function onchange_contract(elm){
 }
 
 function add_new_record(){
-    //definition od the elements
+    //definition of the elements
     contract_=document.getElementById("contract_")
     contract_value=contract_.options[contract_.selectedIndex].text
     contract_id=contract_.value
@@ -102,8 +104,9 @@ function add_new_record(){
     amount_value=amount_.value
     amount_value_wo_comma=Number(amount_value.split(',').join(""))
 
-    currency_contract_=document.getElementById("currency_contract_")
-    currency_contract_value=currency_contract_.innerHTML
+    
+    currency_=document.getElementById("currency_")
+    currency=currency_.value
 
     year_=document.getElementById("year_")
     year_value=year_.value
@@ -150,6 +153,7 @@ function add_new_record(){
                 contract_id:contract_id,
                 partner_id:partner_id,
                 amount_value:amount_value_wo_comma,
+                currency:currency,
                 year_value:year_value,
                 period_id:period_id,
                 booking_date:booking_date_value,
@@ -171,7 +175,7 @@ function add_new_record(){
                     `${partner_value}`,
                     `<div style="display:grid;grid-template-columns: 30px 30px auto" >
                         <span style="color:grey">${transaction_direction_value}</span>
-                        <span style="color:grey">${currency_contract_value}</span>
+                        <span style="color:grey">${currency}</span>
                         <span>${amount_value}</span>
                     </div>`,
                     `${year_value}`,

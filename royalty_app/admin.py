@@ -5,7 +5,7 @@ from .models import (Invoice,Country,Region,Partner,
     Contract_partner,Rule,Tranche,Periodicity_cat,
     File,Sale,Fx,Rule_calc,Conso,Accounting_entry,Consolidation_currency,
     Detail,Wht,Sales_breakdown_for_contract_report,Sales_breakdown_per_contract,
-    Contract_file,Month_table,User,Type)
+    Contract_file,Month_table,User,Type,Milestone)
 
 
 
@@ -29,7 +29,7 @@ class AccountingAdmin(admin.ModelAdmin):
     list_display = ("transaction_direction","account_nb","cost_center_acc","market_acc","pl_bs","d_c_if_amount_positiv")
 
 class BrandAdmin(admin.ModelAdmin):
-    list_display = ("id","m3_brand_code","brand_name")
+    list_display = ("id","brand_code","brand_name")
 
 class FormulationAdmin(admin.ModelAdmin):
     list_display = ("formula_code","formula_name")
@@ -70,6 +70,9 @@ class FxAdmin(admin.ModelAdmin):
 class RuleAdmin(admin.ModelAdmin):
     list_display=("contract","country_incl_excl","country_list","field_type","period_from","period_to","rate_value","qty_value","tranche_currency")
 
+class MilestoneAdmin(admin.ModelAdmin):
+    list_display=("contract","name","amount","currency","booked","booking_date","payment_date")
+
 class Rule_calcAdmin(admin.ModelAdmin):
     list_display=("import_file","contract_id","country_incl_excl","country_list","formulation","period_from","period_to","tranche_type","field_type","qty_value","sales_rate")
 
@@ -96,6 +99,7 @@ admin.site.register(Contract,ContractAdmin)
 admin.site.register(Currency)
 admin.site.register(Contract_partner,Contract_partnerAdmin)
 admin.site.register(Rule,RuleAdmin)
+admin.site.register(Milestone,MilestoneAdmin)
 admin.site.register(Tranche,Tranche_partnerAdmin)
 admin.site.register(Periodicity_cat,Periodicity_catAdmin)
 admin.site.register(Invoice,InvoiceAdmin)

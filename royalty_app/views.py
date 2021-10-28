@@ -9,7 +9,7 @@ from .models import (Invoice,Country,Partner,Region,Payment_type,Brand,
   Payment_structure,Contract,Contract_partner,Rule,Tranche,
   Periodicity_cat,Fx,Sales_breakdown_item,Sales_breakdown_per_contract,Sales_breakdown_item,
   File,Sale, Rule_calc,Periodicity_cat,Consolidation_currency,Cash_flow,Detail,Accounting_entry,Conso,Wht,Sales_breakdown_for_contract_report,
-  Contract_file,Month_table,User,Type)
+  Contract_file,Month_table,User,Type,Milestone)
 from django.views.decorators.csrf import csrf_exempt
 import pandas as pd
 import numpy as np
@@ -42,14 +42,15 @@ from sqlalchemy.engine.create import create_engine
 
 @csrf_exempt
 def isauthenticated(request):
-  print("user verification")
   if request.user.is_authenticated:
     return  JsonResponse({"isauthenticated":"YES"}, status=201)
   else:
     return  JsonResponse({"isauthenticated":"NO"}, status=201)
 
-
+import smtplib
 def login_check(request):
+
+
   if request.user.is_authenticated:
     return HttpResponseRedirect(reverse("home")) 
   if request.method == "POST":
@@ -75,7 +76,7 @@ def login_check(request):
           error_message.append(f"your email has not been verified yet- another token was sent to {username}")
           error_message.append("If your token expired, or you did not receive the email, please contact your administrator")
           send_email(user)
-          return render(request, "royalty_app/login.html", {
+          return render(request, "royalty_app/connection/login.html", {
             "error_message": error_message,
             'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
           })
@@ -96,18 +97,17 @@ def login_check(request):
         #we must utilise request.POST.get('next')
 
       else:
-        return render(request, "royalty_app/login.html", {
+        return render(request, "royalty_app/connection/login.html", {
             "error_message": ['Invalid username and/or password.'],
             'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
         })
     else:  
-      return render(request, "royalty_app/login.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY,"error_message": ["Could not get Google CAPTCHA, please try again"]})
+      return render(request, "royalty_app/connection/login.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY,"error_message": ["Could not get Google CAPTCHA, please try again"]})
   else:
-    return render(request, "royalty_app/login.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
+    return render(request, "royalty_app/connection/login.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
 
 def automatic_logout(request):
-  return render(request, "royalty_app/login.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY,"error_message": ["You have been logged out due to inactivity"]})
-
+  return render(request, "royalty_app/connection/automatic_logout.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
 
 @csrf_exempt
 @login_required(login_url='/login')
@@ -146,19 +146,19 @@ def register(request):
       password = request.POST["password"]
       confirmation = request.POST["confirmation"]
       if password != confirmation:
-          return render(request, "royalty_app/register.html", {
+          return render(request, "royalty_app/connection/register.html", {
               "error_message": ["Passwords must match."],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
           })
       print("password OK")
       if User.objects.filter(email=email):
-          return render(request, "royalty_app/register.html", {
+          return render(request, "royalty_app/connection/register.html", {
               "error_message": ["Email already exists"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
           })
       print("New email OK")
       try: 
         password_validation.validate_password(password, request)
       except Exception as e:
-        return render(request, "royalty_app/register.html",{
+        return render(request, "royalty_app/connection/register.html",{
           "error_message":e ,'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY}
           )
       print("password and email OK")
@@ -172,13 +172,13 @@ def register(request):
         user.save()
         send_email(user)
         print("email sent")
-        return render(request, "royalty_app/register.html", {"message_confirmation": "email for confimation has been sent",'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})    
+        return render(request, "royalty_app/connection/register.html", {"message_confirmation": "email for confimation has been sent",'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})    
       except IntegrityError:
-        return render(request, "royalty_app/register.html", {"error_message": ["Username already taken"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
+        return render(request, "royalty_app/connection/register.html", {"error_message": ["Username already taken"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
     else:
-      return render(request, "royalty_app/register.html",{"error_message": ["CAPTCHA must be validated"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
+      return render(request, "royalty_app/connection/register.html",{"error_message": ["CAPTCHA must be validated"],'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
   else:
-    return render(request, "royalty_app/register.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
+    return render(request, "royalty_app/connection/register.html",{'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY})
 
 
 
@@ -196,117 +196,111 @@ def home(request):
 
     #---------------calculation for Accruals graph------------
     current_year=datetime.now().year
-    year_list=File.objects.filter(file_type="accruals").values_list('acc_year')
-    year_list=list(dict.fromkeys(year_list))
-    year_list=[int(y[0]) for y in year_list]
-    #get the contract Type
-    contract_type_list=Type.objects.all().values_list('name')
-    contract_type_list=[c[0] for c in contract_type_list]
+    accruals_file_list=File.objects.filter(file_type="accruals",dashboard=True)
+
+    # contract_nb and partner_nb:
+    contract_nb=len(Contract.objects.filter(status__in=['CHANGE','DELETE','CURRENT']))
+    partner_nb=len(Partner.objects.filter(status__in=['CHANGE','DELETE','CURRENT']))
+    #year list
+    accruals_year_list=accruals_file_list.values_list('acc_year')
+    accruals_year_list=list(dict.fromkeys(accruals_year_list))
+    accruals_year_list=[int(y[0]) for y in accruals_year_list]
+    #contract Type list
+    detail_queryset=Detail.objects.filter(import_file__in = accruals_file_list)
+    accruals_contract_type_list=Type.objects.filter(detail__in=detail_queryset).distinct().values_list('name')
+    accruals_contract_type_list=[y[0] for y in accruals_contract_type_list]
     #if the current year does not exist, insert it in the list
-    if current_year not in year_list:
-      year_list.append(current_year)
-    year_list.sort()
+    if current_year not in accruals_year_list:
+      accruals_year_list.append(current_year)
+    accruals_year_list.sort()
 
     consolidation_currency=Consolidation_currency.objects.all().first()
-    contract_list=Contract.objects.filter(status__in=["CURRENT","DELETE","CHANGE"])
-    contract_id_list=contract_list.values_list('id')
-    contract_id_list=[c[0] for c in contract_id_list]
+    accruals_contract_list=Contract.objects.filter(detail__in=detail_queryset).distinct().order_by('id')
+    accruals_contract_id_list=accruals_contract_list.values_list('id')
+    accruals_contract_id_list=[c[0] for c in accruals_contract_id_list]
 
+    result=chart_accruals(current_year,accruals_contract_id_list,accruals_contract_type_list)
+    accruals_labels=result[0]
+    accruals_data=result[1]
+    accruals_data_roy_ytd=result[2]
 
-    result=chart_accruals(current_year,contract_id_list,contract_type_list)
-    labels=result[0]
-    data_accruals=result[1]
-    data_roy_ytd=result[2]
-    
-
-    result=chart_accruals(current_year-1,contract_id_list,contract_type_list)
-    data_accruals_last_year=result[1]
-    data_roy_ytd_last_year=result[2]
+    result=chart_accruals(current_year-1,accruals_contract_id_list,accruals_contract_type_list)
+    accruals_data_last_year=result[1]
+    accruals_data_roy_ytd_last_year=result[2]
     
   #---------------calculation for CFF graph------------
-    CFF_report_list=File.objects.filter(file_type="cash_forecast").order_by('-id')[:30]
-    #Get the list of cash flow report, and select the latest
-    if not CFF_report_list :
-      CFF_report_id=0
-      year_list_cash_forecast=[current_year]
-    else:
-      CFF_report=CFF_report_list.first()
-      CFF_report_id=CFF_report.id
-      
-
-    #get the currency list from the contract
-    currency_list=contract_list.values_list('contract_currency')
-    currency_list=list(dict.fromkeys(currency_list))
-    currency_list=[str(c[0]) for c in currency_list]
-
+    CFF_file_list=File.objects.filter(file_type="cash_forecast",dashboard=True)
+    #year list
+    CFF_year_list=Cash_flow.objects.exclude(rule_type="INVOICE").filter(import_file__in=CFF_file_list).values_list('payment_date__year')
+    CFF_year_list=list(dict.fromkeys(CFF_year_list))
+    CFF_year_list=[int(y[0]) for y in CFF_year_list]
+    #contract Type list
+    CFF_contract_type_list=Type.objects.filter(detail__in=Detail.objects.filter(import_file__in = CFF_file_list).exclude(rule_type="INVOICE")).distinct().values_list('name')
+    CFF_contract_type_list=[y[0] for y in CFF_contract_type_list]
+    CFF_currency_list=Currency.objects.filter(cash_flow__in=Cash_flow.objects.filter(import_file__in = CFF_file_list).exclude(rule_type="INVOICE")).distinct().values_list('currency')
+    CFF_currency_list=[y[0] for y in CFF_currency_list]
+    #contract list
+    CFF_contract_list=Contract.objects.filter(detail__in=Detail.objects.filter(import_file__in = CFF_file_list).exclude(rule_type="INVOICE")).distinct().order_by('id')
+    CFF_contract_id_list=CFF_contract_list.values_list('id')
+    CFF_contract_id_list=[c[0] for c in CFF_contract_id_list]
     
     #get the label, data as well as the
-    result=chart_cash_forecast(CFF_report_id,currency_list,current_year,contract_type_list)
-    labels_cash_forecast=result[0]
-    data_cash_forecast=result[1] 
-    year_list_cash_forecast=result[2]
+    result=chart_cash_forecast(current_year,CFF_contract_type_list,CFF_currency_list,CFF_contract_id_list)
+    CFF_labels=result[0]
+    CFF_data=result[1] 
     #data for countract pies
-    labels_contract=result[3]
-    data_contract=result[4]
-    color_contract=result[5]
+    CFF_labels_contract=result[2]
+    CFF_data_contract=result[3]
+    CFF_color_contract=result[4]
     # data for country pie
-    labels_country=result[6]
-    data_country=result[7]
-    color_country=result[8]
+    CFF_labels_country=result[5]
+    CFF_data_country=result[6]
+    CFF_color_country=result[7]
     # data for currency pie
-    labels_currency=result[9]
-    data_currency=result[10]
-    color_currency=result[11]
+    CFF_labels_currency=result[8]
+    CFF_data_currency=result[9]
+    CFF_color_currency=result[10]
 
     #previous year for bar chart
-    result=chart_cash_forecast(CFF_report_id,currency_list,current_year-1,contract_type_list)
-    data_cash_forecast_last_year=result[1] 
+    result=chart_cash_forecast(current_year-1,CFF_contract_type_list,CFF_currency_list,CFF_contract_id_list)
+    CFF_data_last_year=result[1] 
 
     print("contact")
     return render(request, 'royalty_app/home.html', {
-      "contract_type_list":contract_type_list,
-      "total_amount":round(sum(data_country)/1000000,2),
-      "labels_currency":labels_currency,"data_currency":data_currency,"color_currency":color_currency,
-      "color_country":color_country,"data_country":data_country,"labels_country":labels_country,
-      "color_contract":color_contract,"labels_contract":labels_contract,"data_contract":data_contract,
-      "CFF_report_list":CFF_report_list,"CFF_report_id":CFF_report_id,"currency_list":currency_list,"year_list_cash_forecast":year_list_cash_forecast,
-      "data_cash_forecast_last_year":data_cash_forecast_last_year,
-      "data_cash_forecast":data_cash_forecast,
-      "labels_cash_forecast":labels_cash_forecast,
-      "data_accruals_last_year":data_accruals_last_year,
-      "data_roy_ytd_last_year":data_roy_ytd_last_year,
-      "contract_id_list":contract_id_list,
-      "contract_list":contract_list,
+      "current_year":current_year,
+      "contract_nb":contract_nb,
+      "partner_nb":partner_nb,
       "consolidation_currency":consolidation_currency,
-      "labels":labels,
-      "data_accruals":data_accruals,
-      "data_roy_ytd":data_roy_ytd,
-      "year_list":year_list,
-      "current_year":current_year})
+
+      "CFF_total_amount":round(sum(CFF_data_country)/1000000,2),
+      "CFF_labels_currency":CFF_labels_currency,"CFF_data_currency":CFF_data_currency,"CFF_color_currency":CFF_color_currency,
+      "CFF_labels_country":CFF_labels_country,"CFF_data_country":CFF_data_country,"CFF_color_country":CFF_color_country,
+      "CFF_labels_contract":CFF_labels_contract,"CFF_data_contract":CFF_data_contract,"CFF_color_contract":CFF_color_contract,
+      "CFF_currency_list":CFF_currency_list,"CFF_year_list":CFF_year_list,
+      "CFF_contract_type_list":CFF_contract_type_list,
+      "CFF_data_last_year":CFF_data_last_year,
+      "CFF_data":CFF_data,
+      "CFF_labels":CFF_labels,
+      "CFF_contract_list":CFF_contract_list,
+      "CFF_contract_id_list":CFF_contract_id_list,
+      "accruals_contract_type_list":accruals_contract_type_list,
+      "accruals_data_last_year":accruals_data_last_year,
+      "accruals_data_roy_ytd_last_year":accruals_data_roy_ytd_last_year,
+      "accruals_contract_id_list":accruals_contract_id_list,
+      "accruals_contract_list":accruals_contract_list,
+      "accruals_labels":accruals_labels,
+      "accruals_data":accruals_data,
+      "accruals_data_roy_ytd":accruals_data_roy_ytd,
+      "accruals_year_list":accruals_year_list
+      })
 
 
 
-def chart_cash_forecast(CFF_report_id,currency_list,year,contract_type_list):
+def chart_cash_forecast(year,contract_type_list,currency_list,contract_id_list):
 
-  #get Year List
-  print("cash data retreival: 1")
-  current_year=datetime.now().year
-  detail_list=Detail.objects.filter(import_file=CFF_report_id)
-  year_list_cash_forecast=detail_list.values_list('payment_date')
-  year_list_cash_forecast=pd.DataFrame.from_records(list(year_list_cash_forecast), columns=['payment_date'])
-  year_list_cash_forecast["payment_date"]=pd.DatetimeIndex(year_list_cash_forecast["payment_date"]).year
-  year_list_cash_forecast=year_list_cash_forecast.groupby(['payment_date'],as_index=False)
-  year_list_cash_forecast=list(year_list_cash_forecast)
-  year_list_cash_forecast=[y[0] for y in year_list_cash_forecast]
-  if current_year not in year_list_cash_forecast:
-    year_list_cash_forecast.append(current_year)
-  year_list_cash_forecast.sort()
-  print("cash data retreival: 2")
-  #import detail tab:
- 
-  detail_list=Detail.objects.filter(contract_type__name__in=contract_type_list,import_file=CFF_report_id,contract_currency__in=currency_list,payment_date__year=year).values_list('payment_date','amount_consolidation_curr','rule_type','transaction_direction','contract__contract_name','market_id','contract_currency')
+  CFF_report_list=File.objects.filter(file_type="cash_forecast").filter(dashboard=True)
+  detail_list=Detail.objects.exclude(rule_type="INVOICE").filter(contract__id__in=contract_id_list,contract_type__name__in=contract_type_list,import_file__in=CFF_report_list,payment_currency__in=currency_list,payment_date__year=year).values_list('payment_date','amount_consolidation_curr','rule_type','transaction_direction','contract__contract_name','market_id','payment_currency')
 
- 
 
   if not detail_list :
 
@@ -314,30 +308,26 @@ def chart_cash_forecast(CFF_report_id,currency_list,year,contract_type_list):
     data_bar_chart=[0,0,0,0,0,0,0,0,0,0,0,0]
     labels_contract=["NA"]
     data_contract=[0]
-    color_contract=['rgba(54, 162, 235,1.5)']
+    color_contract=['rgba(255, 177, 193,1)']
     labels_country=["NA"]
     data_country=[0]
-    color_country=['rgba(54, 162, 235,1.5)']
+    color_country=['rgba(255, 177, 193,1)']
     labels_currency=["NA"]
     data_currency=[0]
-    color_currency=['rgba(54, 162, 235,1.5)']
+    color_currency=['rgba(255, 177, 193,1)']
   else:
-    df_detail_list=pd.DataFrame.from_records(list(detail_list), columns=['payment_date','amount_consolidation_curr','rule_type','transaction_direction','contract','market_id','contract_currency'])
+    df_detail_list=pd.DataFrame.from_records(list(detail_list), columns=['payment_date','amount_consolidation_curr','rule_type','transaction_direction','contract','market_id','payment_currency'])
     print("cash data retreival: 3")
     #data for bar
-    df_data=df_detail_list.groupby(['payment_date','rule_type','transaction_direction','contract','market_id','contract_currency'], as_index=False).agg({"amount_consolidation_curr": "sum"})
+    df_data=df_detail_list.groupby(['payment_date','rule_type','transaction_direction','contract','market_id','payment_currency'], as_index=False).agg({"amount_consolidation_curr": "sum"})
 
     df_data['payment_month'] =  pd.DatetimeIndex(df_data['payment_date']).month
     df_data['payment_month'] = df_data['payment_month'].astype(int)
     df_data=df_data.drop(['payment_date'], axis = 1)  
 
+    df_data=df_data.rename(columns={'amount_consolidation_curr':'amount'})
+  
 
-    df_data["amount"]=np.where(
-      df_data["rule_type"]=="INVOICE",
-      0,
-      df_data["amount_consolidation_curr"]
-    )
-    
     df_data["amount"]=np.where(
       df_data["transaction_direction"]=="REC",
       -df_data["amount"],
@@ -350,14 +340,11 @@ def chart_cash_forecast(CFF_report_id,currency_list,year,contract_type_list):
     })
 
     df_pie=df_data.copy()
-
     df_data=pd.merge(df_month,df_data,how="left",left_on=["month_nb"],right_on=["payment_month"])
-    
     df_data=df_data.groupby(['month_nb','month'], as_index=False,dropna=False).agg({"amount": "sum"})
     df_data=df_data.sort_values(['month_nb'], ascending=[1])
     df_data=df_data.drop(['month_nb'], axis = 1)
     df_data=df_data.fillna("0")
-
     datas=df_data.values.tolist()
     labels_bar_chart=[ d[0] for d in datas]
     data_bar_chart=[ d[1] for d in datas]
@@ -375,11 +362,11 @@ def chart_cash_forecast(CFF_report_id,currency_list,year,contract_type_list):
       if t>9 :
         small_value=data[1]+small_value
         transparance=1/nb_items
-        color= f'rgba(54, 162, 235,{transparance})'
+        color= f'rgba(255, 177, 193,{transparance})'
       else:  
         transparance=(nb_items-t+1)/nb_items
         t=t+1
-        color= f'rgba(54, 162, 235,{transparance})'
+        color= f'rgba(255, 177, 193,{transparance})'
         color_contract.append(color)
         labels_contract.append(data[0][:15] + (data[0][15:] and '..'))
         data_contract.append(round(data[1],0))
@@ -402,11 +389,11 @@ def chart_cash_forecast(CFF_report_id,currency_list,year,contract_type_list):
       if t>9 :
         small_value=data[1]+small_value
         transparance=1/nb_items
-        color= f'rgba(54, 162, 235,{transparance})'
+        color= f'rgba(255, 177, 193,{transparance})'
       else:  
         transparance=(nb_items-t+1)/nb_items
         t=t+1
-        color= f'rgba(54, 162, 235,{transparance})'
+        color= f'rgba(255, 177, 193,{transparance})'
         color_country.append(color)
         labels_country.append(data[0])
         data_country.append(round(data[1],0))
@@ -415,7 +402,7 @@ def chart_cash_forecast(CFF_report_id,currency_list,year,contract_type_list):
       data_country.append(round(small_value,0))
       color_country.append(color)
     #---------------- pie currency------------
-    df_currency_pie=df_pie.groupby(['contract_currency'], as_index=False).agg({"amount": "sum"}).sort_values(by=['amount'],ascending=False)
+    df_currency_pie=df_pie.groupby(['payment_currency'], as_index=False).agg({"amount": "sum"}).sort_values(by=['amount'],ascending=False)
     datas=df_currency_pie.values.tolist()
 
     labels_currency=[]
@@ -428,11 +415,11 @@ def chart_cash_forecast(CFF_report_id,currency_list,year,contract_type_list):
       if t>9 :
         small_value=data[1]+small_value
         transparance=1/nb_items
-        color= f'rgba(54, 162, 235,{transparance})'
+        color= f'rgba(255, 177, 193,{transparance})'
       else:  
         transparance=(nb_items-t+1)/nb_items
         t=t+1
-        color= f'rgba(54, 162, 235,{transparance})'
+        color= f'rgba(255, 177, 193,{transparance})'
         color_currency.append(color)
         labels_currency.append(data[0])
         data_currency.append(round(data[1],0))
@@ -441,7 +428,7 @@ def chart_cash_forecast(CFF_report_id,currency_list,year,contract_type_list):
       data_currency.append(round(small_value,0))
       color_currency.append(color)
   print("finish cash flow retreival")
-  return [labels_bar_chart, data_bar_chart,year_list_cash_forecast,labels_contract,data_contract,color_contract,labels_country,data_country,color_country,labels_currency,data_currency,color_currency]
+  return [labels_bar_chart, data_bar_chart,labels_contract,data_contract,color_contract,labels_country,data_country,color_country,labels_currency,data_currency,color_currency]
 
 
 
@@ -489,37 +476,36 @@ def cash_forecast_change(request):
       if   currency_list ==['']:
         currency_list=["0"]
 
-      CFF_report_id=data["CFF_report_id"]
-      if   CFF_report_id =='':
-        CFF_report_id=0
 
       contract_type_list=data["contract_type_list"]
       if   contract_type_list ==['']:
         contract_type_list=["0"]
 
+      CFF_contract_id_list=data["CFF_contract_id_list"]
+      if   CFF_contract_id_list ==['']:
+        CFF_contract_id_list=["0"]
+
 
  
-      result=chart_cash_forecast(CFF_report_id,currency_list,year,contract_type_list)
+      result=chart_cash_forecast(year,contract_type_list,currency_list,CFF_contract_id_list)
  
-      data_cash_forecast=result[1]
-      year_list_cash_forecast=result[2]
-      labels_contract=result[3]
-      data_contract=result[4]
-      color_contract=result[5]
-      labels_country=result[6]
-      data_country=result[7]
-      color_country=result[8]
-      labels_currency=result[9]
-      data_currency=result[10]
-      color_currency=result[11]
+      data_cash_forecast=result[1] 
+      #data for countract pies
+      labels_contract=result[2]
+      data_contract=result[3]
+      color_contract=result[4]
+      # data for country pie
+      labels_country=result[5]
+      data_country=result[6]
+      color_country=result[7]
+      # data for currency pie
+      labels_currency=result[8]
+      data_currency=result[9]
+      color_currency=result[10]
 
 
-
-      result=chart_cash_forecast(CFF_report_id,currency_list,year-1,contract_type_list)
-   
+      result=chart_cash_forecast(year-1,contract_type_list,currency_list,CFF_contract_id_list)
       data_cash_forecast_last_year=result[1] 
-    
-
 
       return JsonResponse({
         "success": "data loaded",
@@ -527,7 +513,7 @@ def cash_forecast_change(request):
         "labels_currency":labels_currency,"data_currency":data_currency,"color_currency":color_currency,
         "labels_country":labels_country,"data_country":data_country,"color_country":color_country,
         "labels_contract":labels_contract,"data_contract":data_contract,"color_contract":color_contract,
-        "data_cash_forecast":data_cash_forecast,"data_cash_forecast_last_year":data_cash_forecast_last_year,"year_list_cash_forecast":year_list_cash_forecast,}, status=201)
+        "data_cash_forecast":data_cash_forecast,"data_cash_forecast_last_year":data_cash_forecast_last_year,}, status=201)
     except Exception as e:
       return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 
@@ -539,7 +525,7 @@ def chart_accruals(year,contract_id_list,contract_type_list):
   #create the list of available year
   print("chart_accruals 0")
 
-  file_list=File.objects.filter(file_type="accruals",acc_year=year,dashboard=True)
+  file_list=File.objects.filter(file_type="accruals").filter(acc_year=year).filter(dashboard=True)
   
   df_file_list=pd.DataFrame(list(file_list.values()))
   if not file_list :
@@ -624,66 +610,44 @@ def change_role(request):
   #-----------------------------------PARTNER START----------------------------
   #----------------------------------------------------------------------------
 @login_required(login_url='/login')
-def partners_writer(request):
+def partners(request):
   user=request.user
-  if user.role=="WRITER" :
-    payment_type_list=Payment_type.objects.all()
-    region_list=Region.objects.all()
-    country_list=Country.objects.all().order_by("country").select_related('country_region')
-  
-    partner_list=Partner.objects.all().filter(status__in=["CURRENT","NEW","CHANGE","DELETE"]).select_related('partner_country','partner_payment_type','partner_proposal')
-    for p in partner_list:
-      if p.status=="CHANGE" :
-        partner_proposal=p.partner_proposal
-        p.partner_name= partner_proposal.partner_name
-        p.partner_m3_code= partner_proposal.partner_m3_code
-        p.partner_country= partner_proposal.partner_country
-        p.partner_bank_account= partner_proposal.partner_bank_account
-        p.partner_payment_type= partner_proposal.partner_payment_type
-        p.ico_3rd= partner_proposal.ico_3rd
-
-
-    return render(request, 'royalty_app/partners/partners_writer.html',  { "payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list})
-  else :
-    return HttpResponseRedirect(reverse("partners_current"))
-
-
-@login_required(login_url='/login')
-def partners_to_validate(request):
-  user=request.user
-  if user.role=="VALIDATOR":
-    payment_type_list=Payment_type.objects.all()
-    region_list=Region.objects.all()
-    country_list=Country.objects.all().order_by("country").select_related('country_region')
-    partner_list=Partner.objects.all().filter(status__in=["CHANGE","DELETE","NEW"]).select_related('partner_country','partner_payment_type')
-    for p in partner_list:
-      if p.status=="CHANGE" :
-        partner_proposal=p.partner_proposal
-        p.partner_name= partner_proposal.partner_name
-        p.partner_m3_code= partner_proposal.partner_m3_code
-        p.partner_country= partner_proposal.partner_country
-        p.partner_bank_account= partner_proposal.partner_bank_account
-        p.partner_payment_type= partner_proposal.partner_payment_type
-        p.ico_3rd= partner_proposal.ico_3rd
-
-    return render(request, 'royalty_app/partners/partners_validation.html',  { "payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list})
-  else:
-     return HttpResponseRedirect(reverse("partners_current"))  
-
-
-@login_required(login_url='/login')
-def partners_current(request):
+  partner_list_validated=Partner.objects.filter(status__in=["CURRENT","CHANGE","DELETE"]).select_related('partner_country','partner_payment_type')
   payment_type_list=Payment_type.objects.all()
   region_list=Region.objects.all()
   country_list=Country.objects.all().order_by("country").select_related('country_region')
 
+  if user.role=="WRITER" :
+    partner_list_writer=Partner.objects.filter(status__in=["CURRENT","NEW","CHANGE","DELETE"]).select_related('partner_country','partner_payment_type','partner_proposal')
+    for p in partner_list_writer:
+      if p.status=="CHANGE" :
+        partner_proposal=p.partner_proposal
+        p.partner_name= partner_proposal.partner_name
+        p.partner_m3_code= partner_proposal.partner_m3_code
+        p.partner_country= partner_proposal.partner_country
+        p.partner_bank_account= partner_proposal.partner_bank_account
+        p.partner_payment_type= partner_proposal.partner_payment_type
+        p.ico_3rd= partner_proposal.ico_3rd
+    return render(request, 'royalty_app/partners/partners.html',  {"partner_list_validated":partner_list_validated, "payment_type_list":payment_type_list,"partner_list_writer":partner_list_writer, "country_list":country_list ,"region_list":region_list})
+ 
+  elif user.role=="VALIDATOR":
+    partner_list_to_validate=Partner.objects.all().filter(status__in=["CHANGE","DELETE","NEW"]).select_related('partner_country','partner_payment_type')
+    for p in partner_list_to_validate:
+      if p.status=="CHANGE" :
+        partner_proposal=p.partner_proposal
+        p.partner_name= partner_proposal.partner_name
+        p.partner_m3_code= partner_proposal.partner_m3_code
+        p.partner_country= partner_proposal.partner_country
+        p.partner_bank_account= partner_proposal.partner_bank_account
+        p.partner_payment_type= partner_proposal.partner_payment_type
+        p.ico_3rd= partner_proposal.ico_3rd
 
-  partner_list=Partner.objects.all().filter(status__in=["CURRENT","CHANGE","DELETE"]).select_related('partner_country','partner_payment_type')
-  partner_list_to_validate=Partner.objects.all().filter(status__in=["PROPOSAL","NEW","DELETE"])
-  message_validator=f'you have {len(partner_list_to_validate)} request(s) to validate'
+    return render(request, 'royalty_app/partners/partners.html',  {"partner_list_to_validate":partner_list_to_validate,"partner_list_validated":partner_list_validated, "payment_type_list":payment_type_list, "country_list":country_list ,"region_list":region_list})
+  elif user.role=="READER":
+    return render(request, 'royalty_app/partners/partners.html',  {"partner_list_validated":partner_list_validated, "payment_type_list":payment_type_list, "country_list":country_list ,"region_list":region_list})
+  else :
+    return HttpResponseRedirect(reverse("home"))
 
-  return render(request, 'royalty_app/partners/partners_current.html',  {"payment_type_list":payment_type_list,"partner_list":partner_list, "country_list":country_list ,"region_list":region_list,"message_validator":message_validator})
-  #  Tasks perform by VALIDATOR
 @csrf_exempt 
 @login_required(login_url='/login')
 def validate_new_partner(request,partner_id):
@@ -990,175 +954,222 @@ def contracts_current(request):
 def contracts_to_validate(request):
 
   contract_list=Contract.objects.filter(status__in=['PROPOSAL','DELETE','NEW']).select_related('m3_brand','division','division_via','payment_periodicity','minimum_guar_remaining_allocation_country','contract_currency')
+  print(len(contract_list))
   for c in contract_list :
     if c.status=="PROPOSAL":
-      original_id=Contract.objects.get(contract_proposal=c).id
-      c.pk=original_id
+      try: #in case several "contracts_to_validate" are launched
+        original_id=Contract.objects.get(contract_proposal=c).id
+        c.pk=original_id
+      except:
+        pass
       c.status="CHANGE"
 
   contract_list_to_validate=Contract.objects.all().filter(status__in=["PROPOSAL","NEW","DELETE"])
   return render(request, 'royalty_app/contracts/validator/contracts_validator.html',  {"contract_list":contract_list})
 
-
-
 @login_required(login_url='/login')
-def rules_writer(request,contract_id):
+def rules(request,contract_id):
+  #----------------------------------------------------------------------
+  #------------list for WRITER/VALIDATOR and REARDER---------------------
+  #----------------------------------------------------------------------
 
-  user=request.user
-  if user.role=="WRITER" :
-
-    contract=Contract.objects.get(id=contract_id)#.select_related('contract_currency')
-    if contract.status in ['CHANGE'] : #if the writer want to access the value he submitted to his validator, he should be vuein the proposal
-      contract=contract.contract_proposal 
-
-    contract_file_list=Contract_file.objects.filter(contract=contract)
-    contract_partner_list=Contract_partner.objects.filter(contract=contract)
+    user=request.user
+    contract=Contract.objects.get(id=contract_id)
+    #       Info for WRITER page
+    formulation_list=Formulation.objects.all()
+    region_list=Region.objects.all().order_by("region")
+    country_list=Country.objects.all().order_by("country_id").select_related('country_region')
+    partner_list=Partner.objects.all().filter(status__in=['CHANGE','DELETE','CURRENT']).order_by("partner_name")
+    currency_list=Currency.objects.all()
+    periodicity_list=Periodicity.objects.all()
+    division_list=Division.objects.all()
+    brand_list=Brand.objects.all().order_by("brand_name")
+    #       Info for WRITER, VALIDATE, PENDING_VALIDATION page
+    milestone_list=Milestone.objects.filter(contract=contract).select_related('currency')
+    attachement_list=Contract_file.objects.filter(contract=contract)
     rule_list=Rule.objects.filter(contract=contract).select_related('qty_value_currency','tranche_currency')
     tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
-
-    #cas particulier du breakdown
-    sbd=Sales_breakdown_item.objects.all()
-    sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)
-    sales_breakdown_list=[]
-    for  item_sbd in sbd:
-      sales_breakdown_contract_definition=""
-      for item_sbd_contract in sbd_contract:
-        if item_sbd_contract.sales_breakdown_item==item_sbd:
-          sales_breakdown_contract_definition=item_sbd_contract.sales_breakdown_contract_definition
-          break
-      sub_dict={
-        "id":item_sbd.id,
-        "sales_breakdown_definition":item_sbd.sales_breakdown_definition,
-        "sales_breakdown_contract_definition":sales_breakdown_contract_definition}
-      sales_breakdown_list.append(sub_dict)
-
-
-
-    if contract.status in ['IN_CREATION','CURRENT'] :
-      partner_list=Partner.objects.all().filter(status__in=['CHANGE','DELETE','CURRENT']).order_by("partner_name")
-      country_list=Country.objects.all().order_by("country_id").select_related('country_region')
-      region_list=Region.objects.all().order_by("region")
-      formulation_list=Formulation.objects.all()
-      currency_list=Currency.objects.all()
-      brand_list=Brand.objects.all().order_by("brand_name")
-      division_list=Division.objects.all()
-      periodicity_list=Periodicity.objects.all()
-      if contract.contract_type.name=="ROYALTY" :
-        return render(request, 'royalty_app/contracts/writer/rules_writer_royalty.html', {"periodicity_list":periodicity_list,"division_list":division_list,"brand_list":brand_list,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"currency_list":currency_list,"tranche_list":tranche_list,"formulation_list":formulation_list,"region_list":region_list,"country_list":country_list,"contract":contract,"contract_partner_list":contract_partner_list,"partner_list":partner_list})
-      else :
-        #if we are viewing a margin adj, then most rates are negative ( due to calculation of margin adj vs a normal royalty contract)
-        for r in rule_list :
-          if r.rule_type != "SALES":
-            r.qty_value=abs(r.qty_value)
-            r.rate_value=abs(r.rate_value)
-
-        for t in tranche_list:
-          t.percentage=abs(t.percentage)
-        
-
-        return render(request, 'royalty_app/contracts/writer/rules_writer_margin_adj.html', {"periodicity_list":periodicity_list,"division_list":division_list,"brand_list":brand_list,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"currency_list":currency_list,"tranche_list":tranche_list,"formulation_list":formulation_list,"region_list":region_list,"country_list":country_list,"contract":contract,"contract_partner_list":contract_partner_list,"partner_list":partner_list})
-
-    if contract.status in ['NEW','DELETE','PROPOSAL'] :
-      if contract.status=="PROPOSAL":
-        inital_contract_id=Contract.objects.get(contract_proposal=contract).id
-      else:
-        inital_contract_id=None
-      if contract.contract_type.name== "MARGIN_ADJ":
-        #if we are viewing a margin adj, then most rates are negative ( due to calculation of margin adj vs a normal royalty contract)
-        for r in rule_list :
-          if r.rule_type != "SALES":
-            r.qty_value=abs(r.qty_value)
-            r.rate_value=abs(r.rate_value)
-        for t in tranche_list:
-          t.percentage=abs(t.percentage)
-        return render(request, 'royalty_app/contracts/writer/rules_writer_wait_validation_margin_adj.html', {"inital_contract_id":inital_contract_id,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
-      elif contract.contract_type.name== "ROYALTY":
-        return render(request, 'royalty_app/contracts/writer/rules_writer_wait_validation_royalty.html', {"inital_contract_id":inital_contract_id,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
-  return HttpResponseRedirect(reverse("contracts_current"))  
-
-@login_required(login_url='/login')
-def rules_current(request,contract_id):
-  user=request.user
-  contract=Contract.objects.get(id=contract_id)
-  contract_file_list=Contract_file.objects.filter(contract=contract)
-  contract_partner_list=Contract_partner.objects.filter(contract=contract)
-  rule_list=Rule.objects.filter(contract=contract).select_related('qty_value_currency')
-  tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
-
-  if contract.status in ['CHANGE','DELETE','CURRENT'] :
-
-    sbd=Sales_breakdown_item.objects.all()
-    sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)
-    sales_breakdown_list=[]
-    for  item_sbd in sbd:
-      sales_breakdown_contract_definition=""
-      for item_sbd_contract in sbd_contract:
-        if item_sbd_contract.sales_breakdown_item==item_sbd:
-          sales_breakdown_contract_definition=item_sbd_contract.sales_breakdown_contract_definition
-          break
-      sub_dict={
-        "id":item_sbd.id,
-        "sales_breakdown_definition":item_sbd.sales_breakdown_definition,
-        "sales_breakdown_contract_definition":sales_breakdown_contract_definition}
-      sales_breakdown_list.append(sub_dict)   
+    contract_partner_list=Contract_partner.objects.filter(contract=contract)
     if contract.contract_type.name=="MARGIN_ADJ":
-      #if we are viewing a margin adj, then most rates are negative ( due to calculation of margin adj vs a normal royalty contract)
       for r in rule_list :
         if r.rule_type != "SALES":
+          print(r.qty_value)
           r.qty_value=abs(r.qty_value)
           r.rate_value=abs(r.rate_value)
+          print(r.qty_value)
       for t in tranche_list:
         t.percentage=abs(t.percentage) 
-      return render(request, 'royalty_app/contracts/current/rules_current_margin_adj.html', {"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
-    elif contract.contract_type.name=="ROYALTY":
-      return render(request, 'royalty_app/contracts/current/rules_current_royalty.html', {"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
-  else :
-    pass
-  return HttpResponseRedirect(reverse("contracts_current")) 
 
-@login_required(login_url='/login')
-def rules_validator(request,contract_id):
-  user=request.user
-  if user.role=="VALIDATOR":
-    contract=Contract.objects.get(id=contract_id)#.select_related('contract_currency')
-    if contract.status in ['CHANGE','DELETE','NEW'] :
-      if contract.status=="CHANGE":
-        inital_contract_id=contract.id
-        contract=contract.contract_proposal
-      else:
-        inital_contract_id=None
+    return_page='royalty_app/contracts/current/rules.html'
 
-      contract_file_list=Contract_file.objects.filter(contract=contract)
-      contract_partner_list=Contract_partner.objects.filter(contract=contract)
-      rule_list=Rule.objects.filter(contract=contract)
-      tranche_list=Tranche.objects.filter(rule__in=rule_list).order_by("id").select_related('rule')
+    rule_SALES_list=len(rule_list.filter(rule_type="SALES"))
+    rule_ROYALTY_list=len(rule_list.filter(rule_type="ROYALTY"))
+    rule_COGS_list=len(rule_list.filter(rule_type="COGS"))
+    rule_MARGIN_list=len(rule_list.filter(rule_type="MARGIN"))
 
-      sbd=Sales_breakdown_item.objects.all()
-      sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)
-      sales_breakdown_list=[]
-      for  item_sbd in sbd:
-        sales_breakdown_contract_definition=""
-        for item_sbd_contract in sbd_contract:
-          if item_sbd_contract.sales_breakdown_item==item_sbd:
-            sales_breakdown_contract_definition=item_sbd_contract.sales_breakdown_contract_definition
-            break
-        sub_dict={
-          "id":item_sbd.id,
-          "sales_breakdown_definition":item_sbd.sales_breakdown_definition,
-          "sales_breakdown_contract_definition":sales_breakdown_contract_definition}
-        sales_breakdown_list.append(sub_dict)
-      if contract.contract_type.name=="MARGIN_ADJ":
-        #if we are viewing a margin adj, then most rates are negative ( due to calculation of margin adj vs a normal royalty contract)
-        for r in rule_list :
+    sbd=Sales_breakdown_item.objects.all()
+    sbd_contract=Sales_breakdown_per_contract.objects.filter(contract=contract)
+
+    print(contract.status)
+  #----------------------------------------------------------------------
+  #---------------------IN_CREATION -------------------------------------
+  #----------------------------------------------------------------------
+    if contract.status=='IN_CREATION':
+      return render(request, return_page, {
+        # For Dashboard
+          "contract":contract,
+        # WRITER content:
+          #main detail
+            "contract_WRITER":contract,
+            "milestone_list_WRITER":milestone_list,
+            "attachement_list_WRITER":attachement_list,
+            "sbd_WRITER":sbd,
+            "sbd_contract_WRITER":sbd_contract,
+            "rule_list_WRITER":rule_list,
+            "rule_SALES_list_WRITER":rule_SALES_list,
+            "rule_COGS_list_WRITER":rule_COGS_list,
+            "rule_ROYALTY_list_WRITER":rule_ROYALTY_list,
+            "rule_MARGIN_list_WRITER":rule_MARGIN_list,
+            "tranche_list_WRITER":tranche_list,
+            "contract_partner_list_WRITER":contract_partner_list,
+          #specific to writer view
+            "formulation_list":formulation_list,
+            "region_list":region_list,
+            "country_list":country_list,
+            "partner_list":partner_list,
+            "currency_list":currency_list,
+            "periodicity_list":periodicity_list,
+            "division_list":division_list,
+            "brand_list":brand_list,
+          #GOOGLE CAPTCHA
+          'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
+        })
+  #---------------------------------------------------------------------- 
+  #---------------------CURRENT-- -------------------------------------
+  #----------------------------------------------------------------------
+    if contract.status=='CURRENT':
+      return render(request, return_page, {
+        # For Dashboard
+          "contract":contract,
+        # WRITER content:
+          #main detail
+            "contract_WRITER":contract,
+            "milestone_list_WRITER":milestone_list,
+            "attachement_list_WRITER":attachement_list,
+            "sbd_WRITER":sbd,
+            "sbd_contract_WRITER":sbd_contract,
+            "rule_list_WRITER":rule_list,
+            "rule_SALES_list_WRITER":rule_SALES_list,
+            "rule_COGS_list_WRITER":rule_COGS_list,
+            "rule_ROYALTY_list_WRITER":rule_ROYALTY_list,
+            "rule_MARGIN_list_WRITER":rule_MARGIN_list,
+            "tranche_list_WRITER":tranche_list,
+            "contract_partner_list_WRITER":contract_partner_list,
+          #specific to writer view
+            "formulation_list":formulation_list,
+            "region_list":region_list,
+            "country_list":country_list,
+            "partner_list":partner_list,
+            "currency_list":currency_list,
+            "periodicity_list":periodicity_list,
+            "division_list":division_list,
+            "brand_list":brand_list,
+        # VALIDATED content:
+          #main detail
+            "contract_VALIDATED":contract,
+            "milestone_list_VALIDATED":milestone_list,
+            "attachement_list_VALIDATED":attachement_list,
+            #"sales_breakdown_list_VALIDATED":sales_breakdown_list,
+            "sbd_VALIDATED":sbd,
+            "sbd_contract_VALIDATED":sbd_contract,
+            "rule_list_VALIDATED":rule_list,
+            "rule_SALES_list_VALIDATED":rule_SALES_list,
+            "rule_COGS_list_VALIDATED":rule_COGS_list,
+            "rule_ROYALTY_list_VALIDATED":rule_ROYALTY_list,
+            "rule_MARGIN_list_VALIDATED":rule_MARGIN_list,
+            "tranche_list_VALIDATED":tranche_list,
+            "contract_partner_list_VALIDATED":contract_partner_list,
+          #GOOGLE CAPTCHA
+          'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
+        })
+  #----------------------------------------------------------------------
+  #---------------------DELETE/NEW- -------------------------------------
+  #----------------------------------------------------------------------
+    if contract.status in ['DELETE','NEW']:
+      return render(request, return_page, {
+        # For Dashboard
+          "contract":contract,
+        # PENDING_VALIDATION content:
+          #main detail
+            "contract_PENDING_VALIDATION":contract,
+            "milestone_list_PENDING_VALIDATION":milestone_list,
+            "attachement_list_PENDING_VALIDATION":attachement_list,
+            "rule_list_PENDING_VALIDATION":rule_list,
+            "rule_SALES_list_PENDING_VALIDATION":rule_SALES_list,
+            "rule_COGS_list_PENDING_VALIDATION":rule_COGS_list,
+            "rule_ROYALTY_list_PENDING_VALIDATION":rule_ROYALTY_list,
+            "rule_MARGIN_list_PENDING_VALIDATION":rule_MARGIN_list,
+            "tranche_list_PENDING_VALIDATION":tranche_list,
+            "contract_partner_list_PENDING_VALIDATION":contract_partner_list,
+            "sbd_PENDING_VALIDATION":sbd,
+            "sbd_contract_PENDING_VALIDATION":sbd_contract,
+          #GOOGLE CAPTCHA
+          'recaptcha_site_key':GOOGLE_RECAPTCHA_SITE_KEY
+        })
+  #----------------------------------------------------------------------
+  #---------------------CHANGE-------------------------------------------
+  #----------------------------------------------------------------------
+    if contract.status == 'CHANGE':
+      # ---- get the value from the corresponding PROPOSAL 
+      contract_proposal=contract.contract_proposal
+      rule_list_PENDING_VALIDATION=Rule.objects.filter(contract=contract_proposal).select_related('qty_value_currency','tranche_currency')
+      tranche_list_PENDING_VALIDATION=Tranche.objects.filter(rule__in=rule_list_PENDING_VALIDATION).order_by("id").select_related('rule')
+      if contract_proposal.contract_type.name=="MARGIN_ADJ":
+        for r in rule_list_PENDING_VALIDATION :
           if r.rule_type != "SALES":
             r.qty_value=abs(r.qty_value)
             r.rate_value=abs(r.rate_value)
-        for t in tranche_list:
+        for t in tranche_list_PENDING_VALIDATION:
           t.percentage=abs(t.percentage) 
-        return render(request, 'royalty_app/contracts/validator/rules_validator_margin_adj.html', {"inital_contract_id":inital_contract_id,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
-      elif contract.contract_type.name=="ROYALTY":
-        return render(request, 'royalty_app/contracts/validator/rules_validator_royalty.html', {"inital_contract_id":inital_contract_id,"contract_file_list":contract_file_list,"sales_breakdown_list":sales_breakdown_list,"rule_list":rule_list,"tranche_list":tranche_list,"contract":contract,"contract_partner_list":contract_partner_list})
-  return HttpResponseRedirect(reverse("contracts_current")) 
+      sbd_contract_PENDING_VALIDATION=Sales_breakdown_per_contract.objects.filter(contract=contract_proposal)
+      rule_SALES_list_PENDING_VALIDATION=len(rule_list_PENDING_VALIDATION.filter(rule_type="SALES"))
+      rule_ROYALTY_list_PENDING_VALIDATION=len(rule_list_PENDING_VALIDATION.filter(rule_type="ROYALTY"))
+      rule_COGS_list_PENDING_VALIDATION=len(rule_list_PENDING_VALIDATION.filter(rule_type="COGS"))
+      rule_MARGIN_list_PENDING_VALIDATION=len(rule_list_PENDING_VALIDATION.filter(rule_type="MARGIN"))
+
+      return render(request, return_page, {
+        # For Dashboard
+          "contract":contract,
+        # PENDING_VALIDATION content:
+          #main detail
+            "contract_PENDING_VALIDATION":contract_proposal,
+            "milestone_list_PENDING_VALIDATION":Milestone.objects.filter(contract=contract_proposal).select_related('currency'),
+            "attachement_list_PENDING_VALIDATION":Contract_file.objects.filter(contract=contract_proposal),
+            "rule_list_PENDING_VALIDATION":rule_list_PENDING_VALIDATION,
+            "rule_SALES_list_PENDING_VALIDATION":rule_SALES_list_PENDING_VALIDATION,
+            "rule_COGS_list_PENDING_VALIDATION":rule_COGS_list_PENDING_VALIDATION,
+            "rule_ROYALTY_list_PENDING_VALIDATION":rule_ROYALTY_list_PENDING_VALIDATION,
+            "rule_MARGIN_list_PENDING_VALIDATION":rule_MARGIN_list_PENDING_VALIDATION,
+            "tranche_list_PENDING_VALIDATION":tranche_list_PENDING_VALIDATION,
+            "contract_partner_list_PENDING_VALIDATION":Contract_partner.objects.filter(contract=contract_proposal),
+            "sbd_PENDING_VALIDATION":sbd,
+            "sbd_contract_PENDING_VALIDATION":sbd_contract_PENDING_VALIDATION,
+        # VALIDATED content:
+          #main detail
+            "contract_VALIDATED":contract,
+            "milestone_list_VALIDATED":milestone_list,
+            "attachement_list_VALIDATED":attachement_list,
+            "rule_list_VALIDATED":rule_list,
+            "rule_SALES_list_VALIDATED":rule_SALES_list,
+            "rule_COGS_list_VALIDATED":rule_COGS_list,
+            "rule_ROYALTY_list_VALIDATED":rule_ROYALTY_list,
+            "rule_MARGIN_list_VALIDATED":rule_MARGIN_list,
+            "tranche_list_VALIDATED":tranche_list,
+            "contract_partner_list_VALIDATED":contract_partner_list,
+            "sbd_VALIDATED":sbd,
+            "sbd_contract_VALIDATED":sbd_contract,
+        })
+
 
 
 
@@ -1169,11 +1180,12 @@ def invoices(request):
   periodicity_cat_list=Periodicity_cat.objects.all().select_related('periodicity')
   invoice_list=Invoice.objects.all()
   country_list=Country.objects.all()
-  return render(request, 'royalty_app/invoices.html', {"country_list":country_list,"invoice_list":invoice_list,"periodicity_cat_list":periodicity_cat_list,"contract_partner_list":contract_partner_list,"contract_list":contract_list})
+  currency_list=Currency.objects.all()
+  return render(request, 'royalty_app/invoices.html', {"currency_list":currency_list,"country_list":country_list,"invoice_list":invoice_list,"periodicity_cat_list":periodicity_cat_list,"contract_partner_list":contract_partner_list,"contract_list":contract_list})
 
 @login_required(login_url='/login')
 def static_data(request):
-  return render(request, 'royalty_app/static_data.html', {})
+  return render(request, 'royalty_app/static/static_data.html', {})
 
 @login_required(login_url='/login')
 def settings(request):
@@ -1184,21 +1196,21 @@ def monthly_accruals(request):
   month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="accruals")
 
-  return render(request, 'royalty_app/monthly_accruals.html', {"month_list":month_list,"file_list":file_list})
+  return render(request, 'royalty_app/reports/monthly_accruals.html', {"month_list":month_list,"file_list":file_list})
 
 @login_required(login_url='/login')
 def cash_flow_forecast(request):
   month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="cash_forecast")
   current_month_nb=datetime.now().month
-  return render(request, 'royalty_app/cash_flow_forecast.html', {"current_month_nb":current_month_nb,"month_list":month_list,"file_list":file_list})
+  return render(request, 'royalty_app/reports/cash_flow_forecast.html', {"current_month_nb":current_month_nb,"month_list":month_list,"file_list":file_list})
 
 @login_required(login_url='/login')
 def partner_report(request):
   month_list=Month_table.objects.all()
   file_list=File.objects.filter(file_type="partner_report")
   current_month_nb=datetime.now().month
-  return render(request, 'royalty_app/partner_report.html', {"current_month_nb":current_month_nb,"month_list":month_list,"file_list":file_list})
+  return render(request, 'royalty_app/reports/partner_report.html', {"current_month_nb":current_month_nb,"month_list":month_list,"file_list":file_list})
 
 
 
@@ -1624,56 +1636,55 @@ def response_validator(request):
       return HttpResponseRedirect(reverse("contracts_to_validate"))
 
     if response_validator=="approve_contract_modification":
-      #when modification is approved, we delete the old contract, we copy the new contract and save it with the contract_id
-
+      #when modification is approved, 1) we delete the old contract, 2) we create a new_contract ( with ID same a the "old contract") 3) we copy from the proposal to new_contract 4) we delete the proposal
       contract_proposal_id=contract.contract_proposal.id
 
-     
       #  loop though the Contract_file//Contract_partner//Rule//Tranche//Sales_breakdown_per_contract and delete
       Contract_file.objects.filter(contract=contract).delete()
       Contract_partner.objects.filter(contract=contract).delete()
+      Milestone.objects.filter(contract=contract).delete()
       rule_list_old_contract=Rule.objects.filter(contract=contract)
       Tranche.objects.filter(rule__in=rule_list_old_contract).delete()
       Rule.objects.filter(contract=contract).delete()
       Sales_breakdown_per_contract.objects.filter(contract=contract).delete()
       
       # Copy contract summary from contract proposal
-      contract_changed=contract.contract_proposal
-      contract_changed.status="CURRENT"
-      contract_changed.pk=contract_id
-      contract_changed.save()
+      new_contract=contract.contract_proposal
+      new_contract.status="CURRENT"
+      new_contract.pk=contract_id
+      new_contract.save()
       
-      contract_proposal=Contract.objects.get(id=contract_proposal_id)
 
       # now loop though the Contract_file//Contract_partner//Tranche//Sales_breakdown_per_contract- with contract id =contract_proposal_id, and change it to contract_id
-      
-        #we copy the list of file_list currently used in the contract. after we have added the new file_contract , we will remove them 
-      
+      # we copy the list of file_list currently used in the contract. after we have added the new file_contract , we will remove them 
+      contract_proposal=Contract.objects.get(id=contract_proposal_id)
       contract_file_list=Contract_file.objects.filter(contract=contract_proposal)
       for cf in contract_file_list:
-        cf.contract=contract_changed
+        cf.contract=new_contract
         cf.save()
 
       contract_partner_list=Contract_partner.objects.filter(contract=contract_proposal)
       for cp in contract_partner_list:
-        cp.contract=contract_changed 
+        cp.contract=new_contract 
         cp.save()
+
+      milestone_list=Milestone.objects.filter(contract=contract_proposal)
+      for milestone in milestone_list:
+        milestone.contract=new_contract 
+        milestone.save()
 
       rule_list=Rule.objects.filter(contract=contract_proposal)
       for r in rule_list:
-        r.contract=contract_changed 
+        r.contract=new_contract 
         r.save()
 
       sales_breakdown_per_contract_list=Sales_breakdown_per_contract.objects.filter(contract=contract_proposal)
       for sb in sales_breakdown_per_contract_list:
-        sb.contract=contract_changed 
+        sb.contract=new_contract 
         sb.save()
 
-
       contract_proposal.delete()
-
-
-      return HttpResponseRedirect(reverse("contracts_to_validate"))
+      return HttpResponseRedirect(reverse("rules_current",args=[int(contract_id)]))
 
     if response_validator=="reject_contract_modification":
       print("response_validator")
@@ -1682,7 +1693,7 @@ def response_validator(request):
       contract.contract_proposal=None
       contract.save()
       contract_proposal.delete()
-      return HttpResponseRedirect(reverse("contracts_to_validate"))
+      return HttpResponseRedirect(reverse("rules_current",args=[int(contract_id)]))
 
   else:
     return HttpResponseRedirect(reverse("contracts_to_validate")) 
@@ -1695,25 +1706,24 @@ def pdf_file_to_keep(request,contract_id):
   if user.role !="WRITER":
     return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=201)
   else:
-    data = json.loads(request.body)
-    contract=Contract.objects.get(id=contract_id)
-    if contract.status=="PROPOSAL": #then it means that we must copy the file from the corresponding CHANGE
-      initial_contract=Contract.objects.get(contract_proposal=contract_id)
-
-      contract_file_list=Contract_file.objects.filter(contract =initial_contract).filter (id__in =data["list"])
-
-      for c in contract_file_list:
-        new_file = ContentFile(c.upload.read())
-        new_file.name = c.name
-        contract_file_proposal = Contract_file(
-          upload = new_file,
-          contract = contract,
-          name = c.name,
-        )
-
-        contract_file_proposal.save()
-
-
+    try:
+      data = json.loads(request.body)
+      print(data)
+      contract=Contract.objects.get(id=contract_id)
+      if contract.status=="PROPOSAL": #then it means that we must copy the file from the corresponding CHANGE
+        initial_contract=Contract.objects.get(contract_proposal=contract_id)
+        contract_file_list=Contract_file.objects.filter(contract =initial_contract).filter (id__in =data["list"])
+        for c in contract_file_list:
+          new_file = ContentFile(c.upload.read())
+          new_file.name = c.name
+          contract_file_proposal = Contract_file(
+            upload = new_file,
+            contract = contract,
+            name = c.name,
+          )
+          contract_file_proposal.save()
+    except Exception as e:
+      return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
 
     if contract.status in ["IN_CREATION","NEW"]: 
       contract_file_list=Contract_file.objects.filter(contract =contract).exclude(id__in =data["list"])
@@ -1792,6 +1802,49 @@ def save_contract_partner(request,contract_id):
     return JsonResponse({"response": "OK"}, status=201)
   else:
     return JsonResponse({"error": "GET or PUT request required."}, status=400)
+
+@csrf_exempt
+@login_required(login_url='/login')
+def save_milestone(request,contract_id):
+  if request.method == "POST":
+    user=request.user
+    if user.role!="WRITER":
+      return JsonResponse({"error": "as a non WRITER, you do not have the right to perform that task"}, status=201)
+    try: 
+      contract=Contract.objects.get(id=contract_id)
+      milestone_before_modification=Milestone.objects.filter(contract=contract)
+      Milestone.objects.filter(contract=contract).delete()    #delete the existing record 
+      data = json.loads(request.body)
+      for item in data :
+        booked=item['booked']
+        if booked =="NO":
+          booking_date="1900-01-01"
+          payment_date="1900-01-01"
+          market=Country.objects.get(country_id="USA")
+        else:
+          booking_date=item['booking_date']
+          payment_date=item['payment_date']
+          market=Country.objects.get(country_id=item['market'])
+
+        m=Milestone(
+          contract = contract,
+          name=item['name'],
+          amount=item['amount'],
+          currency=Currency.objects.get(currency=item['currency']),
+          booked=booked,
+          market=market,
+          booking_date=booking_date,
+          payment_date=payment_date,
+        )
+        m.save()
+    except Exception as e:
+      for  m in milestone_before_modification:
+        m.save()
+      return JsonResponse({"error": f"data not loaded-   server message: {e}"}, status=404)
+    return JsonResponse({"response": "OK"}, status=201)
+  else:
+    return JsonResponse({"error": "GET or PUT request required."}, status=400)
+
 
 @csrf_exempt
 @login_required(login_url='/login')
@@ -1933,6 +1986,7 @@ def new_invoice(request):
         contract = Contract.objects.get(id=data["contract_id"]),
         partner = Partner.objects.get(id=data["partner_id"]),
         amount=data["amount_value"],
+        currency = Currency.objects.get(currency=data["currency"]),
         booking_date=data["booking_date"],
         year=data["year_value"],
         periodicity_cat= Periodicity_cat.objects.get(id=data["period_id"]),
@@ -2196,6 +2250,41 @@ def new_report(request):
         tax_list=Tax.objects.all()
         df_tax = pd.DataFrame(list(tax_list.values()))
 
+        #Milestone
+        milestone_list=Milestone.objects.filter(contract__in=contract_list).filter(booked="YES")
+
+        df_milestone = pd.DataFrame(list(milestone_list.values()))
+        df_milestone_empty=pd.DataFrame({
+            'id': [0],
+            'contract_id': [0],
+            'name': [''],
+            'amount': [0],
+            'currency_id': [0],
+            'booked': [''],
+            'market_id': [0],
+            'year': [0], #=year_booking
+            'month': [0],#=month_booking
+            'payment_date': [''],
+          })
+      
+        if df_milestone.empty:
+          df_milestone=df_milestone
+        else:
+          df_milestone['month_booking']=pd.DatetimeIndex(df_milestone['booking_date']).month # we filter the invoice booked during the period under analysis
+          df_milestone['year_booking']=pd.DatetimeIndex(df_milestone['booking_date']).year
+          df_milestone=pd.merge(df_milestone,df_year_month, how="inner",left_on=['year_booking','month_booking'], right_on=['year','month'] )
+          df_milestone=df_milestone.drop(['year_booking','month_booking'], axis = 1)
+          # if the invoices have been booked at a time not mentionned in the from/to period, the dataframe will be empty- same as mention before, we must fill in the table anyway
+          if df_milestone.empty:
+            df_milestone=df_milestone_empty
+        print("milestone done")
+        
+        '''
+        1) Eliminate the Booked=NO
+        2) Filter based on the year/month_from year/month_to ( file) and the booking_date
+        3) 
+        4) payment date ( row 2845 --> if payment_date not null, choose payment date)
+        '''
         #Sales_breakdown_item
         
         sales_breakdown_item_list=Sales_breakdown_item.objects.all()
@@ -2206,10 +2295,8 @@ def new_report(request):
             'sales_breakdown_definition': ['NA'],
           })
 
-          
-
         #Sales_breakdown_per_contract
-        breakdown_per_contract_list=Sales_breakdown_per_contract.objects.all()
+        breakdown_per_contract_list=Sales_breakdown_per_contract.objects.filter(contract__in=contract_list)
         df_breakdown_per_contract = pd.DataFrame(list(breakdown_per_contract_list.values()))
         df_breakdown_per_contract=df_breakdown_per_contract.rename(columns={'contract_id':'contract_id_breakdown'})
         if df_breakdown_per_contract.empty:  
@@ -2224,11 +2311,9 @@ def new_report(request):
         df_breakdown_per_contract=df_breakdown_per_contract[['contract_id_breakdown','sales_breakdown_definition','sales_breakdown_contract_definition']]
         print("df_breakdown_per_contract")
 
-      
-
-
+    
         #Contract_partner
-        contract_partner_list=Contract_partner.objects.all()
+        contract_partner_list=Contract_partner.objects.filter(contract__in=contract_list)
         df_contract_partner = pd.DataFrame(list(contract_partner_list.values()))
         if df_contract_partner.empty:  
           df_contract_partner=pd.DataFrame({
@@ -2236,9 +2321,9 @@ def new_report(request):
             'partner_id': [0],
             'percentage': [0],
           })
+
         #Invoice
-        
-        invoice_list=Invoice.objects.all()
+        invoice_list=Invoice.objects.filter(contract__in=contract_list)
         df_invoice = pd.DataFrame(list(invoice_list.values()))
           # if the dataframe is empty, we create one --> this step is necessary, as later on we append the table from Invoice + Minigar + Roy on sales
         df_invoice_empty=pd.DataFrame({
@@ -2266,7 +2351,7 @@ def new_report(request):
           if df_invoice.empty:
             df_invoice=df_invoice_empty
 
-        print("definition of DF expect Sale: Done")
+        print("definition of invoice: Done")
 
         #Sale
         df_sales = pd.read_excel(filehandle, 'Sales',dtype={'formulation':str,'year':int,'month':int})
@@ -2567,18 +2652,20 @@ def new_report(request):
         
           df_on_sales['qty_value_contract_curr']=df_on_sales['qty_value']*df_on_sales['exchange_rate_qty_value_curr']/df_on_sales['exchange_rate_contract_curr']
           print("def_on_sales 4")
+
           df_on_sales['amount_contract_curr']=np.where(
             df_on_sales['field_type']=='RATE',
             df_on_sales['sales_rate']*df_on_sales['sales_in_contract_curr']/100,
             df_on_sales['qty_value_contract_curr']*df_on_sales['volume']
           )
-
- 
-          df_on_sales=df_on_sales[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','payment_periodicity_id','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency']]
+          df_on_sales['amount_payment_curr']=df_on_sales['amount_contract_curr'] # payment for roy based on sales are made in contract currency
+          df_on_sales['payment_currency_id']=df_on_sales['contract_currency']
+          df_on_sales['payment_date']=None
+          df_on_sales=df_on_sales[['contract_id','rule_type','year','month','SKU','SKU_name','amount_payment_curr','amount_contract_curr','payment_periodicity_id','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','payment_currency_id','tranche_currency','qty_value_currency','payment_date']]
           df_on_sales=df_on_sales.fillna("")
 
           print("def_on_sales 5")# // 
-          df_on_sales=df_on_sales.groupby(['contract_id','rule_type','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency'], as_index=False).agg({"amount_contract_curr": "sum","sales_in_market_curr": "sum","sales_in_contract_curr": "sum","volume":"sum"})
+          df_on_sales=df_on_sales.groupby(['contract_id','rule_type','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','payment_currency_id','tranche_currency','qty_value_currency','payment_date'], as_index=False).agg({"amount_contract_curr": "sum","amount_payment_curr":"sum","sales_in_market_curr": "sum","sales_in_contract_curr": "sum","volume":"sum"})
 
           #df_on_sales['rule_type']='INVOICE'
 
@@ -2598,15 +2685,55 @@ def new_report(request):
           'field_type': [''],
           'sales_rate': [0],
           'qty_value': [0],
+          'payment_currency_id': [''],
           'tranche_currency': [''],
           'qty_value_currency': [0],
           'amount_contract_curr': [0],
+          'amount_payment_curr': [0],
           'sales_in_market_curr': [0],
           'sales_in_contract_curr': [0],
           'volume': [0],
+          'payment_date':'NA',
         })
- 
-      #         ii. : Mini Gar 
+        print(df_on_sales)
+      #         ii. : Milestone
+        if not df_milestone.empty :
+
+          df_milestone=pd.merge(df_milestone,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
+          print("Milestone 1")
+
+
+          # convert the Milestone in contract currency
+          df_milestone=pd.merge(df_milestone,df_fx, how="inner",left_on=['year','currency_id'], right_on=['year','currency'] )
+          df_milestone = df_milestone.rename(columns={'exchange_rate': 'fx_from'})
+          df_milestone=pd.merge(df_milestone,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
+          df_milestone = df_milestone.rename(columns={'exchange_rate': 'fx_to'})
+          df_milestone = df_milestone.rename(columns={'country_id': 'market_id'})
+          df_milestone = df_milestone.rename(columns={'currency_id': 'payment_currency_id'})
+          df_milestone = df_milestone.rename(columns={'amount': 'amount_payment_curr'})
+          print("Milestone 2")
+
+          df_milestone["amount_contract_curr"]=df_milestone["amount_payment_curr"]*df_milestone["fx_from"]/df_milestone["fx_to"]
+          df_milestone["market_curr"]=""
+          df_milestone["rule_type"]="MILESTONE"
+          df_milestone["sales_in_market_curr"]=0
+          df_milestone["sales_in_contract_curr"]=0
+          df_milestone["SKU"]=""
+          df_milestone["SKU_name"]=""
+          df_milestone["volume"]=0
+          df_milestone["tranche_currency"]=""
+          df_milestone["field_type"]=""
+          df_milestone["sales_rate"]=0
+          df_milestone["qty_value"]=0
+          df_milestone["qty_value_currency"]=""
+
+          df_milestone=df_milestone[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','amount_payment_curr','payment_currency_id','payment_periodicity_id','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency','payment_date']]
+          df_milestone=df_milestone.groupby(['contract_id','rule_type','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','payment_currency_id','tranche_currency','qty_value_currency','payment_date'], as_index=False).agg({"amount_contract_curr": "sum","amount_payment_curr":"sum","sales_in_market_curr": "sum","sales_in_contract_curr":"sum","volume":"sum"})
+          print("Milestone 3")
+        
+        milestone_empty=df_milestone.empty
+        print(df_milestone)
+      #         iii. : Mini Gar 
 
         print("Mini Gar2")
 
@@ -2643,11 +2770,10 @@ def new_report(request):
                                         ),
                                       df_mini_gar['minimum_guar_amount']/12*df_mini_gar['month_nb']
                                       )
+        df_mini_gar['amount_payment_curr']=df_mini_gar['amount_contract_curr'] # payment for roy based on sales are made in contract currency
+        df_mini_gar['payment_currency_id']=df_mini_gar['contract_currency'] # payment for roy based on sales are made in contract currency
         df_mini_gar["month"]=12
-
-        
         print("Mini Gar6")
-
         df_mini_gar["market_curr"]=""
         df_mini_gar["rule_type"]="MINIMUM_GARANTEE"
         df_mini_gar["sales_in_market_curr"]=0
@@ -2660,85 +2786,87 @@ def new_report(request):
         df_mini_gar["sales_rate"]=0
         df_mini_gar["qty_value"]=0
         df_mini_gar["qty_value_currency"]=""
-
+        df_mini_gar["payment_date"]=''
         df_mini_gar = df_mini_gar.rename(columns={'payment_periodicity_id_x':'payment_periodicity_id'})
-        df_mini_gar=df_mini_gar[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','payment_periodicity_id','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency']]
+        df_mini_gar=df_mini_gar[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','amount_payment_curr','payment_periodicity_id','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','payment_currency_id','tranche_currency','qty_value_currency','payment_date']]
+        df_mini_gar=df_mini_gar.groupby(['contract_id','rule_type','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','payment_currency_id','tranche_currency','qty_value_currency','payment_date'], as_index=False).agg({"amount_contract_curr": "sum","amount_payment_curr":"sum","sales_in_market_curr": "sum","sales_in_contract_curr":"sum","volume":"sum"})
 
-
-        df_mini_gar=df_mini_gar.groupby(['contract_id','rule_type','year','month','SKU','SKU_name','payment_periodicity_id','market_id','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency'], as_index=False).agg({"amount_contract_curr": "sum","sales_in_market_curr": "sum","sales_in_contract_curr":"sum","volume":"sum"})
-
-        #df_mini_gar['rule_type']='MINIMUM_GARANTEE'
         print("Mini Gar7")
         mini_gar_empty=df_mini_gar.empty
 
-
-      #         iii. : append mini gar and roy on sales
+      #         iii. : append mini gar and roy on sales and Milestone
       
         #df_mini_gar=df_mini_gar.fillna("")
         df_on_sales=df_on_sales.fillna("")
-      
-        
-        df_append_mini_roy=df_mini_gar.append(df_on_sales)
+        df_append=df_mini_gar.append(df_on_sales)
+        df_append=df_append.append(df_milestone)
+        print(df_on_sales)
+        print(df_milestone)
+        print("df_append")
 
-        print("df_append_mini_roy1")
- 
         #merge with payment structure 
         
         df_payment_structure=df_payment_structure.rename(columns={'sales_month_id': 'sales_month'})#.astype(str)
         df_payment_terms=pd.merge(df_periodicity_cat,df_payment_structure, how="inner",left_on=['id'], right_on=['periodicity_cat_id'] )
-        df_append_mini_roy=pd.merge(df_append_mini_roy,df_payment_terms, how="inner",left_on=['payment_periodicity_id','month'], right_on=['periodicity_id','sales_month'] )  
-  
-        print("df_append_mini_roy2")    
-        df_append_mini_roy=df_append_mini_roy[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency','periodicity_cat_id']]
-        print("df_append_mini_roy3")
+        df_append=pd.merge(df_append,df_payment_terms, how="inner",left_on=['payment_periodicity_id','month'], right_on=['periodicity_id','sales_month'] )  
+        print("df_append2") 
+        df_append=df_append[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','payment_currency_id','amount_payment_curr','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency','periodicity_cat_id','payment_date']]
+        print("df_append3")
         #merge with contract_partner and calculate amount per partner
-        df_append_mini_roy=pd.merge(df_append_mini_roy,df_contract_partner, how="left",left_on=['contract_id'], right_on=['contract_id'] )
-        df_append_mini_roy['percentage']=df_append_mini_roy['percentage'].fillna(100) #If the user did not insert a partner, then we should populate those fields
-        df_append_mini_roy['partner_id']=df_append_mini_roy['partner_id'].fillna(0)#If the user did not insert a partner, then we should populate those fields
-  
-        df_append_mini_roy["amount_contract_curr"]=df_append_mini_roy["amount_contract_curr"]*df_append_mini_roy["percentage"]/100
+        df_append=pd.merge(df_append,df_contract_partner, how="left",left_on=['contract_id'], right_on=['contract_id'] )
+        df_append['percentage']=df_append['percentage'].fillna(100) #If the user did not insert a partner, then we should populate those fields
+        df_append['partner_id']=df_append['partner_id'].fillna(0)#If the user did not insert a partner, then we should populate those fields
+        df_append["amount_contract_curr"]=df_append["amount_contract_curr"]*df_append["percentage"]/100
+        df_append= df_append.rename(columns={'percentage':'beneficiary_percentage'})
+        df_append=df_append[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','payment_currency_id','amount_payment_curr','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency','periodicity_cat_id','partner_id','beneficiary_percentage','payment_date']]
+        df_append['invoice_detail']=""
+        df_append['invoice_paid']=""
 
-        df_append_mini_roy= df_append_mini_roy.rename(columns={'percentage':'beneficiary_percentage'})
-        df_append_mini_roy=df_append_mini_roy[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency','periodicity_cat_id','partner_id','beneficiary_percentage']]
+        print("df_append 4")
 
-
-        df_append_mini_roy['invoice_detail']=""
-        df_append_mini_roy['invoice_paid']=""
-
-        print("df_append_mini_roy4")
-   
 
       #         iv.: Invoice  
 
         df_invoice=pd.merge(df_year_nb_month,df_invoice, how="inner",left_on=['year'], right_on=['year'] )
-        df_invoice['rule_type']='INVOICE'
-        df_invoice['month']=0
-        df_invoice['SKU']=""
-        df_invoice['SKU_name']=""
-        df_invoice['market_curr']=""
-        df_invoice['field_type']=""
-        df_invoice['sales_rate']=0
-        df_invoice['sales_in_market_curr']=0
-        df_invoice['sales_in_contract_curr']=0
-        df_invoice['volume']=0
-        df_invoice['qty_value']=0
-        df_invoice['tranche_currency']=""
-        df_invoice['qty_value_currency']=""
-        df_invoice['beneficiary_percentage']=0
-        df_invoice=df_invoice.rename(columns={'comment': 'invoice_detail','amount':'amount_contract_curr','paid':'invoice_paid'})
-        df_invoice=df_invoice[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency','periodicity_cat_id','partner_id','beneficiary_percentage','invoice_detail','invoice_paid']]
+        if not df_invoice.empty:
+          df_invoice['rule_type']='INVOICE'
+          df_invoice['month']=0
+          df_invoice['SKU']=""
+          df_invoice['SKU_name']=""
+          df_invoice['market_curr']=""
+          df_invoice['field_type']=""
+          df_invoice['sales_rate']=0
+          df_invoice['sales_in_market_curr']=0
+          df_invoice['sales_in_contract_curr']=0
+          df_invoice['volume']=0
+          df_invoice['qty_value']=0
+          df_invoice['tranche_currency']=""
+          df_invoice['qty_value_currency']=""
+          df_invoice['beneficiary_percentage']=0
+          df_invoice['payment_date']=''
+          df_invoice=df_invoice.rename(columns={'amount': 'amount_payment_curr'})
+          df_invoice['payment_currency_id']=df_invoice['currency_id']
 
+          # convert the invoice in contract currency
+          df_invoice=pd.merge(df_invoice,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] ) # get contract currency
+          df_invoice=pd.merge(df_invoice,df_fx, how="inner",left_on=['year','payment_currency_id'], right_on=['year','currency'] )
+          df_invoice = df_invoice.rename(columns={'exchange_rate': 'fx_from'})
+          df_invoice=pd.merge(df_invoice,df_fx, how="inner",left_on=['year','contract_currency'], right_on=['year','currency'] )
+          df_invoice = df_invoice.rename(columns={'exchange_rate': 'fx_to'})
+          df_invoice['amount_contract_curr']=df_invoice['amount_payment_curr']*df_invoice['fx_from']/df_invoice['fx_to']
+          df_invoice=df_invoice.rename(columns={'comment': 'invoice_detail','paid':'invoice_paid'})
+          df_invoice=df_invoice[['contract_id','rule_type','year','month','SKU','SKU_name','amount_contract_curr','payment_currency_id','amount_payment_curr','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency','periodicity_cat_id','partner_id','beneficiary_percentage','invoice_detail','invoice_paid']]
         invoice_empty=df_invoice.empty
-
+        print("df_invoice: Done")
         #--------------------------------------------
 
-        print("df_invoice: Done")
+        
 
       #         iv.: Detail : 
 
-        print('df_append_mini_roy')
+        print('df_append')
         
-        if mini_gar_empty and roy_on_sales_empty and invoice_empty :
+        if mini_gar_empty and roy_on_sales_empty and invoice_empty and milestone_empty:
           print("df_detail null")
           df_detail=pd.DataFrame({
             'division': [''],
@@ -2758,8 +2886,10 @@ def new_report(request):
             'qty_value': [''],
             'beneficiary_percentage': [0],
             'amount_contract_curr': [0],
-            'transaction_direction': [''],
+            'amount_payment_curr': [0],
             'contract_currency': [''],
+            'transaction_direction': [''],
+            'payment_currency_id': [''],
             'consolidation_currency': [''],
             'amount_consolidation_curr': [0],
             'contract_id': [0],
@@ -2771,18 +2901,20 @@ def new_report(request):
             'partner_name': [''],
             'partner_country_id': [''],
             'brand_name': [''],
-            'm3_brand_code': [''],
+            'brand_code': [''],
             'period': [''],
             'invoice_paid': [''],
             'invoice_detail': [''],
-            'payment_date': [None],
+            'payment_date': [''],
           })
         else:
- 
-          df_append_mini_roy=df_append_mini_roy.fillna("")
-          df_invoice=df_invoice.fillna("")
-          df_detail=df_append_mini_roy.append(df_invoice)
+
+          df_append=df_append.fillna("")
+          df_invoice=df_invoice.fillna("") 
+          df_detail=df_append.append(df_invoice)
+
           print("df_detail 00")
+
 
           # get last month of the period (i.e. for Q1, it's march)
           df_detail=pd.merge(df_detail,df_periodicity_cat, how="inner",left_on=['periodicity_cat_id'], right_on=['id'] )
@@ -2794,14 +2926,32 @@ def new_report(request):
 
           df_detail["date"]= pd.to_datetime(df_detail[['year', 'month','day']], errors = 'coerce')
           df_detail["day_end_period"]= pd.to_datetime(df_detail['date'], format="%Y%m") + MonthEnd(1)
-          df_detail=df_detail[['contract_id','rule_type','year','SKU','SKU_name','month_of_sales','amount_contract_curr','periodicity_cat','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency','partner_id','beneficiary_percentage','invoice_detail','day_end_period','invoice_paid']]
+          df_detail=df_detail[['contract_id','rule_type','year','SKU','SKU_name','month_of_sales','amount_contract_curr','payment_currency_id','amount_payment_curr','periodicity_cat','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','field_type','sales_rate','qty_value','tranche_currency','qty_value_currency','partner_id','beneficiary_percentage','invoice_detail','day_end_period','invoice_paid','payment_date']]
   
           print("df_detail 1")
 
           # get contract detail, get the payment terms and calculate the payment date 
           df_detail=pd.merge(df_detail,df_contract, how="inner",left_on=['contract_id'], right_on=['contract_id'] )
-          df_detail["payment_date"]= df_detail["day_end_period"]+  pd.to_timedelta(df_detail['payment_terms'], unit='d')
+          
+          '''
+          df_detail["payment_date"]=df_detail["day_end_period"]+  pd.to_timedelta(df_detail['payment_terms'], unit='d')
           df_detail["payment_date"]= pd.to_datetime(df_detail['payment_date'],format='%d.%m.%Y') #needed, otherwise cannot load in system
+          df_detail["payment_date"]=df_detail["payment_date"].astype(str)
+          print(df_detail[["payment_date"]].dtypes)
+          '''
+          # In general, the payment will be automatically calculated based- but for Milestone, it should not ( as we already gide a payment date)
+          df_detail["payment_date"]=pd.to_datetime(df_detail["payment_date"])
+          df_detail["payment_date"]=df_detail["payment_date"].astype(str)
+          df_detail["payment_date_calc"]=df_detail["day_end_period"]+  pd.to_timedelta(df_detail['payment_terms'], unit='d')
+          df_detail["payment_date_calc"]= pd.to_datetime(df_detail['payment_date_calc'],format='%d.%m.%Y')
+          df_detail["payment_date_calc"]=df_detail["payment_date_calc"].astype(str)
+
+          df_detail["payment_date"]= np.where(
+            df_detail["payment_date"] == "NaT",
+            df_detail["payment_date_calc"],
+            df_detail["payment_date"],
+          )
+
           
           print("df_detail 2")
 
@@ -2835,12 +2985,12 @@ def new_report(request):
           
 
           #filter
-          df_detail=df_detail[['division','division_country_id','division_via_id','field_type','year','month_of_sales','SKU','SKU_name','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','sales_rate','qty_value','beneficiary_percentage','contract_currency','transaction_direction','amount_contract_curr','consolidation_currency','amount_consolidation_curr','contract_id','contract_name','contract_type_id','rule_type','partner_id','ico_3rd','partner_name','partner_country_id','brand_name','m3_brand_code','periodicity_cat','invoice_paid','invoice_detail','payment_date']]
+          df_detail=df_detail[['division','division_country_id','division_via_id','field_type','year','month_of_sales','SKU','SKU_name','market_id','sales_in_market_curr','sales_in_contract_curr','volume','market_curr','sales_rate','qty_value','beneficiary_percentage','contract_currency','transaction_direction','amount_contract_curr','payment_currency_id','amount_payment_curr','consolidation_currency','amount_consolidation_curr','contract_id','contract_name','contract_type_id','rule_type','partner_id','ico_3rd','partner_name','partner_country_id','brand_name','brand_code','periodicity_cat','invoice_paid','invoice_detail','payment_date']]
           df_detail = df_detail.rename(columns={'division_via_id': 'division_via',"periodicity_cat":"period","year":"year_of_sales"})
 
-          df_detail["payment_date"]=df_detail["payment_date"].astype(str)
-          df_detail["invoice_paid"]=df_detail["invoice_paid"].astype(str)
 
+          df_detail["invoice_paid"]=df_detail["invoice_paid"].astype(str)
+          print(df_detail['payment_currency_id'].dtypes)
 
         print("definition of Detail: Done")
 
@@ -2852,18 +3002,18 @@ def new_report(request):
           df_wht['rule_type']=(df_wht['rule_type']=="INVOICE")
           df_wht=df_wht[df_wht.rule_type ==False]
           df_wht=df_wht.fillna("")
-          df_wht=df_wht.groupby(['division','division_country_id','partner_country_id','ico_3rd','partner_name','contract_currency','transaction_direction'], as_index=False).agg({"amount_contract_curr": "sum"})    
+          df_wht=df_wht.groupby(['division','division_country_id','partner_country_id','ico_3rd','partner_name','payment_currency_id','transaction_direction'], as_index=False).agg({"amount_payment_curr": "sum"})    
 
           
           df_wht["country_from"]=np.where(
                                   df_wht["transaction_direction"]=="PAY",
                                   np.where(
-                                    df_wht["amount_contract_curr"]>0,
+                                    df_wht["amount_payment_curr"]>0,
                                     df_wht["division_country_id"],
                                     df_wht["partner_country_id"],
                                   ),
                                   np.where(
-                                    df_wht["amount_contract_curr"]>0,
+                                    df_wht["amount_payment_curr"]>0,
                                     df_wht["partner_country_id"],
                                     df_wht["division_country_id"] ,
                                   )
@@ -2876,7 +3026,7 @@ def new_report(request):
           df_wht["from_payor"]=np.where(
                                   df_wht["transaction_direction"]=="PAY",
                                   np.where(
-                                    df_wht["amount_contract_curr"]>0,
+                                    df_wht["amount_payment_curr"]>0,
                                     "ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")",
                                     np.where(
                                       df_wht["ico_3rd"]=="ICO",
@@ -2885,7 +3035,7 @@ def new_report(request):
                                     )  
                                   ),
                                   np.where(
-                                    df_wht["amount_contract_curr"]>0,
+                                    df_wht["amount_payment_curr"]>0,
                                     np.where(
                                       df_wht["ico_3rd"]=="ICO",
                                       "ICO-" + df_wht["partner_name"] + "(" + df_wht["partner_country_id"]+ ")",
@@ -2903,10 +3053,10 @@ def new_report(request):
                                     ) ,
                                     "ICO-" + df_wht["division"] + " (" + df_wht["division_country_id"] + ")"
                               )
-          df_wht['amount_contract_curr']=abs(df_wht['amount_contract_curr'])
+          df_wht['amount_payment_curr']=abs(df_wht['amount_payment_curr'])
 
           df_wht=df_wht.fillna("")
-          df_wht=df_wht.groupby(['country_from','country_to','from_payor','to_payee','contract_currency'], as_index=False).agg({"amount_contract_curr": "sum"})
+          df_wht=df_wht.groupby(['country_from','country_to','from_payor','to_payee','payment_currency_id'], as_index=False).agg({"amount_payment_curr": "sum"})
 
           df_wht=pd.merge(df_wht,df_tax, how="left",left_on=['country_from','country_to'], right_on=['country_from_id','country_to_id'] )
           df_wht["wht_rate"]=df_wht["wht_rate"].astype(str)
@@ -2919,13 +3069,13 @@ def new_report(request):
                                       )
           )
 
-          df_wht=df_wht[['from_payor','to_payee','contract_currency','amount_contract_curr','wht_rate']]
+          df_wht=df_wht[['from_payor','to_payee','payment_currency_id','amount_payment_curr','wht_rate']]
           print("WHT Done")
           #         iv.:  summary cash flow--------------------- 
           # if REC, them - + if invoice -
           df_cash_flow= df_detail.copy()
           df_cash_flow=df_cash_flow.fillna("")
-          df_cash_flow=df_cash_flow.groupby(['division','contract_currency','payment_date','rule_type','invoice_paid','transaction_direction'], as_index=False).agg({"amount_contract_curr": "sum"})
+          df_cash_flow=df_cash_flow.groupby(['division','payment_currency_id','payment_date','rule_type','invoice_paid','transaction_direction'], as_index=False).agg({"amount_payment_curr": "sum"})
 
         if file.file_type=="accruals":
           #          v.:  Conso for accruals--------------------- 
@@ -2965,7 +3115,7 @@ def new_report(request):
               'reverseDate': [''],
               'account_nb': [''],
               'cost_center_acc': [''],
-              'dim3': [''],
+              'brand_code': [''],
               'market_acc': [''],
               'accruals_contract_curr': [0],
               'd_c': [''],
@@ -2975,7 +3125,7 @@ def new_report(request):
             df_accounting_entry= df_detail.copy()
             df_accounting_entry["accruals_contract_curr"]=np.where(df_accounting_entry["rule_type"]=="INVOICE",-df_accounting_entry["amount_contract_curr"],df_accounting_entry["amount_contract_curr"])
             
-            df_accounting_entry=df_accounting_entry[['market_id','division','contract_type_id','m3_brand_code','brand_name','transaction_direction','contract_currency','accruals_contract_curr']]
+            df_accounting_entry=df_accounting_entry[['market_id','division','contract_type_id','brand_code','brand_name','transaction_direction','contract_currency','accruals_contract_curr']]
             df_accounting_entry=df_accounting_entry.fillna("")
             print("df_accounting_entry")
             print(df_accounting_entry)
@@ -2984,9 +3134,9 @@ def new_report(request):
             df_accounting_entry=pd.merge(df_accounting_entry,df_accounting, how="inner",left_on=['transaction_direction','contract_type_id'], right_on=['transaction_direction','contract_type_id'] )
             df_accounting_entry["market_acc"]=np.where(df_accounting_entry["market_acc"]=="SPLIT",df_accounting_entry["market_id"],df_accounting_entry["market_acc"])
 
-            df_accounting_entry=df_accounting_entry.groupby(['division','contract_type_id','m3_brand_code','brand_name','transaction_direction','contract_currency','account_nb','cost_center_acc','market_acc','pl_bs','d_c_if_amount_positiv'], as_index=False).agg({"accruals_contract_curr": "sum"})
+            df_accounting_entry=df_accounting_entry.groupby(['division','contract_type_id','brand_code','brand_name','transaction_direction','contract_currency','account_nb','cost_center_acc','market_acc','pl_bs','d_c_if_amount_positiv'], as_index=False).agg({"accruals_contract_curr": "sum"})
             
-            df_accounting_entry["dim3"]=np.where(df_accounting_entry["pl_bs"]=="PL",df_accounting_entry["m3_brand_code"],"")
+            df_accounting_entry["brand_code"]=np.where(df_accounting_entry["pl_bs"]=="PL",df_accounting_entry["brand_code"],"")
             df_accounting_entry["d_c_if_amount_negativ"]=np.where(df_accounting_entry["d_c_if_amount_positiv"]=="C","D","C")
             df_accounting_entry["d_c"]=np.where(df_accounting_entry["accruals_contract_curr"]>0,df_accounting_entry["d_c_if_amount_positiv"],df_accounting_entry["d_c_if_amount_negativ"])
             df_accounting_entry["accruals_contract_curr"]=abs(df_accounting_entry["accruals_contract_curr"])
@@ -3005,7 +3155,7 @@ def new_report(request):
             
             df_accounting_entry["sheet_name"]= "Accounting_" +df_accounting_entry["division"]+"_"+df_accounting_entry["contract_currency"]
             df_accounting_entry=df_accounting_entry.sort_values(['sheet_name','pl_bs','brand_name'], ascending=[1,0,1])
-            df_accounting_entry=df_accounting_entry[['sheet_name','contract_type_id','division','contract_currency','accountingdate','reverseDate','account_nb','cost_center_acc','dim3','market_acc','accruals_contract_curr','d_c','text_voucherline']]
+            df_accounting_entry=df_accounting_entry[['sheet_name','contract_type_id','division','contract_currency','accountingdate','reverseDate','account_nb','cost_center_acc','brand_code','market_acc','accruals_contract_curr','d_c','text_voucherline']]
           print("df_accounting_entry")
 
    
@@ -3050,6 +3200,7 @@ def new_report(request):
         print("df_detail loaded succesfully")
     
         if file.file_type=="cash_forecast":
+          print(df_cash_flow)
           df_cash_flow["import_file_id"]=file.id
           df_cash_flow.to_sql('royalty_app_cash_flow', con=conn, index=False, if_exists="append")
           print("df_cash_flow loaded succesfully")
@@ -3109,6 +3260,7 @@ def export_report(request,file_array,table_array):
 
       if table_name =="detail":
         detail_list=Detail.objects.filter(import_file__in=file_object_list)
+        print(pd.DataFrame(list(detail_list.values())))
         df_detail_list = pd.DataFrame(list(detail_list.values())).drop(['id'], axis = 1)
         #name of type
         type_list=Type.objects.all()
@@ -3126,6 +3278,7 @@ def export_report(request,file_array,table_array):
         df_cash_flow.to_excel(writer, sheet_name='Cash_Flow',index=False)
 
       if table_name=="conso":
+        
         conso_list=Conso.objects.filter(import_file__in=file_object_list)
         df_conso = pd.DataFrame(list(conso_list.values()))
         df_conso=df_conso.drop(['id'], axis = 1)
@@ -3181,33 +3334,33 @@ def modif_static(request,table_name):
   if table_name == "division" :
     country_list=Country.objects.all().order_by("country_id")
     division_list=Division.objects.all() 
-    return render(request, 'royalty_app/division.html',  { "country_list":country_list ,"division_list":division_list})
+    return render(request, 'royalty_app/static/division.html',  { "country_list":country_list ,"division_list":division_list})
 
   if table_name=="country":
     country_list=Country.objects.all().order_by("country_region","country_id").select_related('country_region')
     region_list=Region.objects.all()
-    return render(request, 'royalty_app/country.html',  { "country_list":country_list ,"region_list":region_list})
+    return render(request, 'royalty_app/static/country.html',  { "country_list":country_list ,"region_list":region_list})
 
   if table_name=="region":
     region_list=Region.objects.all()
-    return render(request, 'royalty_app/region.html',  { "region_list":region_list})
+    return render(request, 'royalty_app/static/region.html',  { "region_list":region_list})
 
   if table_name=="brand":
     brand_list=Brand.objects.all()
-    return render(request, 'royalty_app/brand.html',  { "brand_list":brand_list})
+    return render(request, 'royalty_app/static/brand.html',  { "brand_list":brand_list})
 
   if table_name=="formulation":
     formulation_list=Formulation.objects.all()
-    return render(request, 'royalty_app/formulation.html',  { "formulation_list":formulation_list})
+    return render(request, 'royalty_app/static/formulation.html',  { "formulation_list":formulation_list})
 
   if table_name=="currency":
     currency_list=Currency.objects.all()
-    return render(request, 'royalty_app/currency.html',  { "currency_list":currency_list})
+    return render(request, 'royalty_app/static/currency.html',  { "currency_list":currency_list})
 
   if table_name=="consolidation_currency":
     currency_list=Currency.objects.all()
     consolidation_currency=Consolidation_currency.objects.all().first()
-    return render(request, 'royalty_app/consolidation_currency.html',  { "consolidation_currency":consolidation_currency,"currency_list":currency_list})
+    return render(request, 'royalty_app/static/consolidation_currency.html',  { "consolidation_currency":consolidation_currency,"currency_list":currency_list})
 
   if table_name=="accounting":
     accounting_list=Accounting.objects.all().select_related('contract_type')
@@ -3218,20 +3371,20 @@ def modif_static(request,table_name):
     country_list=[ d[0] for d in country_list]
     market_list=['','SPLIT']+ country_list
 
-    return render(request, 'royalty_app/accounting.html',  { "market_list":market_list,"contract_type_list":contract_type_list,"accounting_list":accounting_list})
+    return render(request, 'royalty_app/static/accounting.html',  { "market_list":market_list,"contract_type_list":contract_type_list,"accounting_list":accounting_list})
 
   if table_name=="tax":
     tax_list=Tax.objects.all().select_related('country_from','country_to')
     country_list=Country.objects.all()
-    return render(request, 'royalty_app/tax.html',  { "country_list":country_list,"tax_list":tax_list})
+    return render(request, 'royalty_app/static/tax.html',  { "country_list":country_list,"tax_list":tax_list})
 
   if table_name=="sales_breakdown_item":
     sales_breakdown_item_list=Sales_breakdown_item.objects.all()
-    return render(request, 'royalty_app/sales_breakdown_item.html',  { "sales_breakdown_item_list":sales_breakdown_item_list})
+    return render(request, 'royalty_app/static/sales_breakdown_item.html',  { "sales_breakdown_item_list":sales_breakdown_item_list})
 
   if table_name=="payment_type":
     payment_type_list=Payment_type.objects.all()
-    return render(request, 'royalty_app/payment_type.html',  { "payment_type_list":payment_type_list})
+    return render(request, 'royalty_app/static/payment_type.html',  { "payment_type_list":payment_type_list})
 
 
 
@@ -3371,20 +3524,20 @@ def save_brand(request):
 
       for d in data :
         brand_id=d["brand_id"]
-        m3_brand_code=d["m3_brand_code"]
+        brand_code=d["brand_code"]
         brand_name=d["brand_name"]
         
         #if the item already exist, we modify it
         existing_items_equal_d=Brand.objects.filter(id=brand_id)
         if len(existing_items_equal_d)==1:  
           item_to_modify= existing_items_equal_d[0] 
-          item_to_modify.m3_brand_code=m3_brand_code
+          item_to_modify.brand_code=brand_code
           item_to_modify.brand_name=brand_name
           item_to_modify.save()
         #if the item is new, we create it
         else:
           mew_item=Brand(
-            m3_brand_code =m3_brand_code,
+            brand_code =brand_code,
             brand_name =brand_name,
           )
           mew_item.save()

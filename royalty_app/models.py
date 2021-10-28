@@ -51,7 +51,7 @@ class Accounting(models.Model):
     d_c_if_amount_positiv= models.CharField(max_length=1,choices=(('D','D'),('C','C')), default='C')
 
 class Brand(models.Model):
-    m3_brand_code= models.CharField(max_length=20)
+    brand_code= models.CharField(max_length=20)
     brand_name= models.CharField(max_length=50)
     def __str__(self):
         return f"{self.brand_name}"
@@ -156,6 +156,18 @@ class Rule(models.Model):
     qty_value_currency=models.ForeignKey(Currency,on_delete=models.PROTECT, default="USD" ,related_name="qty_value_currency")
     def __str__(self):
         return f"{self.id}"
+
+class Milestone(models.Model):
+    contract=  models.ForeignKey(Contract, related_name="milestone_contract",on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    amount=models.FloatField(default=0)
+    currency=models.ForeignKey(Currency, related_name="milestone_currency", on_delete=models.PROTECT, default="USD")
+    booked=models.CharField(max_length=3,choices=(('YES','YES'),('NO','NO')), default='NO')
+    market=models.ForeignKey(Country, related_name="market_milestone",on_delete=models.PROTECT, default="USA")
+    booking_date=models.DateField(default="1900-01-01")
+    payment_date=models.DateField(default="1900-01-01")
+    def __str__(self):
+        return f"{self.id}"
     
 class Tranche(models.Model):
     rule=  models.ForeignKey(Rule, related_name="tranche_rule",on_delete=models.CASCADE)
@@ -169,6 +181,7 @@ class Invoice(models.Model):
     contract=  models.ForeignKey(Contract, related_name="invoice_contract",on_delete=models.PROTECT)
     partner=  models.ForeignKey(Partner, related_name="invoice_partner",on_delete=models.PROTECT)
     amount=models.FloatField(default=0)
+    currency=  models.ForeignKey(Currency, related_name="invoice_currency",on_delete=models.PROTECT)
     booking_date=models.DateField(default="1900-01-01")
     year=  models.IntegerField()
     periodicity_cat=  models.ForeignKey(Periodicity_cat, related_name="invoice_periodicity_cat",on_delete=models.PROTECT)
@@ -240,7 +253,7 @@ class Accounting_entry(models.Model):
     reverseDate= models.CharField(max_length=50,null=True,blank=True)
     account_nb= models.CharField(max_length=50,null=True,blank=True)
     cost_center_acc= models.CharField(max_length=50,null=True,blank=True)
-    dim3= models.CharField(max_length=50,null=True,blank=True)
+    brand_code= models.CharField(max_length=50,null=True,blank=True)
     market_acc= models.CharField(max_length=50,null=True,blank=True)
     accruals_contract_curr= models.FloatField(null=True,blank=True)
     d_c= models.CharField(max_length=10,null=True,blank=True)
@@ -269,6 +282,8 @@ class Detail(models.Model):
     amount_contract_curr= models.FloatField(null=True,blank=True)
     transaction_direction= models.CharField(max_length=10,null=True,blank=True)
     contract_currency= models.CharField(max_length=10,null=True,blank=True)
+    amount_payment_curr= models.FloatField(null=True,blank=True)
+    payment_currency= models.ForeignKey(Currency, on_delete=models.PROTECT)
     amount_consolidation_curr= models.FloatField(null=True,blank=True)
     consolidation_currency= models.CharField(max_length=10,null=True,blank=True)
     contract=models.ForeignKey(Contract, on_delete=models.PROTECT)
@@ -279,7 +294,7 @@ class Detail(models.Model):
     partner_name= models.CharField(max_length=100,null=True,blank=True)
     partner_country_id= models.CharField(max_length=10,null=True,blank=True)
     brand_name= models.CharField(max_length=100,null=True,blank=True)
-    m3_brand_code= models.CharField(max_length=100,null=True,blank=True)
+    brand_code= models.CharField(max_length=100,null=True,blank=True)
     period= models.CharField(max_length=100,null=True,blank=True)
     invoice_paid= models.CharField(max_length=10,null=True,blank=True)
     invoice_detail= models.CharField(max_length=100,null=True,blank=True)
@@ -292,16 +307,17 @@ class Cash_flow(models.Model):
     rule_type= models.CharField(max_length=20,null=True,blank=True)
     invoice_paid= models.CharField(max_length=10,null=True,blank=True)
     transaction_direction= models.CharField(max_length=10,null=True,blank=True)
-    contract_currency= models.CharField(max_length=10,null=True,blank=True)
+    #payment_currency= models.CharField(max_length=10,null=True,blank=True)
+    payment_currency= models.ForeignKey(Currency, on_delete=models.PROTECT)
     payment_date= models.DateField(default="1900-01-01")
-    amount_contract_curr= models.FloatField(null=True,blank=True)    
+    amount_payment_curr= models.FloatField(null=True,blank=True)    
 
 class Wht(models.Model):
     import_file=models.ForeignKey(File, on_delete=models.CASCADE)
     from_payor= models.CharField(max_length=100,null=True,blank=True)   
     to_payee= models.CharField(max_length=100,null=True,blank=True)   
-    contract_currency= models.CharField(max_length=20,null=True,blank=True)   
-    amount_contract_curr= models.FloatField(null=True,blank=True) 
+    payment_currency= models.ForeignKey(Currency, on_delete=models.PROTECT)  
+    amount_payment_curr= models.FloatField(null=True,blank=True) 
     wht_rate= models.CharField(max_length=100,null=True,blank=True)
 
 class Sales_breakdown_item(models.Model):

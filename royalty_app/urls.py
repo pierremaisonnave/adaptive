@@ -21,9 +21,8 @@ urlpatterns = [
 
   #---------------------Partner-------------------------------
   #------------------------------------------------------------
-  path('partners/writer', views.partners_writer, name='partners'),
-  path('partners/to_validate', views.partners_to_validate, name='partners_to_validate'),
-  path('partners/current', views.partners_current, name='partners_current'),
+  path('partners', views.partners, name='partners'),
+
   path('validate_new_partner/<int:partner_id>', views.validate_new_partner, name='validate_new_partner'),
   path('validate_change_partner/<int:partner_id>', views.validate_change_partner, name='validate_change_partner'),
   path('reject_change_partner/<int:partner_id>', views.reject_change_partner, name='reject_change_partner'),
@@ -36,9 +35,8 @@ urlpatterns = [
   path('contracts/writer', views.contracts_writer, name='contracts_writer'),
   path('contracts/to_validate', views.contracts_to_validate, name='contracts_to_validate'),
   path('contracts/current', views.contracts_current, name='contracts_current'),
-  path('contracts/writer/<int:contract_id>', views.rules_writer, name='rules_writer'),
-  path('contracts/to_validate/<int:contract_id>', views.rules_validator, name='rules_validator'),
-  path('contracts/current/<int:contract_id>', views.rules_current, name='rules_current'),
+  path('contracts/<int:contract_id>', views.rules, name='rules'),
+
   path('delete_contract/<int:contract_id>', views.delete_contract, name='delete_contract'),
   path('submit_delete_contract_request/<int:contract_id>', views.submit_delete_contract_request, name='submit_delete_contract_request'),
   path("change_row/<int:partner_id>", views.change_row, name="change_row"),
@@ -53,6 +51,7 @@ urlpatterns = [
   path("save_contract_partner/<int:contract_id>", views.save_contract_partner, name="save_contract_partner"),
   path("save_mini/<int:contract_id>", views.save_mini, name="save_mini"),
   path("save_rule/<int:contract_id>", views.save_rule, name="save_rule"),
+  path("save_milestone/<int:contract_id>", views.save_milestone, name="save_milestone"),
   path("save_invoice_breakdown/<int:contract_id>", views.save_invoice_breakdown, name="save_invoice_breakdown"),
   path("new_contract_file", views.new_contract_file, name="new_contract_file"),
   path("save_contract_basic_info/<int:contract_id>/<str:save_type>", views.save_contract_basic_info, name="save_contract_basic_info"),

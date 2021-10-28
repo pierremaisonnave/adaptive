@@ -1,8 +1,10 @@
 {% extends "royalty_app/layout.html" %}
 {% block content %}
 
+
+
       <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-        <h1 class="h2">Cash Flow Forecast </h1>
+        <h1 class="h2">Partner payment report </h1>
       </div>
 
   <!------------------------------------------------------------------------------------->   
@@ -11,13 +13,13 @@
     <form   id="form_new"  > 
     {% csrf_token %} 
       <table>
-        <tr><!--Row 1-->
-          <td ><!--Name-->
-            <span style="width: 100%; margin-left:5px;">New Forecast:</span>
+        <tr ><!--Row 1-->
+          <td colspan="3"><!--Name-->
+            <span style="width: 100%; margin-left:5px;">New Partner Report:</span>
           </td>
         </tr>
         <tr><!--Row 2-->
-          <td colspan="3"><!--file Name-->
+          <td colspan="3"><!--accruals Name-->
             <input  type="text"  id="name_" placeholder="name" maxlength="50" style="width: 100%; margin-left:5px;">
           </td>  
         </tr>
@@ -29,7 +31,7 @@
             <input  disabled="true" class="number-separator" style="width: 100%; margin-left:5px;"  type="text" value="January">
           </td >
           <td >
-            <input  type="number"  id="year_from"   style=" width:100%;margin-left:5px;" value="{% now 'Y' %}" onchange="changeyear(this)" >
+            <input  type="number"  id="year_from"   style=" width:100%;margin-left:5px;" value="{% now 'Y' %}" onchange="changeyear(this)">
           </td>
         </tr >
         <tr > <!--Row 4-->
@@ -38,7 +40,7 @@
           </td >
           <td ><!-- month to-->
             <div > 
-              <select id="month_to" style="width:100%; padding:2px; margin-left:5px;" onchange="period_message()" >
+              <select id="month_to" style="width:100%; padding:2px; margin-left:5px;" onchange="period_message()">
                 <option disabled=true selected value="">month</option>
                 {% for m in month_list %}
                  {% if m.month_nb ==  current_month_nb %}
@@ -58,7 +60,7 @@
           <td colspan="3"> <!--file selection-->
             <input  type="file" name="loaded_file" id="fileSelect" accept=".xlsx"  style="width: 100%; margin-left:5px;">
           </td>
-        </tr >        
+        </tr >
         <tr > <!--Row 6-->
           <td colspan="2"><!--message-->
             <div style="width: 100%; margin-left:5px;">
@@ -68,22 +70,11 @@
               <div id="message_period"  hidden > make sure your import file contains FX and Sales for the period: <span id="period_message_date"> </span> </div>
           </div>
           </td>
-          <td  style="  float: right;display:grid;grid-template-columns: 35px  35px"><!--Button-->
-            <div style="margin-right: 3px">
-              <button type="submit" class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()" id="saved_button"><span class="bi bi-save2-fill"></span></button>
-              <div id="spinner" style="display: None; padding-top: 6px;padding-left: 4px">
-                <div class="sk-chase" >
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                  <div class="sk-chase-dot"></div>
-                </div>
-              </div>
-              <div style="text-align: end; color:green ;display: None;    position: relative; right: 10px ;top:5px" id="saved_message" >Saved</div>
+          <td ><!--Button-->
+            <div style="width: 100%; text-align: end; margin-left:5px;">
+              <button type="submit" class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()"><span class="bi bi-save2-fill"></span></button>
+              <button class="btn btn-sm btn-outline-warning"  type="reset" title="cancel"> <span class="bi bi-x-circle"></span></button>
             </div>
-            <button class="btn btn-sm btn-outline-warning"  type="reset" title="cancel"> <span class="bi bi-x-circle"></span></button>
           </td>
         </tr>
       </table> 
@@ -96,8 +87,7 @@
           <input checked type="checkbox" value="fx"><span>Fx</span>
           <input checked type="checkbox" value="rule"><span>Rule</span>
           <input checked type="checkbox" value="detail"><span>Detail</span>
-          <input checked type="checkbox" value="cash_flow"><span>Cash_Flow</span>
-          <input checked type="checkbox" value="wht"><span>WHT</span>
+          <input checked type="checkbox" value="sales_details"><span>sales_details</span>
         </div>
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group mr-2">
@@ -153,15 +143,9 @@
     {% load static %}
   
     <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
-    <script src="{% static 'royalty_app/cash_flow_forecast.js'%}"></script>
-
-    <!-- when adding a "class="number-separator", the text item, a "," separator is added for the thousands-->
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" 
-      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" 
-      crossorigin="anonymous">
-    </script>
-    <script src="{% static 'royalty_app/easy-number-separator.js'%}"></script>
+    <script src="{% static 'royalty_app/reports/partner_report.js'%}"></script>
     <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
+
 
 
   </div>

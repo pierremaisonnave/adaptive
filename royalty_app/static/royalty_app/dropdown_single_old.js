@@ -1,12 +1,15 @@
 
 document.addEventListener('DOMContentLoaded', function() {
-
+    const dropdown_user=document.getElementById("dropdown_user")
     document.addEventListener('click', event => {
         var element = event.target;
+        var classnameparent=element.parentElement.className;
+        var classname=element.className;
+        var dd_id = element.getAttribute("dd_id")
+        var isindd = isindropdownlist(element,dd_id)
         
         //hide all dp 
-        if (!isindropdownlist(event)){  //we verify if the user click inside a dd- if so, we do not hide all dd
-
+        if (!isindd){  //we verify if the user click inside a dd- if so, we do not hide all dd
             hidde_all_dropdows()
         }
          
@@ -15,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var dd_id = element.getAttribute("dd_id")
         const region_id = element.getAttribute("region_id")
         
-        if (isindropdownlist(event) ){ 
+        if (isindd ){ 
             //hide or unhide a region
             if (classname.includes("comboTreeParentPlus")){
                 unhideregion(dd_id,region_id,element)}
@@ -94,23 +97,26 @@ function unhideregion(dd_id,region_id,element){
 }
 
  
-function isindropdownlist(event){
-    var e= event.target;
-    if (e.className.includes("comboTreeInputBox")){
-        grandparentelement=e.parentElement.parentElement
-        if (grandparentelement.childNodes[3].style.display=="block"){return true}
+ 
+function isindropdownlist(element,dd_id){
+    //if we click on a div + the vorresponding dd is not hidden
+    var dropdown= document.getElementById(`dropdown_${dd_id}`)
+    if (dropdown){
+        if (dropdown.style.display=="block"){return true}
     }
-    if (e.id== "user_menu" || e.id=="user_photo_on_layout"){
+    //specific to user menu on top right
+    if (element.id== "user_menu" || element.id=="user_photo_on_layout"){ 
         if (dropdown_user.style.display=="block"){return true }
     }
-
-    node=e.parentNode
-    while (node != null){
-        if (node.className=="comboTreeDropDownContainer") {return true }else{}
-        node = node.parentNode;
+    //for each combotree container, we 
+    comboTreedd_list=document.querySelectorAll(".comboTreeDropDownContainer")
+    comboTreedd_list_length=comboTreedd_list.length
+    for (ctdd = 0; ctdd < comboTreedd_list_length; ++ctdd) { 
+        if (comboTreedd_list[ctdd].contains(element)){
+            return true
+        }
     }
-
-    return false   
+    return false
 }
 
 function hidde_all_dropdows(){

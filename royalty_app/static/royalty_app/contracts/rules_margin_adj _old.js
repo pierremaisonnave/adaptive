@@ -1,4 +1,4 @@
-
+const number_fetch_before_reload = 6
 function save_contract(contract_id,save_type){
     //check that each table is properly done
         body=check_each_table()
@@ -19,9 +19,10 @@ function save_contract(contract_id,save_type){
     //book the modification in views.py for each table
         //create the bodies:
             body_basic_info=body[0]
-            body_contract_partner=body[1] 
-            body_rule=body[2]
-            body_mini_gar=body[3]
+            body_contract_partner=body[1]
+            body_milestone=body[2] 
+            body_rule=body[3]
+            body_mini_gar=body[4]
         //save contracts
             count=document.getElementById("count")
             count.value=0
@@ -67,7 +68,7 @@ function save_contract(contract_id,save_type){
                             //if nb_new=0, it means that there are no new files to load, hence we can skip this part, else we must loop through the remaining of the list, from nb_new till the end of the table
                             if (nb_new==0){
                                 count.value=Number(count.value)+1
-                                if (count.value==5 ){end_function_message()}
+                                if (count.value==number_fetch_before_reload ){end_function_message()}
                                 }else{
                                     from_new=length_table-nb_new
                                     for (var i = from_new; i < length_table; i++) {
@@ -89,7 +90,7 @@ function save_contract(contract_id,save_type){
                                             nb_new=nb_new-1
                                             if (nb_new==0){
                                                 count.value=Number(count.value)+1
-                                                if (count.value==5 ){end_function_message()}
+                                                if (count.value==number_fetch_before_reload ){end_function_message()}
                                             }
                                         })
                                     }
@@ -108,8 +109,19 @@ function save_contract(contract_id,save_type){
                         .then(result => {
                             if (!!result.error) {alert(result.error);location.reload();}
                             count.value=Number(count.value)+1
-                            if (count.value==5 ){end_function_message()}
+                            if (count.value==number_fetch_before_reload ){end_function_message()}
                         })
+                //save milestone
+                fetch(`/save_milestone/${contract_id}`, {
+                    method: 'POST',
+                    body: body_milestone
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (!!result.error) {alert(result.error);location.reload();}
+                        count.value=Number(count.value)+1
+                        if (count.value==number_fetch_before_reload ){end_function_message()}
+                    })
                 //save rules
                     fetch(`/save_rule/${contract_id}`, {
                         method: 'POST',
@@ -120,7 +132,7 @@ function save_contract(contract_id,save_type){
                             if (!!result.error) {alert(result.error);location.reload();}
                                            
                             count.value=Number(count.value)+1
-                            if (count.value==5 ){end_function_message()}
+                            if (count.value==number_fetch_before_reload ){end_function_message()}
                         })
                 //save mini guar
                     fetch(`/save_mini/${contract_id}`, {
@@ -130,7 +142,7 @@ function save_contract(contract_id,save_type){
                         .then(result => { 
                             if (!!result.error) {alert(result.error);location.reload();}
                             count.value=Number(count.value)+1
-                            if (count.value==5 ){end_function_message()}
+                            if (count.value==number_fetch_before_reload ){end_function_message()}
                         })  
                 //save invoice breakdown
                     table_breakdown=document.getElementById(id="sales_breakdown_table").children[1]
@@ -156,7 +168,7 @@ function save_contract(contract_id,save_type){
                         .then(result => {
                             if (!!result.error) {alert(result.error);return}
                             count.value=Number(count.value)+1
-                            if (count.value==5 ){end_function_message()}
+                            if (count.value==number_fetch_before_reload ){end_function_message()}
                         })
             })
 
@@ -214,7 +226,45 @@ function check_each_table(){
             }
         //prepare body
             body_contract_partner="["+import_array+"]"
+    //table: Milestone
+        //verify coherence data
+        milestone_table=document.getElementById(id="milestone_table").children[1]
+        length_table=milestone_table.rows.length-1
+        var sub_list = []
+        if (length_table!=0){
+            for (var m = 0; m < length_table; m++) {
+            //create sublist before looping 
+                
+                row=milestone_table.rows[m]
+                name_milestone=row.cells[0].children[0].value
+                amount=row.cells[1].children[0].value.split(',').join("")
+                currency=row.cells[2].children[0].value
+                booked=row.cells[3].children[0].value
+                market=row.cells[4].children[0].value
+                booking_date=row.cells[5].children[0].value
+                payment_date=row.cells[6].children[0].value
+                if (name_milestone=="" ||amount=="" || currency==""|| booked==""){
+                    alert(`in milestone section : make sure you inserted some value for the name, amount, currency or booked`)
+                    return
+                }
+                if (booked=="YES" && ( booking_date=="" || payment_date==""|| market=="") ){
+                    alert(`in milestone section :make sure you fill in the dates and market`)
+                    return
+                }
 
+                sub_list.push(`{
+                    "name":"${name_milestone}",
+                    "amount":"${amount}",
+                    "currency":"${currency}",
+                    "booked":"${booked}",
+                    "market":"${market}",
+                    "booking_date":"${booking_date}",
+                    "payment_date":"${payment_date}"
+                    }`)     
+            } 
+        }
+        //prepare body
+        body_milestone="["+sub_list+"]"
     //table: rules:
         //verify if contract is a MARGIN_ADJ type:
 
@@ -558,7 +608,7 @@ function check_each_table(){
                         mini_gar_from:mini_gar_from.value,
                         mini_gar_to:mini_gar_to.value  , 
                     })
-    return [body_basic_info,body_contract_partner, body_rule, body_mini_gar]
+    return [body_basic_info,body_contract_partner,body_milestone, body_rule, body_mini_gar]
 }
 
 function tranche_field_ROYALTY(elm){

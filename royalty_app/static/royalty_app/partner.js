@@ -3,28 +3,80 @@
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    //--------------------Initialization of Datatable ---------------------
-    //the datatable is imported, and ordered
-    $('#partners_table').DataTable({
-        "aaSorting": [[ 0, "desc" ]],
-        columnDefs: [{ orderable: false, targets: [0,1,2,3,4,5,6,7] }],
-        })
+    //--------------------Initialization of Datatable writer---------------------
+    partners_table_writer=document.getElementById("partners_table_writer")
+    if (partners_table_writer!=null){
+        //the datatable is imported, and ordered
+        $(partners_table_writer).DataTable({
+            "aaSorting": [[ 0, "desc" ]],
+            columnDefs: [{ orderable: false, targets: [0,1,2,3,4,5,6,7] }],
+            })
 
 
-    //the datatable automatically generate a filter button, we do not need it ( as we have search bar for each column)
-    document.getElementById("partners_table_filter").hidden=true
-    var table = $('#partners_table').DataTable();
+        //the datatable automatically generate a filter button, we do not need it ( as we have search bar for each column)
+        document.getElementById("partners_table_writer_filter").hidden=true
+        var partners_table_writer = $(partners_table_writer).DataTable();
 
-    // when we select a search item, the following element must take place
-    $('.fname2').on( 'keyup', function () {
-        var column_nb=this.getAttribute("column")
-        if (['3','4','6'].includes(column_nb)) {searched_value=`searched_value:${this.value}`} else {searched_value=this.value}
-        table
-            .columns( column_nb )
-            .search( searched_value  )
-            .draw();
-        } 
-    );
+        // when we select a search item, the following element must take place
+        $('.fname1').on( 'keyup', function () {
+            var column_nb=this.getAttribute("column")
+            if (['3','4','6'].includes(column_nb)) {searched_value=`searched_value:${this.value}`} else {searched_value=this.value}
+            partners_table_writer   
+                .columns( column_nb )
+                .search( searched_value  )
+                .draw();
+            } 
+        );
+    }
+    //--------------------Initialization of Datatable validated partners---------------------
+    partners_table_validated=document.getElementById("partners_table_validated")
+    if (partners_table_validated!=null){
+        //the datatable is imported, and ordered
+        $(partners_table_validated).DataTable({
+            "aaSorting": [[ 0, "desc" ]],
+            columnDefs: [{ orderable: false, targets: [0,1,2,3,4,5,6,7] }],
+            })
+
+
+        //the datatable automatically generate a filter button, we do not need it ( as we have search bar for each column)
+        document.getElementById("partners_table_validated_filter").hidden=true
+        var partners_table_validated = $(partners_table_validated).DataTable();
+
+        // when we select a search item, the following element must take place
+        $('.fname2').on( 'keyup', function () {
+            var column_nb=this.getAttribute("column")
+            searched_value=this.value
+            partners_table_validated
+                .columns( column_nb )
+                .search( searched_value  )
+                .draw();
+            } 
+        );
+    }
+    //--------------------Initialization of Datatable  partners to validate---------------------
+    partners_table_to_validate=document.getElementById("partners_table_to_validate")
+    if (partners_table_to_validate!=null){
+        //the datatable is imported, and ordered
+        $(partners_table_to_validate).DataTable({
+            "aaSorting": [[ 0, "desc" ]],
+            columnDefs: [{ orderable: false, targets: [0,1,2,3,4,5,6,7] }],
+            })
+        //the datatable automatically generate a filter button, we do not need it ( as we have search bar for each column)
+        document.getElementById("partners_table_to_validate_filter").hidden=true
+        var partners_table_to_validate = $(partners_table_to_validate).DataTable();
+
+        // when we select a search item, the following element must take place
+        $('.fname3').on( 'keyup', function () {
+            var column_nb=this.getAttribute("column")
+            searched_value=this.value
+            partners_table_to_validate
+                .columns( column_nb )
+                .search( searched_value  )
+                .draw();
+            } 
+        );
+    }
+
     //----------------------------------------------------------------------   
   
     // event to be taken when an object in the table is modified:
@@ -81,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         //once the modification has been done in the DOM ( here above) we also must do the modif in the Datatable ( so that we can apply filter and other JQuery)   
         modification_=element.parentElement.innerHTML//
-        var t = $('#partners_table').DataTable() 
+        var t = $('#partners_table_writer').DataTable() 
         t.cell(element.parentElement).data(modification_).draw(false)
 
     })
@@ -103,6 +155,7 @@ function delete_row(partner_id) {
         .then(result => {
             if (!!result.error) {
                 alert(result.error);
+                spinner_off()
                 cancel_row_partner(partner_id)
                 
                 return;
@@ -115,7 +168,7 @@ function delete_row(partner_id) {
                     unhide_column()
                     restate_color_button(partner_id,"DELETE")
                     //get the row
-                        var t = $('#partners_table').DataTable()
+                        var t = $('#partners_table_writer').DataTable()
                         var row_to_modify=document.getElementById(`partner_${partner_id}`) 
                         td_list=row_to_modify.querySelectorAll('td')
                     //change the dom
@@ -171,8 +224,9 @@ function delete_row(partner_id) {
 }               
 
 function cancel_row_partner(partner_id){
-    spinner=document.getElementById("spinner_top")
-    spinner.style.display="block"
+    //spinner=document.getElementById("spinner_top")
+    //spinner.style.display="block"
+    spinner_on()
     //Everytime the user decide to cancel a modification, we must go thought a 3 steps approache
     //firts, we must get the original info from the database, through a fetch, Second, we modify the DOM, Thirds we load it in the Database
     fetch(`/cancel_row_partner/${partner_id}`)
@@ -235,7 +289,7 @@ function cancel_row_partner(partner_id){
 
         //------------------------------------------------------------------------
         //Third, save the modification in the datatable
-            var t = $('#partners_table').DataTable()
+            var t = $('#partners_table_writer').DataTable()
             var row_to_modify=document.getElementById(`partner_${partner_id}`)
             td_list=row_to_modify.querySelectorAll("td")
             var td_list_html=[
@@ -253,14 +307,16 @@ function cancel_row_partner(partner_id){
         //------------------------------------------------------------------------
 
 
-        hide_column() 
-        spinner.style.display="none"  
+        hide_column()
+        spinner_off() 
+        //spinner.style.display="none"  
     }); 
 }
 
 function change_row(partner_id){
-    spinner=document.getElementById("spinner_top")
-    spinner.style.display="block"
+    spinner_on()
+    //spinner=document.getElementById("spinner_top")
+    //spinner.style.display="block"
     unhide_column()
     partner_m3_code = document.getElementById(`m3_code_${partner_id}`).value,
     partner_name = document.getElementById(`name_${partner_id}`).value,
@@ -275,9 +331,10 @@ function change_row(partner_id){
     unhide_column()    
     restate_color_button(partner_id,"CHANGE") 
 
+
     //first, we change the DOM, and remove the select and so on
         //get the row
-            var t = $('#partners_table').DataTable()
+            var t = $('#partners_table_writer').DataTable()
             var row_to_modify=document.getElementById(`partner_${partner_id}`) 
             td_list=row_to_modify.querySelectorAll('td')
         //change the dom
@@ -340,15 +397,20 @@ function change_row(partner_id){
       }).then(response => response.json())
         .then(result => {
             if (!!result.error) {
+                spinner_off()
                 alert(result.error);
-                spinner.style.display="none" ;
+                //spinner.style.display="none" ;
                 return}
             tr_newlycreated=document.getElementById(`partner_${partner_id}`)
             color_tr_newlycreated=tr_newlycreated.style.backgroundColor
             tr_newlycreated.style.backgroundColor="#b3e3be"
             message_save.hidden=false
-            spinner.style.display="none" 
-            setTimeout(function() { message_save.hidden=true;tr_newlycreated.style.backgroundColor=color_tr_newlycreated }, 1000) // we show a text explaining that thje load has been done
+            //spinner.style.display="none" 
+            
+            setTimeout(function() { 
+                message_save.hidden=true;
+                tr_newlycreated.style.backgroundColor=color_tr_newlycreated;
+                spinner_off() }, 1000) // we show a text explaining that thje load has been done
 
 
             hide_column()
@@ -444,7 +506,7 @@ function add_new_record(){
                     // we prepare the select option for ico_3rd
                         if (ico_3rd=="ICO"){ico_select='selected="selected"'; third_select=""}else{ico_select="";third_select='selected="selected"'}
                     //creaation of the element in each cell- which will be lowded in the datatable
-                    var t = $('#partners_table').DataTable().row.add( [
+                    var t = $('#partners_table_writer').DataTable().row.add( [
                         // for each tr in the td ( eight elements in total, seperated by a ","), we insert the HTML elements
                         //tr 0  ID
                         `<span class="fname" partner_id=${partner_id} id="id_${partner_id}" >${partner_id}</span>`,
@@ -486,8 +548,8 @@ function add_new_record(){
                     // the last tr, which corresponds to the buttons, must have a class attribute called "button_td"- this is used as a reference for the CSS
  
                         //we clear the search items
-                             $('#partners_table').DataTable().search("").columns().search('').draw()
-                            table=document.getElementById("partners_table")
+                             $('#partners_table_writer').DataTable().search("").columns().search('').draw()
+                            table=document.getElementById("partners_table_writer")
                             search_row=table.children[0].children[0]
                             search_input=search_row.querySelectorAll("input")
                             for (s in search_input){search_input[s].value=""}
@@ -505,7 +567,7 @@ function add_new_record(){
                             tr_newlycreated.style.backgroundColor=color_tr_newlycreated 
                             }, 1000) // we show a text explaining that thje load has been done
                         hide_column()
-                        document.getElementById("form_new").reset() // once the form is submitted , we reset the form
+                        document.getElementById("form_new_partner").reset() // once the form is submitted , we reset the form
                 }) 
             }
 
@@ -524,14 +586,15 @@ function is_in_tbody(event){
 }
 
 function column_sel(){
-    column_selection=document.getElementById("column_selection")
+    column_selection=document.getElementById("column_selection_writter")
     if (column_selection.style.display == "none"){
         column_selection.style.display="block"}
         else{column_selection.style.display="none"}
 }
 
-function column_visibility(elm,column_nb){
-    var table = $('#partners_table').DataTable();
+function column_visibility(elm,column_nb,table_name){
+
+    var table = $(`#${table_name}`).DataTable();
     if (elm.checked){
         table.column( column_nb ).visible( true );
     }else{
@@ -541,13 +604,13 @@ function column_visibility(elm,column_nb){
 }
 
 function unhide_column(){
-    var table = $('#partners_table').DataTable();
+    var table = $('#partners_table_writer').DataTable();
     table.columns().visible( true );
 }
 
 function hide_column(){
-    column_selection=document.getElementById("column_selection")
-    var table = $('#partners_table').DataTable();
+    column_selection=document.getElementById("column_selection_writter")
+    var table = $('#partners_table_writer').DataTable();
     uncheck_list=column_selection.querySelectorAll('input[type="checkbox"]:not(:checked)')
     for (c = 0; c < uncheck_list.length; c++){
         column_nb=uncheck_list[c].value
@@ -558,7 +621,7 @@ function hide_column(){
 //Approve/Reject from VALIDATOR:
 
 function approve(partner_id,status){
-    var t = $('#partners_table').DataTable()
+    var t = $('#partners_table_writer').DataTable()
     var tr_to_delete=document.getElementById(`partner_${partner_id}`) 
 
     if ( status=="DELETE"){
@@ -594,7 +657,7 @@ function approve(partner_id,status){
 }
 
 function reject(partner_id,status){
-    var t = $('#partners_table').DataTable()
+    var t = $('#partners_table_writer').DataTable()
     var tr_to_delete=document.getElementById(`partner_${partner_id}`) 
     if ( status=="NEW"){
         fetch(`/delete_partner/${partner_id}`, {

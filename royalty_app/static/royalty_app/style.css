@@ -72,6 +72,7 @@
 	overflow-y: auto;
 }
 
+
 .comboTreeDropDownContainer ul{
 	padding: 0px;
 	margin: 0;
@@ -127,12 +128,12 @@ span.comboTreeItemTitle{
 
 .comboTreeInputBox {
     width:100%;
-
+    cursor: pointer; 
 }
 
 
 .multiplesFilter{
-	
+	width: 100%;
 	padding: 5px;
 	box-sizing: border-box;
 	border-top: none;
@@ -155,7 +156,7 @@ span.comboTreeItemTitle{
 
 @media (min-width: 0px){
     .main_authentificated {
-        padding-left: 60px!important;
+        padding-left: 50px!important;
     }
     #displayed_item_name_user{
         display: None;
@@ -164,7 +165,7 @@ span.comboTreeItemTitle{
         display: None;
         }   
     .sidebar{
-        width: 50px;
+        width: 55px;
         display: block!important;
     }
     .item_name{
@@ -191,7 +192,7 @@ span.comboTreeItemTitle{
 
 @media (min-width: 992px){
     .main_authentificated {
-        padding-left: 155px!important;
+        padding-left: 150px!important;
     }
     .sidebar{
         width: 150px;
@@ -202,7 +203,7 @@ span.comboTreeItemTitle{
 }
 @media (min-width: 1200px){
     .main_authentificated {
-        padding-left: 190px!important;
+        padding-left: 180px!important;
 
     }
     .sidebar{
@@ -218,10 +219,106 @@ span.comboTreeItemTitle{
     color:red;
     border-right: solid 2px red;
 }
+
 .nav-item:hover span{
-    color:red;
-    
+    color:red; 
 }
+
+.horizontal-bar-contract{
+    display: flex ; 
+    background-color: rgb(255, 247, 247);  
+    border-bottom: solid 1px rgb(248, 198, 198);
+    padding:0px 20px
+}
+.graph_input{
+    display: flex ;  
+    padding:10px 20px
+}
+.graph_input_pink{
+    display: flex ; 
+    background-color: rgb(255, 247, 247);  
+    border-bottom: solid 1px rgb(248, 198, 198);
+    padding:10px 20px;
+}
+
+
+.icon, .contract_icon{
+    cursor: pointer;
+    padding:10px 10px;
+    width:95px;
+    border-bottom:2px transparent solid
+}
+
+.icon .icon-circle,.contract_icon  .icon-circle{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid black;
+    text-align: center;
+    color:back;
+    margin: auto;
+}
+
+.icon:hover,.contract_icon:hover {
+ 
+    border-bottom: solid 2px red;
+    color:red; 
+    font-weight:bold;
+}
+.icon:hover .icon-circle,.contract_icon:hover .icon-circle  {
+    background-color:white ;
+    border: 2px solid red ;
+    color:red; 
+
+}
+.icon:hover div span,.contract_icon:hover div span{
+    color:red; 
+     
+}
+
+.chevron{
+    display:grid;
+    grid-template-columns: 20px auto;
+}
+.chevron span{
+    cursor: pointer;
+}
+.sub_chevron{
+    display:grid;
+    grid-template-columns: 20px auto;
+}
+.sub_chevron span{
+    cursor: pointer;
+}
+.top_row{
+
+    width:100%;
+    background-color: rgb(255, 247, 247); 
+    text-align: center; 
+    border-bottom: solid 1px rgb(248, 198, 198);
+    padding:2px
+}
+.top_chevron_row{
+    padding:0px 20px 5px 20px;
+    background-color: rgb(248, 248, 248);
+    transition: background-color 1s ease; 
+}
+
+.top_chevron_bar{
+
+    display:grid;
+    grid-template-columns: 20px auto 150px;
+    height: 31px;
+}
+
+.top_chevron {
+    height: 0px;
+    position:relative;
+    top:10px;
+    right:13px
+}
+
+
 #user_menu:hover{
     background-color:white;
     
@@ -249,10 +346,14 @@ span.comboTreeItemTitle{
     padding:0 32px;
     transition: 400ms;
     box-shadow:0 -2px 16px black;
-    z-index: 200; 
+    z-index: 1000; 
 }
 .cookie-container.active{
     bottom:0;
+}
+.chevron_unhide, .chevron_hide {
+    width:20px;
+    cursor: pointer;
 }
 .cookie-btn{
     background:red;
@@ -287,7 +388,7 @@ span.comboTreeItemTitle{
     font-size:20px
 }
 
-#logon_frame_l1{
+.logon_frame_l1{
     margin-top:0px;
     background-color: white;
     margin:auto;
@@ -295,33 +396,86 @@ span.comboTreeItemTitle{
     border: 1px solid rgb(187, 187, 187);
     box-shadow:0 -2px 16px black;
 }
-#logon_red-band{
+.logon_red-band{
     height: 7px;
     background-color: red;
     border-bottom: 1px solid rgb(187, 187, 187)
 }
-#logon_grey-band{
+.logon_grey-band{
     margin-top:3px;
     height: 7px;
     background-color: rgb(219, 218, 218)
 }
-#logon_top-message{
+.logon_top-message{
     margin-left:30px;
     font-size:15px;
     color:rgb(88, 88, 88)
 }
-#logon_frame_l2{
+.logon_frame_l2{
     margin: 3px 3px 20px 3px;
     border-top:2px solid rgb(187, 187, 187);
     border-bottom:2px solid rgb(187, 187, 187)
 }
-#logon_frame_l3{
+.logon_frame_l3{
     margin:20px auto 20px auto; 
     max-width: 600px;
 }
-#logon_frame_l4{
+.logon_frame_l4{
     border:1px solid rgb(187, 187, 187);
     padding:0px 10px 0px 10px;
     margin:30px 0px 30px 0px;
     background-color:rgb(246, 246, 246)
 }
+.form_dashboard{
+    min-width:500px;
+    display: grid;
+    width: 100%;
+    margin:10px;
+    padding:0px
+  }
+.form_dashboard_fixed tr{
+    line-height: 27px
+}
+.form_dashboard_content{
+    width: 100%; 
+    margin-left:9px;
+    padding-left:1px
+}
+.form_dashboard_content_writer{
+    width: 100%; 
+    margin-left:5px;
+    padding-left:3px
+}
+.form_dashboard_content_writer_droppdown{
+    width: 100%; 
+    margin-left:5px;
+    padding:2px 0px;
+}
+
+#partners_table_wrapper{
+ margin-bottom: 50px;  /* we need thise margin so that the "Change" button function*/
+}
+
+.action_button{
+    display: none;
+    border-radius: 0.35rem;
+    overflow: hidden; 
+    margin-top:5px;
+    right:0px; 
+    min-width: 220px;
+    padding:5px
+}
+
+#time_out_warning{
+    background-color: white;
+    display: None;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 400px;
+    height: 200px;
+    margin: auto;
+    z-index: 10001;
+   }

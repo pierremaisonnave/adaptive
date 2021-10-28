@@ -24,18 +24,18 @@
 
           <td>
             <!--contract-type-->
-            <div style="width: 100%; margin-left:5px;">
+            <div style="width: 100%; margin-left:5px;" class="comboTreeWrapper">
               {% if type_list %}
                 <div  class="comboTreeInputWrapper" dd_id="type_new">
                   <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Type" readonly dd_id="type_new" id="displayed_item_name_type_new" >
-                  <input type="text"   hidden id="hidden_item_code_type_new">
+                  <input type="text"    class="comboTreeHiddenBox" hidden id="hidden_item_code_type_new">
                 </div>
                 <div  class="comboTreeDropDownContainer" id="dropdown_type_new" style="display: none;">
-                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="type_new" >
+                  <input  type="text" class="multiplesFilter" style="width:100%" placeholder="Type to filter" dd_id="type_new" style="width: 100%;">
                     <ul  >
                       {% for type in type_list %}
-                        <li style="display: block;" class="item_single_select" dd_id="type_new">
-                          <span hidden>{{ type.id }}</span><span hidden> : </span><span>{{ type.name }}</span>
+                        <li style="display: block;" class="item_single_select" dd_id="type_new" item_code="{{ type.id }}" item_display="{{ type.name }}">
+                          <span >{{ type.name }}</span>
                         </li>
                       {% endfor %}
                     </ul>
@@ -53,18 +53,18 @@
 
           <td>
             <!--Gald Div list-->
-            <div style="width: 100%; margin-left:5px;">
+            <div style="width: 100%; margin-left:5px;"class="comboTreeWrapper">
               {% if division_list %}
                 <div  class="comboTreeInputWrapper" dd_id="division_new">
                   <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Division" readonly dd_id="division_new" id="displayed_item_name_division_new" >
-                  <input type="text"   hidden id="hidden_item_code_division_new">
+                  <input type="text"    class="comboTreeHiddenBox" hidden id="hidden_item_code_division_new">
                 </div>
                 <div  class="comboTreeDropDownContainer" id="dropdown_division_new" style="display: none;">
-                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="division_new" >
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="division_new" style="width: 100%;">
                     <ul  >
                       {% for division in division_list %}
-                        <li style="display: block;" class="item_single_select" dd_id="division_new">
-                          <span >{{ division.division_id }}</span><span > : </span><span>{{ division.division_name }}</span>
+                        <li style="display: block;" class="item_single_select" dd_id="division_new" item_code="{{ division.division_id }}" item_display="{{ division.division_name }}">
+                          <span >{{ division.division_id }}:{{ division.division_name }}</span>
                         </li>
                       {% endfor %}
                     </ul>
@@ -78,7 +78,7 @@
           </td>
           <td style="display: None;"> 
             <!-- Div via-->
-            <div style="width: 100%; margin-left:5px; ">
+            <div style="width: 100%; margin-left:5px; "class="comboTreeWrapper">
               {% if division_list %}
                 <div  class="comboTreeInputWrapper" dd_id="division_via_new">
                   <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="pass-through division" readonly dd_id="division_via_new" id="displayed_item_name_division_via_new" >
@@ -87,7 +87,7 @@
                 <div  class="comboTreeDropDownContainer" id="dropdown_division_via_new" style="display: none;">
                   <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="division_via_new" >
                     <ul  >
-                      <li style="display: block;" class="item_single_select" dd_id="division_via_new">
+                      <li style="display: block;" class="item_single_select" dd_id="division_via_new" >
                         <span></span><span style="color:white"> : </span><span></span>
                       </li>
                       {% for division in division_list %}
@@ -116,18 +116,18 @@
         <tr>
           <td>
             <!--Currency-->
-            <div style="width: 100%; margin-left:5px;">
+            <div style="width: 100%; margin-left:5px;"class="comboTreeWrapper">
               {% if currency_list %}
                 <div  class="comboTreeInputWrapper" dd_id="contract_currency_new">
                   <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Currency" readonly dd_id="contract_currency_new" id="displayed_item_name_contract_currency_new" >
-                  <input type="text"   hidden id="hidden_item_code_contract_currency_new">
+                  <input type="text"    class="comboTreeHiddenBox" hidden id="hidden_item_code_contract_currency_new">
                 </div>
                 <div  class="comboTreeDropDownContainer" id="dropdown_contract_currency_new" style="display: none;">
-                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="contract_currency_new" >
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="contract_currency_new" style="width: 100%;">
                     <ul  >
                       {% for currency in currency_list %}
-                        <li style="display: block;" class="item_single_select" dd_id="contract_currency_new">
-                          <span hidden>{{ currency.currency }}</span><span hidden> : </span><span>{{ currency.currency }}</span>
+                        <li style="display: block;" class="item_single_select" dd_id="contract_currency_new" item_code="{{ currency.currency }}" item_display="{{ currency.currency }}">
+                          <span >{{ currency.currency }}</span>
                         </li>
                       {% endfor %}
                     </ul>
@@ -142,18 +142,18 @@
           
           <td>
             <!--periodicity-->
-            <div style="width: 100%; margin-left:5px;">
+            <div style="width: 100%; margin-left:5px;"class="comboTreeWrapper">
               {% if periodicity_list %}
                 <div  class="comboTreeInputWrapper" dd_id="periodicity_new">
                   <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Periodicity" readonly dd_id="periodicity_new" id="displayed_item_name_periodicity_new" >
-                  <input type="text"   hidden id="hidden_item_code_periodicity_new">
+                  <input type="text"   class="comboTreeHiddenBox" hidden id="hidden_item_code_periodicity_new">
                 </div>
                 <div  class="comboTreeDropDownContainer" id="dropdown_periodicity_new" style="display: none;">
-                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="periodicity_new" >
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="periodicity_new" style="width: 100%;" >
                     <ul  >
                       {% for periodicity in periodicity_list %}
-                        <li style="display: block;" class="item_single_select" dd_id="periodicity_new">
-                          <span hidden>{{ periodicity.id }}</span><span hidden> : </span><span>{{ periodicity.periodicity }}</span>
+                        <li style="display: block;" class="item_single_select" dd_id="periodicity_new" item_code="{{ periodicity.id }}" item_display="{{ periodicity.periodicity }}">
+                          <span >{{ periodicity.periodicity }}</span>
                         </li>
                       {% endfor %}
                     </ul>
@@ -170,18 +170,18 @@
           </td>
           <td>
             <!--M3 Brand list-->
-            <div style="width: 100%; margin-left:5px;">
+            <div style="width: 100%; margin-left:5px;"class="comboTreeWrapper">
               {% if m3_brand_list %}
                 <div  class="comboTreeInputWrapper" dd_id="m3_brand_new">
                   <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Brand Code" readonly dd_id="m3_brand_new" id="displayed_item_name_m3_brand_new" >
-                  <input type="text"   hidden id="hidden_item_code_m3_brand_new">
+                  <input type="text"   class="comboTreeHiddenBox" hidden id="hidden_item_code_m3_brand_new">
                 </div>
                 <div  class="comboTreeDropDownContainer" id="dropdown_m3_brand_new" style="display: none;">
-                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="m3_brand_new" >
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="m3_brand_new" style="width: 100%;">
                     <ul  >
                       {% for brand in m3_brand_list %}
-                        <li style="display: block;" class="item_single_select" dd_id="m3_brand_new">
-                          <span hidden>{{ brand.id }}</span><span hidden> : </span><span>{{ brand.brand_name }}</span>
+                        <li style="display: block;" class="item_single_select" dd_id="m3_brand_new" item_code="{{ brand.id }}" item_display="{{ brand.brand_name }}">
+                          <span>{{ brand.brand_name }}</span>
                         </li>
                       {% endfor %}
                     </ul>
@@ -207,27 +207,27 @@
           </td>
           <!--Country List-->
           <td  class="comboTreeWrapper mini_gar_option" hidden>
-            <div style="width: 100%; margin-left:5px;" >
+            <div style="width: 100%; margin-left:5px;" class="comboTreeWrapper">
               {% if country_list %}
                 <div  class="comboTreeInputWrapper" dd_id="country_new">
                   <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Country" readonly dd_id="country_new" id="displayed_item_name_country_new" >
-                  <input type="text"   hidden id="hidden_item_code_country_new">
+                  <input type="text"   class="comboTreeHiddenBox" hidden id="hidden_item_code_country_new">
                 </div>
                 <div  class="comboTreeDropDownContainer" id="dropdown_country_new" style="display: none;">
-                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="country_new" >
+                  <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="country_new" style="width: 100%;" >
                     <ul  >
-                      <li style="display: block;" class="item_single_select" dd_id="country_new">
+                      <li style="display: block;" class="item_single_select" dd_id="country_new" >
                         <span></span><span style="color:white"> : </span><span></span>
                       </li> 
                     {% for region in region_list %} 
                       <li  >
-                        <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="country_new" region_id={{region.id}} ></span>
-                        <span class="region" dd_id="country_new">{{region.region}}</span>
+                        <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="country_new" group_id={{region.id}} ></span>
+                        <span  dd_id="country_new">{{region.region}}</span>
                         <ul style="display: block;" id="country_new_{{region.id}}">
                           {% for country in country_list %}
                             {% if region == country.country_region%}
-                              <li style="display: block;" class="item_single_select" dd_id="country_new">
-                                <span>{{ country.country_id }}</span><span> : </span><span>{{ country.country }}</span>
+                              <li style="display: block;" class="item_single_select" dd_id="country_new" item_code="{{ country.country_id }}" item_display="{{ country.country }}">
+                                <span>{{ country.country_id }} : {{ country.country }}</span>
                               </li>
                               {% endif %}
                           {% endfor %}
@@ -397,7 +397,7 @@
         {% for contract in contract_list %}
           <tr>
             <td><!--ID-->
-              <a href="{% url 'rules_writer' contract_id=contract.id %}"  onclick="spinner()"><span class="fname" contract_id={{contract.id}} id="id_{{contract.id}}" >{{contract.id}}</span></a>
+              <a href="{% url 'rules' contract_id=contract.id %}"  onclick="spinner()"><span class="fname" contract_id={{contract.id}} id="id_{{contract.id}}" >{{contract.id}}</span></a>
             </td>
             <td><!--Type-->
               <span >{{contract.contract_type}}</span>
@@ -463,7 +463,6 @@
 {% load static %}
   
     <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
-    <script src="{% static 'royalty_app/dropdown_single.js'%}"></script>
     <script src="{% static 'royalty_app/contracts/contract.js'%}"></script>
     <script src="{% static 'royalty_app/easy-number-separator.js'%}"></script>
 

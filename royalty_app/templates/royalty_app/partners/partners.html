@@ -1,0 +1,559 @@
+{% extends "royalty_app/layout.html" %}
+{% block content %}
+
+
+
+  <div class="top_row" >Partners</div> 
+  <div class="horizontal-bar-contract">
+    <div class="icon icon_all" onclick="change_tab('all')">
+      <div  class="icon-circle" style="background-Color : red; color:red;border:solid 2px red">
+        <span  class="bi bi-eye-fill "  style="font-size:30px; color:white"></span>  
+      </div>
+      <div style="text-align: center;">All</div>
+    </div>
+    {% if user.role == "WRITER"%}
+      <div class="icon icon_writer" onclick="change_tab('writer')">
+        <div  class="icon-circle">
+          <span  class="bi bi-pencil"  style="font-size:30px"></span>  
+        </div>
+        <div style="text-align: center;">Writer</div>
+        <div style="position:relative; bottom:65px;left:58px;line-height:0">{{ partner_list_writer|length }}</div>
+      </div>
+    {% endif%}
+    {% if user.role == "VALIDATOR"%}
+      <div class="icon icon_to_validate" onclick="change_tab('to_validate')">
+        <div  class="icon-circle">
+          <span  class="bi bi-person-check-fill"  style="font-size:30px"></span>  
+        </div>
+        <div style="text-align: center;">To validate</div>
+        <div style="position:relative; bottom:65px;left:58px;line-height:0">{{ partner_list_to_validate|length }}</div>
+      </div>
+    {% endif%}
+    
+    <div class="icon icon_validated" onclick="change_tab('validated')">
+      <div  class="icon-circle">
+        <span  class="bi bi-check"  style="font-size:30px"></span>  
+      </div>
+      <div style="text-align: center;">Validated</div>
+      <div style="position:relative; bottom:65px;left:58px;line-height:0">{{ partner_list_validated|length }}</div>
+    </div>
+
+  </div>
+    <!------------------------------------------------------------------------------------->   
+    <!---------------------------writter Partners Table------------------------------------>
+    <!-------------------------------------------------------------------------------------> 
+      {% if user.role == "WRITER"%}
+        <!----hide/unhide partner table----->
+          <div style="margin-left: 10px;" class="chevron" >
+            <span  style="display: none;" class="bi bi-chevron-right" id="unhide_writer" onclick='unhide_table("writer")'></span>
+            <span  class="bi bi-chevron-down" id="hide_writer" onclick='hide_table("writer")'></span>
+            <h5>Writer view</h5>
+          </div>
+        <!----content partner table----->  
+          <div id="writer" class="content writer"  >
+            <!----Form for new partners----->
+              <form  hidden id="form_new_partner" class="graph_input_pink" > 
+                <table style="width:1000px">
+                  <tbody  >
+                    <tr><!--Row 2-->
+                      <!--M3 Code-->
+                        <td style="width:150px"> <b>Partner Code:</b></td>
+                        <td style="width: 200x;">
+                          <input type="text" id="partner_m3_code_new" placeholder="Partner Code" name="partner_m3_code" maxlength="50" style="width: 100%">
+                        </td>
+                      <!--Name-->
+                        <td style="width:150px"> <b style=" margin-left:10px">Partner Name:</b></td>
+                        <td> 
+                          <input type="text" id="name_new" name="partner_name" placeholder="Partner Name" maxlength="100" style="width: 100%" >
+                        </td>
+                    </tr>
+                    <tr > <!--Row 3-->
+                      <!--Country List-->
+                        <td style="width:150px"> <b >Country:</b></td>
+                        <td  class="comboTreeWrapper"> 
+                          <div style="width: 100%" class="comboTreeWrapper">
+                            {% if country_list %}
+                              <div  class="comboTreeInputWrapper" dd_id="new_country">
+                                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="Country" readonly dd_id="new_country" id="displayed_item_name_new_country" >
+                                <input type="text"   class="comboTreeHiddenBox" hidden id="hidden_item_code_new_country" >
+                              </div>
+                              <div  class="comboTreeDropDownContainer" id="dropdown_new_country" style="display: none;">
+                                <input  type="text" class="multiplesFilter" placeholder="Type to filter" dd_id="new_country" style="width:100%" >
+                                  <ul  >
+                                  {% for region in region_list %}  
+                                    <li  >
+                                      <span class="bi-arrow-down-circle comboTreeParentPlus" dd_id="new_country" group_id={{region.id}} ></span>
+                                      <span  dd_id="new_country">{{region.region}}</span>
+                                      <ul style="display: block;" id="new_country_{{region.id}}">
+                                          {% for country in country_list %}
+                                            {% if region == country.country_region%}
+                                            <li style="display: block;" class="item_single_select" dd_id="new_country" item_code="{{ country.country_id }}" item_display="{{ country.country }}">
+                                              <span >{{ country.country_id }} : {{ country.country }}</span>
+                                            </li>
+                                            {% endif %}
+                                          {% endfor %}
+                                      </ul>
+                                    </li>
+                                  {% endfor %}
+                                    
+                                  </ul>
+                              </div>
+                            {% else %}
+                              <input type="text" readonly placeholder="Countries: Empty"  style="width:100%" title="please insert Countries in static data tab" id="displayed_item_name_new_country">
+                              <input type="text"   hidden id="hidden_item_code_new_country">
+                              {% endif %}
+                          </div>
+                        </td>
+                      <!--Bank-->
+                        <td style="width:150px"> <b style=" margin-left:10px">Bank account:</b></td>
+                        <td>
+                          <input type="text"  id="bank_new" name="partner_bank_account" placeholder="bank account here" maxlength="100"style="width: 100%; ">
+                        </td>
+                    </tr>
+                    <tr > <!--Row 4-->
+                      <!--ico_3rd-->
+                        <td style="width:150px"> <b>Ico or third party:</b></td>
+                        <td>
+                          <select style="width: 100%;; padding:1px" id="new_ico_3rd">
+                            <option value="3rd">3rd</option>
+                            <option value="ICO">ICO</option>
+                          </select>
+                        </td>
+                      <!--payment list-->
+                        <td style="width:150px"> <b style=" margin-left:10px">Payment type:</b></td>
+                        <td>
+                          <div style="width: 100%" class="comboTreeWrapper">
+                            {% if payment_type_list %}
+                              <div  class="comboTreeInputWrapper" dd_id="new_payment">
+                                <input type="text"   class="justAnInputBox comboTreeInputBox" placeholder="payment type" readonly dd_id="new_payment" id="displayed_item_name_new_payment" >
+                                <input type="text"   hidden id="hidden_item_code_new_payment" class="comboTreeHiddenBox">
+                              </div>
+                              <div  class="comboTreeDropDownContainer" id="dropdown_new_payment" style="display: none;">
+                                  <ul  >
+                                    {% for payment_type in payment_type_list %}
+                                      <li style="display: block;" class="item_single_select" dd_id="new_payment" item_code="{{ payment_type.id  }}" item_display="{{ payment_type }}">
+                                        <span>{{ payment_type.id }} : {{ payment_type }}</span>
+                                      </li>
+                                    {% endfor %}
+                                  </ul>
+                              </div>
+                            {% else %}
+                              <input type="text"   hidden id="hidden_item_code_new_payment">
+                              <input type="text" readonly placeholder="payment type: Empty"  style="width:100%" title="please insert payment_type in static data tab" id="displayed_item_name_new_payment" >
+                            {% endif %}
+                          </div>
+                        </td>
+                      
+
+                    </tr >
+
+                    <tr > <!--Row 5-->
+                      <td colspan="3"><!--message-->
+                        <div style="width: 100%; ">
+                          <div id="message_save" style="color: green" hidden > Item saved</div>
+                          <div id="message_error" style="color: red;" hidden > error: some fields are missing</div>
+                      </div>
+                      </td>
+                      <td style=" padding-top:10px; float: right;display:flex">
+                        <div style="margin-right: 3px">
+                          <button class="btn btn-sm btn-outline-success" type="button" onclick="add_new_record()" title="save" id="saved_button" style="display: Block;">Add</button>
+                          <div style="text-align: end; color:green ;display: None;    position: relative; right: 10px ;top:5px" id="saved_message" >Saved</div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-warning"   type="reset" title="cancel"> Cancel</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table> 
+              </form>
+            <!----setting to unhide/hide column--->  
+              <div class="sub_chevron" style="margin: 10px 15px;display: flex;">
+                <span  class="bi bi-chevron-right" id="unhide_column_selection_writter" onclick="unhide_table('column_selection_writter')" title="column selection" >hide/unhide column</span> 
+                <span style="display: none;" class="bi bi-chevron-down" id="hide_column_selection_writter" onclick="hide_table('column_selection_writter')" title="column selection" >hide/unhide column</span> 
+              </div>
+
+              <div id="column_selection_writter" style=" margin-left: 15px;display:none" >
+                <table class="table table-striped table-sm" id="beneficiary_table" >
+                  <tbody>
+                    <tr >
+                      <td ><input type="checkbox" checked value=1 onclick="column_visibility(this,1,'partners_table_writer')"></td>
+                      <td >Partner Code</td>
+                      <td ><input type="checkbox" checked value=2 onclick="column_visibility(this,2,'partners_table_writer')"></td>
+                      <td >Name</td>
+                      <td ><input type="checkbox" checked value=3 onclick="column_visibility(this,3,'partners_table_writer')"></td>
+                      <td >ICO-3rd</td>
+                    </tr >
+                    <tr >
+                      <td ><input type="checkbox" checked value=4 onclick="column_visibility(this,4,'partners_table_writer')"></td>
+                      <td >Country</td>
+                      <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5,'partners_table_writer')"></td>
+                      <td >Bank account</td>
+                      <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6,'partners_table_writer')"></td>
+                      <td >Payment type</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div> 
+            <!----datatable--->  
+              <div class="table-responsive" style="margin-right:15px;padding-left:15px">
+                <table class="table table-striped table-sm " id="partners_table_writer" style="width: 100%;">
+                  <thead>
+                    <tr class="search_box_class">
+                      <th style="padding-left:8px"><input  id="column0_search"  class="fname1" placeholder="..." column=0> </th>
+                      <th style="padding-left:8px"><input  id="column1_search"  class="fname1" placeholder="..." column=1> </th>
+                      <th style="padding-left:8px"><input  id="column2_search"  class="fname1" placeholder="..." column=2>  </th>
+                      <th style="padding-left:8px"><input  id="column3_search"  class="fname1" placeholder="..." column=3> </th>
+                      <th style="padding-left:8px"><input  id="column4_search"  class="fname1" placeholder="..." column=4> </th>
+                      <th style="padding-left:8px"><input  id="column5_search"  class="fname1" placeholder="..." column=5> </th>
+                      <th style="padding-left:8px"><input  id="column6_search"  class="fname1" placeholder="..." column=6> </th>
+                      <th style="padding-left:8px"><input  id="column7_search"  class="fname1" placeholder="..." column=7> </th>
+                    </tr>
+                    <tr style="height:65px">
+                      <th id="partner_id" style="padding-left: 8px; width:20px">ID  </th>
+                      <th id="partner_M3" style="padding-left: 8px;max-width:90px">Partner Code</th>
+                      <th id="partner_name" style="padding-left: 8px;">Name</th>
+                      <th id="partner_name" style="padding-left: 8px;">Ico-3rd</th>
+                      <th id="partner_country" style="padding-left: 8px;">Country</th>
+                      <th style="padding-left: 8px;">Bank account</th>
+                      <th style="padding-left: 8px;">Payment type</th>
+                      <th ></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody_partner">
+                    {% for partner in partner_list_writer %}
+                      <tr id="partner_{{partner.id}}" partner_id={{partner.id}}> 
+                        <td><!--ID-->
+                          <span class="fname" partner_id={{partner.id}} id="id_{{partner.id}}" >{{partner.id}}</span>
+                        </td>
+                        <td><!--M3 Code-->
+                          <span hidden=true id="span_m3_code_{{partner.id}}">{{partner.partner_m3_code}}</span>
+                          {% if partner.status == "CURRENT"%} 
+                            <input type="text" class="fname" partner_id={{partner.id}} id="m3_code_{{partner.id}}" placeholder="Partner Code" value='{{partner.partner_m3_code}}'  >
+                          {%else%}
+                            <span style="cursor:default; padding-left:2px">{{partner.partner_m3_code}}</span>
+                          {% endif %}
+                        </td>
+                        <td><!--Name-->
+                            <span hidden=true id="span_name_{{partner.id}}">{{partner.partner_name}}</span>
+                          {% if partner.status == "CURRENT"%} 
+                            <input type="text" class="fname" partner_id={{partner.id}} id="name_{{partner.id}}" placeholder="name" value='{{partner.partner_name}}' >
+                          {%else%}
+                            <span style="cursor:default; padding-left:2px">{{partner.partner_name}}</span>
+                          {% endif %}
+                        </td>
+                        <td ><!--Ico_3rd-->
+                          <span hidden=true id="span_ico_3rd_{{partner.id}}">searched_value:{{partner.ico_3rd}}</span>
+                          {% if partner.status == "CURRENT"%} 
+                            <select id="ico_3rd_{{partner.id}}" style="width:100%;background-color: transparent;border-style: hidden;" partner_id={{partner.id}} {% if user.role != "WRITER"%} readonly  aria-disabled="true"{% endif %}>
+                              {% if "3rd" == partner.ico_3rd  %}
+                                <option value="3rd" selected="selected">3rd</option>
+                                <option value="ICO" >ICO</option>
+                              {% else%}
+                                <option value="3rd" >3rd</option>
+                                <option value="ICO"selected="selected" >ICO</option>
+                              {% endif %}
+                            </select>
+                            {%else%}
+                            <span style="cursor:default; padding-left:4px">{{partner.ico_3rd}}</span>
+                          {% endif %}
+                        </td>
+
+                        <td><!--Country-->
+                          <span hidden=true  id="span_country_{{partner.id}}">searched_value:{{partner.partner_country.country_id}} </span>
+                          {% if partner.status == "CURRENT"%} 
+                            <select partner_id={{partner.id}}  class="fname" id="country_{{partner.id}}" {% if user.role != "WRITER"%} readonly {% endif %}>
+                              {% for region in region_list %}  
+                                <optgroup label={{region.region}}>
+                                  {% for country in country_list %}
+                                    {% if region == country.country_region%}
+                                      {% if country == partner.partner_country  %}
+                                        
+                                        <option value="{{ country.country_id }}" selected="selected">{{ country.country_id }}:{{ country.country }}   </option> 
+                                      {% else %}
+                                        <option value="{{ country.country_id }}"> {{ country.country_id }}:{{country.country}} </option>
+                                      {% endif %}
+                                    {% endif %}
+                                  {% endfor %}
+                                </optgroup>
+                              {% endfor %}
+                            </select>
+                          {%else%}
+                            <span style="cursor:default; padding-left:4px">{{partner.partner_country.country_id}}:{{ partner.partner_country.country}} </span>
+                          {% endif %}
+                        </td>
+                        <td><!--Bank-->
+                          <span hidden=true id="span_bank_{{partner.id}}">{{partner.partner_bank_account}}</span>
+                          {% if partner.status == "CURRENT"%} 
+                            <input type="text" class="fname" partner_id={{partner.id}} id="bank_{{partner.id}}" placeholder="bank account here" value='{{partner.partner_bank_account}}' {% if user.role != "WRITER"%} readonly {% endif %}>
+                          {%else%}
+                            <span style="cursor:default; padding-left:2px">{{partner.partner_bank_account}} </span>
+                          {% endif %}
+                          </td>
+                        <td><!--payment ype-->
+                          <span hidden=true id="span_payment_type_{{partner.id}}">searched_value:{{partner.partner_payment_type}} </span>
+                          {% if partner.status == "CURRENT"%} 
+                            <select name="payment_type"  class="fname" name="new" partner_id={{partner.id}} id="payment_type_{{partner.id}}" {% if user.role != "WRITER"%} readonly {% endif %}>
+                                {% for payment_type in payment_type_list %}
+                                  {% if payment_type == partner.partner_payment_type  %}
+                                    <option value="{{ payment_type.id }}" selected="selected">{{ payment_type }}</option>
+                                  {% else%}
+                                    <option value="{{ payment_type.id }}">{{ payment_type }}</option>
+                                  {% endif %}
+                                {% endfor %}
+                            </select>
+                          {%else%}
+                            <span style="cursor:default; padding-left:4px">{{partner.partner_payment_type}} </span>
+                          {% endif %}
+                        </td>
+                          {% if partner.status == "CURRENT" %} 
+                            <td class="button_td" ><!--Button-->
+                              <button class="btn btn-sm btn-outline-danger" title="delete" name="delete" partner_id={{partner.id}} id="delete_{{partner.id}}" onclick="delete_row('{{partner.id}}')"><span class="bi bi-trash"></span></button>
+                              <button class="btn btn-sm btn-outline-success" title="save modification" partner_id={{partner.id}} name="change" id="change_{{partner.id}}" hidden=true onclick="change_row('{{partner.id}}')"><span class="bi bi-save2-fill"></span></button>
+                              <button class="btn btn-sm btn-outline-warning" title="cancel modification" partner_id={{partner.id}} name="cancel" id="cancel_{{partner.id}}" onclick="cancel_row_partner('{{partner.id}}')" hidden=true><span class="bi bi-x-circle"></span></button>
+                              <span style="color:orange" hidden id="pending_validation_{{partner.id}}"> </span>
+                            </td>
+                            {% else%}
+                            <td>
+                              <span style="color:orange"> {{partner.status}} pending validation</span>
+                            </td>
+                          {%endif%}
+                      </tr>
+                    {% endfor %}
+                  </tbody>     
+                </table>
+              </div>
+          </div>
+        {% endif%}
+  <!------------------------------------------------------------------------------------->   
+  <!--------------------------- Partners to validate------------------------------------->   
+  <!-------------------------------------------------------------------------------------> 
+    {% if user.role == "VALIDATOR" %}    
+      <!----hide/unhide partner table-----> 
+        <div style="margin-left: 10px;" class="chevron" >
+          <span  style="display: none;" class="bi bi-chevron-right" id="unhide_to_validate" onclick='unhide_table("to_validate")'></span>
+          <span  class="bi bi-chevron-down" id="hide_to_validate" onclick='hide_table("to_validate")'></span>
+          <h5>Partners to validate</h5>
+        </div>
+      <!----content partner table----->
+        <div id="to_validate" class="content to_validate"  > 
+          <!----setting to unhide/hide column--->
+            <div class="sub_chevron" style="margin: 10px 15px;display: flex">
+              <span  class="bi bi-chevron-right" id="unhide_column_selection_to_validate" onclick="unhide_table('column_selection_to_validate')" title="column selection" >hide/unhide column</span> 
+              <span style="display: none;" class="bi bi-chevron-down" id="hide_column_selection_to_validate" onclick="hide_table('column_selection_to_validate')" title="column selection" >hide/unhide column</span> 
+            </div>
+            <div id="column_selection_to_validate" style=" display:none;margin-left:15px;" >
+              <table class="table table-striped table-sm" id="beneficiary_table" >
+                <tbody>
+                  <tr >
+                    <td ><input type="checkbox" checked value=1 onclick="column_visibility(this,1,'partners_table_to_validate')"></td>
+                    <td >Partner Code</td>
+                    <td ><input type="checkbox" checked value=2 onclick="column_visibility(this,2,'partners_table_to_validate')"></td>
+                    <td >Name</td>
+                    <td ><input type="checkbox" checked value=3 onclick="column_visibility(this,3,'partners_table_to_validate')"></td>
+                    <td >ICO-3rd</td>
+                  </tr >
+                  <tr >
+                    <td ><input type="checkbox" checked value=4 onclick="column_visibility(this,4,'partners_table_to_validate')"></td>
+                    <td >Country</td>
+                    <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5,'partners_table_to_validate')"></td>
+                    <td >Bank account</td>
+                    <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6,'partners_table_to_validate')"></td>
+                    <td >Payment type</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div> 
+          <!----datatable--->
+            <div class="table-responsive" style="margin-right:15px;padding-left:15px" >
+              <table class="table table-striped table-sm " id="partners_table_to_validate" style="width: 100%;margin-bottom: 20px;">
+                <thead>
+                  <tr class="search_box_class">
+                    <th style="padding-left:8px"><input  id="column0_search"  class="fname3" placeholder="..." column=0> </th>
+                    <th style="padding-left:8px"><input  id="column1_search"  class="fname3" placeholder="..." column=1> </th>
+                    <th style="padding-left:8px"><input  id="column2_search"  class="fname3" placeholder="..." column=2>  </th>
+                    <th style="padding-left:8px"><input  id="column3_search"  class="fname3" placeholder="..." column=3> </th>
+                    <th style="padding-left:8px"><input  id="column4_search"  class="fname3" placeholder="..." column=4> </th>
+                    <th style="padding-left:8px"><input  id="column5_search"  class="fname3" placeholder="..." column=5> </th>
+                    <th style="padding-left:8px"><input  id="column6_search"  class="fname3" placeholder="..." column=6> </th>
+                    <th style="padding-left:8px"></th>
+                  </tr>
+                  <tr style="height:65px">
+                    <th id="partner_id" style="padding-left: 8px; width:20px">ID  </th>
+                    <th id="partner_M3" style="padding-left: 8px;max-width:90px">Partner Code</th>
+                    <th id="partner_name" style="padding-left: 8px;">Name</th>
+                    <th id="partner_name" style="padding-left: 8px;">Ico-3rd</th>
+                    <th id="partner_country" style="padding-left: 8px;">Country</th>
+                    <th style="padding-left: 8px;">Bank account</th>
+                    <th style="padding-left: 8px;">Payment type</th>
+                    <th style="width: 100px;">Request type</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody_partner">
+                  {% for partner in partner_list_to_validate %}
+                    <tr id="partner_{{partner.id}}" partner_id={{partner.id}}> 
+                      <td><!--ID-->
+                        <span class="fname" partner_id={{partner.id}} id="id_{{partner.id}}" >{{partner.id}}</span>
+                      </td>
+                      <td><!--M3 Code-->
+                        <span hidden=true id="span_m3_code_{{partner.id}}">{{partner.partner_m3_code}}</span>
+                        <span >{{partner.partner_m3_code}}</span>
+        
+                      </td>
+                      <td><!--Name-->
+                        <span hidden=true id="span_name_{{partner.id}}">{{partner.partner_name}}</span>
+                        <span >{{partner.partner_name}}</span>
+         
+                      </td>
+                      <td ><!--Ico_3rd-->
+                        <span hidden=true id="span_ico_3rd_{{partner.id}}">searched_value:{{partner.ico_3rd}}</span>
+                        <span >{{partner.ico_3rd}}</span>
+                      </td>
+        
+                      <td><!--Country-->
+                        <span hidden=true  id="span_country_{{partner.id}}">searched_value:{{partner.partner_country.country_id}} </span>
+                        <span >{{partner.partner_country.country_id}}</span>
+        
+                      </td>
+                      <td><!--Bank-->
+                        <span hidden=true id="span_bank_{{partner.id}}">{{partner.partner_bank_account}}</span>
+                        <span >{{partner.partner_bank_account}}</span>
+                        </td>
+                      <td><!--payment ype-->
+                        <span hidden=true id="span_payment_type_{{partner.id}}">searched_value:{{partner.partner_payment_type}} </span>
+                        <span >{{partner.partner_payment_type}}</span>
+        
+                        <td>
+                          <div style="width:100px ;margin-left:8px;" >
+                              <div  class="comboTreeInputWrapper" dd_id="{{partner.id}}" >
+                                <button class="comboTreeInputBox" style="width:100px; margin:2px;background-color:transparent" dd_id="{{partner.id}}">{{partner.status}}</button>
+                              </div>
+                              <div  class="comboTreeDropDownContainer " id="dropdown_{{partner.id}}" style="display: none;border-radius: 0.35rem;overflow: hidden; margin-top:5px ;right:12px; min-width: 160px;padding:5px">
+                  
+                                <li style="display: block; padding-left:0px; margin:2px"    >
+                                  <button   class="approve_button" onclick='approve({{partner.id}},"{{partner.status}}")'>Approve</button>
+                                </li>
+                                <li style="display: block; padding-left:0px; margin:2px"  >
+                                  <button class="reject_button" onclick='reject({{partner.id}},"{{partner.status}}")'>Reject</button>
+                                </li>
+                              </div>
+                          </div>
+                        </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>   
+              </table>
+            </div>
+        </div>
+    {% endif%}  
+  <!------------------------------------------------------------------------------------->   
+  <!---------------------------Validated Partners Table---------------------------------->   
+  <!-------------------------------------------------------------------------------------> 
+
+    <!----hide/unhide partner table-----> 
+      <div style="margin-left: 10px;" class="chevron" >
+        <span  style="display: none;" class="bi bi-chevron-right" id="unhide_validated" onclick='unhide_table("validated")'></span>
+        <span  class="bi bi-chevron-down" id="hide_validated" onclick='hide_table("validated")'></span>
+        <h5>Validated partners</h5>
+      </div>
+    <!----content partner table----->
+      <div id="validated" class="content validated"  > 
+
+        <!----setting to unhide/hide column--->
+          <div class="sub_chevron" style="margin: 10px 15px;display: flex">
+            <span  class="bi bi-chevron-right" id="unhide_column_selection_validated" onclick="unhide_table('column_selection_validated')" title="column selection" >hide/unhide column</span> 
+            <span style="display: none;" class="bi bi-chevron-down" id="hide_column_selection_validated" onclick="hide_table('column_selection_validated')" title="column selection" >hide/unhide column</span> 
+          </div>
+          <div id="column_selection_validated" style=" display:none;margin-left:15px;" >
+            <table class="table table-striped table-sm" id="beneficiary_table" >
+              <tbody>
+
+                <tr >
+                  <td ><input type="checkbox" checked value=1 onclick="column_visibility(this,1,'partners_table_validated')"></td>
+                  <td >Partner Code</td>
+                  <td ><input type="checkbox" checked value=2 onclick="column_visibility(this,2,'partners_table_validated')"></td>
+                  <td >Name</td>
+                  <td ><input type="checkbox" checked value=3 onclick="column_visibility(this,3,'partners_table_validated')"></td>
+                  <td >ICO-3rd</td>
+                </tr >
+                <tr >
+                  <td ><input type="checkbox" checked value=4 onclick="column_visibility(this,4,'partners_table_validated')"></td>
+                  <td >Country</td>
+                  <td ><input type="checkbox" checked value=5 onclick="column_visibility(this,5,'partners_table_validated')"></td>
+                  <td >Bank account</td>
+                  <td ><input type="checkbox" checked value=6 onclick="column_visibility(this,6,'partners_table_validated')"></td>
+                  <td >Payment type</td>
+
+                </tr>
+                
+              </tbody>
+            </table>
+          </div> 
+        <!----datatable--->
+          <div class="table-responsive" style="margin-right:15px;padding-left:15px">
+            <table class="table table-striped table-sm " id="partners_table_validated" style="width: 100%;">
+              <thead>
+                <tr class="search_box_class">
+                  <th style="padding-left:8px"><input  id="column0_search"  class="fname2" placeholder="..." column=0> </th>
+                  <th style="padding-left:8px"><input  id="column1_search"  class="fname2" placeholder="..." column=1> </th>
+                  <th style="padding-left:8px"><input  id="column2_search"  class="fname2" placeholder="..." column=2>  </th>
+                  <th style="padding-left:8px"><input  id="column3_search"  class="fname2" placeholder="..." column=3> </th>
+                  <th style="padding-left:8px"><input  id="column4_search"  class="fname2" placeholder="..." column=4> </th>
+                  <th style="padding-left:8px"><input  id="column5_search"  class="fname2" placeholder="..." column=5> </th>
+                  <th style="padding-left:8px"><input  id="column6_search"  class="fname2" placeholder="..." column=6> </th>
+                  <th style="padding-left:8px"></th>
+                </tr>
+                <tr style="height:65px">
+                  <th id="partner_id" style="padding-left: 8px; width:20px">ID  </th>
+                  <th id="partner_M3" style="padding-left: 8px;max-width:90px">Partner Code</th>
+                  <th id="partner_name" style="padding-left: 8px;">Name</th>
+                  <th id="partner_name" style="padding-left: 8px;">Ico-3rd</th>
+                  <th id="partner_country" style="padding-left: 8px;">Country</th>
+                  <th style="padding-left: 8px;">Bank account</th>
+                  <th style="padding-left: 8px;">Payment type</th>
+                  <th ></th>
+                </tr>
+              </thead>
+
+              <tbody id="tbody_partner">
+                {% for partner in partner_list_validated %}
+                  <tr id="partner_{{partner.id}}" partner_id={{partner.id}}> 
+                    <td><!--ID-->
+                      <span class="fname" partner_id={{partner.id}} id="id_{{partner.id}}" >{{partner.id}}</span>
+                    </td>
+                    <td><!--M3 Code-->
+                      <span >{{partner.partner_m3_code}}</span>
+
+                    </td>
+                    <td><!--Name-->
+                      <span >{{partner.partner_name}}</span>
+                    </td>
+                    <td ><!--Ico_3rd-->
+                      <span >{{partner.ico_3rd}}</span>
+                    </td>
+
+                    <td><!--Country-->
+                      <span >{{partner.partner_country.country_id}}</span>
+                    </td>
+                    <td><!--Bank-->
+                      <span >{{partner.partner_bank_account}}</span>
+                      </td>
+                    <td><!--payment ype-->
+                      <span >{{partner.partner_payment_type}}</span>
+                    </td>
+                    <td></td>
+                  </tr>
+                {% endfor %}
+              </tbody>     
+            </table>
+          </div>
+      </div>
+
+
+
+{% load static %}
+  
+    <link rel="stylesheet" href="{% static 'royalty_app/style.css'%}">
+    <script src="{% static 'royalty_app/partner.js'%}"></script> 
+
+
+{% endblock %}
+
