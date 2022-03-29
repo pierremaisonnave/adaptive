@@ -2468,38 +2468,40 @@
               {% if  user.role in 'VALIDATOR'  %}
                 <div style="float: right;">
                   <div style="width:100px ;float: right;" id="button" >
-                    <div  class="comboTreeInputWrapper"  >
-                      <button class="comboTreeInputBox" style="width:100px; margin:2px;background-color:transparent">ACTION</button>
-                    </div>
-                    <div  class="comboTreeDropDownContainer action_button" id="dropdown_contract" >
-                      <form action="{% url 'response_validator' %}" method="post" id="reponse_validator_form" >
-                        {% csrf_token %}
-                        {% if contract.status == 'DELETE'  %}
-                          <li style="display: block; padding-left:0px; margin:2px"  >
-                            <button type="button" class="approve_button" onclick='submit_validator_decision("approve_contract_deletion")'>Approve delition</button>
-                          </li>
-                          <li style="display: block; padding-left:0px; margin:2px"  >
-                            <button type="button" class="reject_button" onclick='submit_validator_decision("reject_contract_deletion")'>Reject delition</button>
-                          </li>
-                        {% elif contract.status == 'NEW' %}
-                          <li style="display: block; padding-left:0px; margin:2px"  >
-                            <button type="button" class="approve_button" onclick='submit_validator_decision("approve_contract_creation")'>Approve creation</button>
-                          </li>
-                          <li style="display: block; padding-left:0px; margin:2px"  >
-                            <button type="button" class="reject_button" onclick='submit_validator_decision("reject_contract_creation")'>Reject creation</button>
-                          </li>
-                        {% else %} <!--if status= Proposal-->
-                          <li style="display: block; padding-left:0px; margin:2px"  >
-                            <button type="button" class="approve_button" onclick='submit_validator_decision("approve_contract_modification")'>Approve modification</button>
-                          </li>
-                          <li style="display: block; padding-left:0px; margin:2px"  >
-                            <button type="button" class="reject_button" onclick='submit_validator_decision("reject_contract_modification")'>Reject modification</button>
-                          </li>
-                        {% endif %}
-                      
-                        <input  hidden name="reponse_validator" id="reponse_validator" >
-                        <input hidden  name="contract_id" value= "{% if contract.status == 'PROPOSAL' %} {{inital_contract_id}} {% else %}{{contract.id}}{%endif%}" >
-                      </form>
+                    <div  class="comboTreeWrapper"  >
+                      <div  class="comboTreeInputWrapper"  >
+                        <button class="comboTreeInputBox" style="width:100px; margin:2px;background-color:transparent">ACTION</button>
+                      </div>
+                      <div  class="comboTreeDropDownContainer action_button" id="dropdown_contract" >
+                        <form action="{% url 'response_validator' %}" method="post" id="reponse_validator_form" >
+                          {% csrf_token %}
+                          {% if contract.status == 'DELETE'  %}
+                            <li style="display: block; padding-left:0px; margin:2px"  >
+                              <button type="button" class="approve_button" onclick='submit_validator_decision("approve_contract_deletion")'>Approve delition</button>
+                            </li>
+                            <li style="display: block; padding-left:0px; margin:2px"  >
+                              <button type="button" class="reject_button" onclick='submit_validator_decision("reject_contract_deletion")'>Reject delition</button>
+                            </li>
+                          {% elif contract.status == 'NEW' %}
+                            <li style="display: block; padding-left:0px; margin:2px"  >
+                              <button type="button" class="approve_button" onclick='submit_validator_decision("approve_contract_creation")'>Approve creation</button>
+                            </li>
+                            <li style="display: block; padding-left:0px; margin:2px"  >
+                              <button type="button" class="reject_button" onclick='submit_validator_decision("reject_contract_creation")'>Reject creation</button>
+                            </li>
+                          {% else %} <!--if status= Proposal-->
+                            <li style="display: block; padding-left:0px; margin:2px"  >
+                              <button type="button" class="approve_button" onclick='submit_validator_decision("approve_contract_modification")'>Approve modification</button>
+                            </li>
+                            <li style="display: block; padding-left:0px; margin:2px"  >
+                              <button type="button" class="reject_button" onclick='submit_validator_decision("reject_contract_modification")'>Reject modification</button>
+                            </li>
+                          {% endif %}
+                        
+                          <input  hidden name="reponse_validator" id="reponse_validator" >
+                          <input hidden  name="contract_id" value= "{% if contract.status == 'PROPOSAL' %} {{inital_contract_id}} {% else %}{{contract.id}}{%endif%}" >
+                        </form>
+                      </div>
                     </div>
                   </div>
                 </div>
