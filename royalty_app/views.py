@@ -2091,20 +2091,15 @@ def new_report(request):
     #   I: book file name in database
   if request.method == "POST":
 
-    #Save File
+    #Import File
     try:
-
       file_type=request.POST.get("file_type")
-
       if file_type =="accruals":
         acc_year=int(request.POST.get("acc_year"))
         acc_month=int(request.POST.get("acc_month")) 
-
       else:
         acc_year=datetime.now().year
         acc_month=datetime.now().month
-
-      
       file=File(
         name =  request.POST.get("name"),
         acc_year =acc_year,
@@ -2113,7 +2108,6 @@ def new_report(request):
       )
       file.save()
 
-  #   II: Start Calculation Roy 
       try:
   #   II: Start Calculation Roy 
     #a- definition and import table
@@ -2122,14 +2116,12 @@ def new_report(request):
         rows = []
         if file_type =="accruals":
           previous_year_checked= request.POST.get("previous_year_checked")
-          
           if previous_year_checked=="true":
             previous_year=acc_year-1
             for i in range(12):
               rows.append([previous_year, i + 1])
           for i in range(acc_month):
             rows.append([acc_year, i + 1])
-
         else:
           year_from=int(request.POST.get("year_from"))
           year_to=int(request.POST.get("year_to"))
@@ -2153,6 +2145,9 @@ def new_report(request):
               file.delete()
               return JsonResponse({"error": "Please make sure that at least one contract is valid"}, status=201)   
         df_contract=df_contract.rename(columns={'id':'contract_id','contract_currency_id':'contract_currency','division_id':'division'})
+        
+        
+        print(df_contract)
         print("contract")
 
         #Rule
@@ -2279,12 +2274,6 @@ def new_report(request):
             df_milestone=df_milestone_empty
         print("milestone done")
         
-        '''
-        1) Eliminate the Booked=NO
-        2) Filter based on the year/month_from year/month_to ( file) and the booking_date
-        3) 
-        4) payment date ( row 2845 --> if payment_date not null, choose payment date)
-        '''
         #Sales_breakdown_item
         
         sales_breakdown_item_list=Sales_breakdown_item.objects.all()
@@ -2306,7 +2295,6 @@ def new_report(request):
             'sales_breakdown_item_id': [0],
             'sales_breakdown_contract_definition': ['NA'],
           })
-
         df_breakdown_per_contract=pd.merge(df_breakdown_per_contract,df_sales_breakdown_item,how="left",left_on=['sales_breakdown_item_id'], right_on=['id'] )
         df_breakdown_per_contract=df_breakdown_per_contract[['contract_id_breakdown','sales_breakdown_definition','sales_breakdown_contract_definition']]
         print("df_breakdown_per_contract")
